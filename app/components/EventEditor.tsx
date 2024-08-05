@@ -5,11 +5,13 @@ import { DateTime } from "luxon";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
 import { StyledBox } from "./StyledBox";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
-import { Create, Save } from "@mui/icons-material";
+import { Backdrop, Button, ButtonGroup, Checkbox, Fade, FormControlLabel, Modal, Stack, TextField, Typography } from "@mui/material";
+import { Create, Save, UploadFile } from "@mui/icons-material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+
+import { StyledModalBox } from "./StyledModalBox";
 
 export interface ItemsEditorProps {
     event: SerializedNullableEventWithItems
@@ -28,6 +30,8 @@ function ItemsEditor({ event }: ItemsEditorProps) {
             </StyledBox>
         );
     }
+
+    const [uploadCsvModalOpen, setUploadCsvModalOpen] = React.useState(false);
 
     const rows: SerializedItem[] = event?.items || [];
     const columns: GridColDef<SerializedItem>[] = [
@@ -77,12 +81,47 @@ function ItemsEditor({ event }: ItemsEditorProps) {
 
     return (
         <StyledBox id="image">
+            <Modal
+                aria-labelledby="transition-modal-title"
+                aria-describedby="transition-modal-description"
+                open={uploadCsvModalOpen}
+                onClose={() => setUploadCsvModalOpen(false)}
+                closeAfterTransition
+                slots={{ backdrop: Backdrop }}
+                slotProps={{
+                    backdrop: {
+                        timeout: 500,
+                    },
+                }}
+            >
+                <Fade in={uploadCsvModalOpen}>
+                    <StyledModalBox>
+                        <Typography id="transition-modal-title" variant="h6" component="h2">
+                            Text in a modal
+                        </Typography>
+                        <Typography id="transition-modal-description" sx={{ mt: 2 }}>
+                            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+                        </Typography>
+                    </StyledModalBox>
+                </Fade>
+            </Modal>
             <Typography variant={"h4"} gutterBottom>{"Items"}</Typography>
-            <DataGrid
-                columns={columns}
-                rows={rows}
-                disableRowSelectionOnClick
-            />
+            <Stack spacing={2}>
+                <ButtonGroup
+                    fullWidth
+                >
+                    <Button
+                        startIcon={<UploadFile />}
+                        color="primary"
+                        onClick={() => setUploadCsvModalOpen(true)}
+                    >Upload from CSV</Button>
+                </ButtonGroup>
+                <DataGrid
+                    columns={columns}
+                    rows={rows}
+                    disableRowSelectionOnClick
+                />
+            </Stack>
         </StyledBox>
     );
 }

@@ -63,7 +63,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                         maxHeight: 40,
                         border: "1px solid",
                         borderColor: "divider",
-                        bgcolor: "hsla(220, 60%, 99%, 0.6)",
+                        backgroundColor: "hsla(220, 60%, 99%, 0.6)",
                         boxShadow:
                             "0 1px 2px hsla(210, 0%, 0%, 0.05), 0 2px 12px hsla(210, 100%, 80%, 0.5)",
                         ...theme.applyStyles("dark", {
@@ -87,7 +87,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                                     variant="text"
                                     color="info"
                                     size="small"
-                                    href="Admin"
+                                    href="/admin"
                                 >
                                     Admin
                                 </Button>

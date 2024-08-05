@@ -97,7 +97,6 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
                 <Footer />
                 <ScrollRestoration />
                 <Scripts />
-                <LiveReload />
             </body>
         </html>
     );

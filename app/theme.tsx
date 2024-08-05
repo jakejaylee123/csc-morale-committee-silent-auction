@@ -831,4 +831,4 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
     };
 }
 
-export const theme = createTheme(getThemeOptions("light"));
+export const theme = createTheme(getThemeOptions("dark"));
