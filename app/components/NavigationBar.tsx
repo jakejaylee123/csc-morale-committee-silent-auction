@@ -31,26 +31,17 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
         setOpen(newOpen);
     };
 
-    const scrollToSection = (sectionId: string) => {
-        const sectionElement = document.getElementById(sectionId);
-        const offset = 128;
-        if (sectionElement) {
-            const targetScroll = sectionElement.offsetTop - offset;
-            sectionElement.scrollIntoView({ behavior: "smooth" });
-            window.scrollTo({
-                top: targetScroll,
-                behavior: "smooth",
-            });
-            setOpen(false);
-        }
-    };
-
     return (
         <AppBar
             position="fixed"
             sx={{ boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", mt: 2 }}
         >
-            <Container maxWidth="lg">
+            <Container 
+                sx={(theme) => ({
+                    px: 0
+                })}
+                maxWidth="lg"
+            >
                 <Toolbar
                     variant="regular"
                     sx={(theme) => ({
@@ -58,7 +49,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                         alignItems: "center",
                         justifyContent: "space-between",
                         flexShrink: 0,
-                        borderRadius: "999px",
+                        borderRadius: 999,
                         backdropFilter: "blur(24px)",
                         maxHeight: 40,
                         border: "1px solid",

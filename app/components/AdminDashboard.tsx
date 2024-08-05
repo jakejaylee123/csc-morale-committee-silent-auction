@@ -12,13 +12,6 @@ export interface AdminDashboardProps {
 
 export function AdminDashboard({ events }: AdminDashboardProps) {
     const [selectedEventId, setSelectedEventId] = React.useState<string | undefined>(undefined);
-    const [editUrl, setEditUrl] = React.useState<string>("");
-
-    React.useEffect(() => {
-        if (selectedEventId) {
-            setEditUrl(`/admin/events/${selectedEventId}/edit`);
-        }
-    }, [selectedEventId]);
 
     const onEventSelectionUpdated = function (event: EventSelectChangeEvent, child: React.ReactNode) {
         setSelectedEventId(event.target.value);
@@ -40,7 +33,7 @@ export function AdminDashboard({ events }: AdminDashboardProps) {
                         disabled={undefined === selectedEventId}
                         startIcon={<Edit />}
                         color="primary"
-                        href={editUrl}
+                        href={`/admin/events/${selectedEventId || 0}/edit`}
                     >Edit event</Button>
                     <Button 
                         startIcon={<Add />}

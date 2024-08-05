@@ -25,8 +25,8 @@ const darkLogos = [
 ];
 
 const logoStyle = {
-    width: "100px",
-    height: "80px",
+    width: 100,
+    height: 80,
     margin: "0 32px",
     opacity: 0.7,
 };

@@ -4,14 +4,14 @@ import { Form } from "@remix-run/react";
 import { DateTime } from "luxon";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
-import { StyledBox } from "./StyledBox";
-import { Backdrop, Button, ButtonGroup, Checkbox, Fade, FormControlLabel, Modal, Stack, TextField, Typography } from "@mui/material";
+import { Button, ButtonGroup, Checkbox, Fade, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import { Create, Save, UploadFile } from "@mui/icons-material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
-import { StyledModalBox } from "./StyledModalBox";
+import { StyledBox } from "./StyledBox";
+import { FileUploadModal } from "./FileUploadModal";
 
 export interface ItemsEditorProps {
     event: SerializedNullableEventWithItems
@@ -81,30 +81,13 @@ function ItemsEditor({ event }: ItemsEditorProps) {
 
     return (
         <StyledBox id="image">
-            <Modal
-                aria-labelledby="transition-modal-title"
-                aria-describedby="transition-modal-description"
+            <FileUploadModal 
+                event={event}
                 open={uploadCsvModalOpen}
+                title="Upload file from CSV"
+                description="Select a CSV file to upload items with."
                 onClose={() => setUploadCsvModalOpen(false)}
-                closeAfterTransition
-                slots={{ backdrop: Backdrop }}
-                slotProps={{
-                    backdrop: {
-                        timeout: 500,
-                    },
-                }}
-            >
-                <Fade in={uploadCsvModalOpen}>
-                    <StyledModalBox>
-                        <Typography id="transition-modal-title" variant="h6" component="h2">
-                            Text in a modal
-                        </Typography>
-                        <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-                            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                        </Typography>
-                    </StyledModalBox>
-                </Fade>
-            </Modal>
+            />
             <Typography variant={"h4"} gutterBottom>{"Items"}</Typography>
             <Stack spacing={2}>
                 <ButtonGroup

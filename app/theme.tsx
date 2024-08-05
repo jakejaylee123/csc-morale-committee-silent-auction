@@ -1,4 +1,3 @@
-import type { } from "@mui/material/themeCssVarsAugmentation";
 import { createTheme, ThemeOptions, alpha } from "@mui/material/styles";
 import { PaletteMode } from "@mui/material";
 
@@ -231,7 +230,8 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                         padding: 8,
                         overflow: "clip",
                         backgroundColor: "hsl(0, 0%, 100%)",
-                        border: "1px solid",
+                        borderWidth: 1,
+                        borderStyle: "solid",
                         borderColor: gray[100],
                         ":before": {
                             backgroundColor: "transparent",
@@ -280,7 +280,7 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                         transition: "all 100ms ease",
                         "&:focus-visible": {
                             outline: `3px solid ${alpha(brand[400], 0.5)}`,
-                            outlineOffset: "2px",
+                            outlineOffset: 2,
                         },
                     },
                 },
@@ -598,7 +598,7 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                             content: '""',
                             position: "absolute",
                             width: 0,
-                            height: "1px",
+                            height: 1,
                             bottom: 0,
                             left: 0,
                             backgroundColor: brand[200],
@@ -611,8 +611,8 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                         },
                         "&:focus-visible": {
                             outline: `3px solid ${alpha(brand[500], 0.5)}`,
-                            outlineOffset: "4px",
-                            borderRadius: "2px",
+                            outlineOffset: 4,
+                            borderRadius: 2,
                         },
                         ...theme.applyStyles("dark", {
                             color: brand[200],
@@ -646,8 +646,8 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                     root: ({ theme }) => ({
                         "input:-webkit-autofill": {
                             WebkitBoxShadow: `0 0 0 1000px ${brand[100]} inset, 0 0 0 1px ${brand[200]}`,
-                            maxHeight: "4px",
-                            borderRadius: "8px",
+                            maxHeight: 4,
+                            borderRadius: 8,
                         },
                         "& .MuiInputBase-input": {
                             fontSize: "1rem",
@@ -658,7 +658,7 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                         },
                         boxSizing: "border-box",
                         flexGrow: 1,
-                        height: "40px",
+                        height: 40,
                         borderRadius: theme.shape.borderRadius,
                         border: "1px solid",
                         borderColor: alpha(gray[300], 0.8),
@@ -670,14 +670,14 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                         },
                         "&.Mui-focused": {
                             outline: `3px solid ${alpha(brand[500], 0.5)}`,
-                            outlineOffset: "2px",
+                            outlineOffset: 2,
                             borderColor: brand[400],
                         },
                         ...theme.applyStyles("dark", {
                             "input:-webkit-autofill": {
                                 WebkitBoxShadow: `0 0 0 1000px ${brand[900]} inset, 0 0 0 1px ${brand[600]}`,
-                                maxHeight: "6px",
-                                borderRadius: "8px",
+                                maxHeight: 6,
+                                borderRadius: 8,
                             },
                             "& .MuiInputBase-input": {
                                 fontSize: "1rem",
@@ -696,7 +696,7 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                             "&.Mui-focused": {
                                 borderColor: brand[400],
                                 outline: `3px solid ${alpha(brand[500], 0.5)}`,
-                                outlineOffset: "2px",
+                                outlineOffset: 2,
                             },
                         }),
                         variants: [

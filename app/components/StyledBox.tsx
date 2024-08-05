@@ -11,7 +11,6 @@ export const StyledBox = styled("div")(({ theme }) => ({
     outlineColor: "hsla(220, 25%, 80%, 0.5)",
     backgroundSize: "cover",
     padding: 20,
-    margin: 20,
     ...theme.applyStyles("dark", {
         backgroundColor: "hsla(0, 0%, 35%, 0.6)",
         boxShadow: "0 0 24px 12px hsla(210, 100%, 25%, 0.2)",

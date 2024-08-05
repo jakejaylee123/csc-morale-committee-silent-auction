@@ -151,7 +151,7 @@ export function Features() {
                                 <span>Learn more</span>
                                 <ChevronRightRounded
                                     fontSize="small"
-                                    sx={{ mt: "1px", ml: "2px" }}
+                                    sx={{ mt: 1, ml: 2 }}
                                 />
                             </Link>
                         </Box>
@@ -256,7 +256,7 @@ export function Features() {
                                             <span>Learn more</span>
                                             <ChevronRightRounded
                                                 fontSize="small"
-                                                sx={{ mt: "1px", ml: "2px" }}
+                                                sx={{ mt: 1, ml: 2 }}
                                             />
                                         </Link>
                                     </div>

@@ -3,8 +3,6 @@ import { json, redirect, useLoaderData } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import { Event } from "@prisma/client";
-
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems, SerializedNullableEventWithItems } from "~/services/event.server";
 import { Identifiers } from "~/services/common.server";

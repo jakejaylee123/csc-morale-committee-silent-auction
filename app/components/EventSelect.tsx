@@ -36,7 +36,7 @@ export function EventSelect({
                 <Stack alignItems="center">
                     <Typography variant={emptyMessageStyle || "body1"} gutterBottom>{emptyMessage}</Typography>
                     <SentimentVeryDissatisfied
-                        sx={{ width: "100px", height: "100px" }}
+                        sx={{ width: 100, height: 100 }}
                         fontSize="large"
                     />
                 </Stack>

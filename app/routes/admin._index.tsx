@@ -1,4 +1,4 @@
-import type { LoaderFunction, MetaFunction } from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { Event } from "@prisma/client";

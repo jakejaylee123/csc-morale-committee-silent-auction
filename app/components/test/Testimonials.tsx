@@ -75,7 +75,7 @@ const darkLogos = [
 ];
 
 const logoStyle = {
-    width: "64px",
+    width: 64,
     opacity: 0.3,
 };
 

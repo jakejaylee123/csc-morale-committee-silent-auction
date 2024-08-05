@@ -12,13 +12,6 @@ export interface DashboardProps {
 
 export function Dashboard({ events }: DashboardProps) {
     const [selectedEventId, setSelectedEventId] = React.useState<string | undefined>(undefined);
-    const [bidUrl, setBidUrl] = React.useState<string>("");
-
-    React.useEffect(() => {
-        if (selectedEventId) {
-            setBidUrl(`/events/${selectedEventId}/bid`);
-        }
-    }, [selectedEventId]);
 
     const onEventSelectionUpdated = function (event: EventSelectChangeEvent, child: React.ReactNode) {
         setSelectedEventId(event.target.value);
@@ -40,7 +33,7 @@ export function Dashboard({ events }: DashboardProps) {
                         disabled={undefined === selectedEventId}
                         startIcon={<PlayArrow />}
                         color="primary"
-                        href={bidUrl}
+                        href={`/events/${selectedEventId || 0}/bid`}
                     >Begin bidding</Button>
                 </ButtonGroup>
             </StyledBox>

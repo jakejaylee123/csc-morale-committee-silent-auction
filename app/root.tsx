@@ -17,7 +17,6 @@ import {
     unstable_useEnhancedEffect as useEnhancedEffect 
 } from "@mui/material";
 
-import { theme } from "./theme";
 import { ClientStyleContext } from "./components/ClientStyleContext";
 import { Layout } from "./components/Layout";
 import { NavigationBar } from "./components/NavigationBar";
@@ -35,10 +34,10 @@ import {
 import { LoaderFunction } from "@remix-run/node";
 import { Footer } from "./components/Footer";
 
-interface RootLoaderFunctionData {
+export interface RootLoaderFunctionData {
     authentication?: BidderAuthentication
 };
-interface SerializedRootLoaderFunctionData {
+export interface SerializedRootLoaderFunctionData {
     authentication?: SerializedBidderAuthentication
 };
 
@@ -53,7 +52,7 @@ export const loader = async function ({ request }) {
 
 const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCache) => {
     const clientStyleData = React.useContext(ClientStyleContext);
-    const loaderData = useLoaderData<typeof loader>() satisfies SerializedRootLoaderFunctionData;
+    const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
     const authentication = loaderData?.authentication;
 
     // Only executed on client
@@ -77,9 +76,9 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
 
     return (
         <html lang="en">
-            <head>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width,initial-scale=1" />                
+            <head suppressHydrationWarning>
+                <meta charSet="utf-8" suppressHydrationWarning />
+                <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />                
                 {title ? <title>{title}</title> : null}
                 <Meta />
                 <Links />
@@ -89,7 +88,7 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
                     rel="stylesheet"
                     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
                 />
-                <meta name="emotion-insertion-point" content="emotion-insertion-point" />
+                <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
                 <NavigationBar bidder={authentication?.bidder} />
