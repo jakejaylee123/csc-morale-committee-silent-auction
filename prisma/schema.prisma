@@ -87,15 +87,15 @@ model Item {
     id              Int          @id @default(autoincrement())
     eventId         Int
     event           Event        @relation(fields: [eventId], references: [id])
-    itemNumber      String
+    itemNumber      Int
     itemDescription String
     minimumBid      Decimal?
     createdAt       DateTime     @default(now())
     createdBy       Int
     createdByUser   Bidder       @relation(name: "creatingBidder", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    updatedAt       DateTime     @default(now())
-    updatedBy       Int
-    updatedByUser   Bidder       @relation(name: "updatingBidder", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    updatedAt       DateTime?     @default(now())
+    updatedBy       Int?
+    updatedByUser   Bidder?       @relation(name: "updatingBidder", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
     categoryId      Int
     category        CategoryCode @relation(fields: [categoryId], references: [id])
 }
