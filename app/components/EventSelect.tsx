@@ -1,5 +1,7 @@
 import { SentimentVeryDissatisfied } from "@mui/icons-material";
 import {
+    FormControl,
+    InputLabel,
     MenuItem,
     Select,
     SelectChangeEvent,
@@ -47,19 +49,21 @@ export function EventSelect({
     }
 
     return (
-        <>
+        <FormControl fullWidth>
+            <InputLabel id="event-select-label">{title}</InputLabel>
             <Stack alignItems="center">
                 <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
+                    labelId="event-select-label"
+                    id="event-select"
                     value={value}
                     label={title}
                     onBlur={onBlur}
                     onChange={onChange}
+                    fullWidth
                 >
                     {events.map(event => <MenuItem value={event.id}>{event.description}</MenuItem>)}
                 </Select>
             </Stack>
-        </>
+        </FormControl>
     );
 }

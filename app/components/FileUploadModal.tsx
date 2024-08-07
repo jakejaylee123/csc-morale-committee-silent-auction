@@ -76,7 +76,6 @@ export function FileUploadModal({
                                         value={file}
                                         name="uploadFile"
                                         onChange={(e) => {
-                                            console.log(e);
                                             setFile(e.target.value);
                                         }} />
                                 </Button>

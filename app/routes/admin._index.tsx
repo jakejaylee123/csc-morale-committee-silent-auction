@@ -21,7 +21,7 @@ export const loader = async function ({ request }) {
     });
     
     const data = {
-        events: await EventService.getActive()
+        events: await EventService.getAll()
     } satisfies AdminLoaderFunctionData;
 
     return json(data);

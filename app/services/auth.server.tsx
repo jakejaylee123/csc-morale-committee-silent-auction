@@ -48,8 +48,6 @@ const microsoftStrategy = new MicrosoftStrategy(
         // The email address received from Microsoft Entra ID is not validated and can be changed to anything from Azure Portal.
         // If you use the email address to identify users and allow signing in from any tenant (`tenantId` is not set)
         // it opens up a possibility of spoofing users!
-        console.log(JSON.stringify(profile, undefined, 4));
-
         return {
             accessToken,
             bidder: await BidderService.findOrCreate({ 

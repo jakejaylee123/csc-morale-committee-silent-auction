@@ -1,28 +1,112 @@
 import * as React from "react";
-import { Form } from "@remix-run/react";
+import { Form, useFetcher } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
-import { Button, ButtonGroup, Checkbox, Fade, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
-import { Create, Save, UploadFile } from "@mui/icons-material";
+import { Alert, AlertProps, Button, ButtonGroup, Checkbox, FormControlLabel, Snackbar, Stack, TextField, Typography } from "@mui/material";
+import { Create, Delete, Save, UploadFile } from "@mui/icons-material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridColDef, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridRowModesModel, GridRowParams, GridRowsProp, GridSlots, GridToolbarContainer } from "@mui/x-data-grid";
 
 import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
+import { SerializedCategoryCode } from "~/services/category.server";
+import { SerializedUncreatedItem } from "~/services/item.server";
+import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
+import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
 
+export interface ItemsEditorToolbarProps {
+    event: SerializedNullableEventWithItems,
+    categories: SerializedCategoryCode[]
+    setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+    setRowModesModel: (
+        newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
+    ) => void;
+}
 export interface ItemsEditorProps {
-    event: SerializedNullableEventWithItems
+    event: SerializedNullableEventWithItems,
+    categories: SerializedCategoryCode[]
 }
 export interface EventEditorProps {
-    event: SerializedNullableEventWithItems
+    event: SerializedNullableEventWithItems,
+    categories: SerializedCategoryCode[]
 };
 
 type NullableDateTime = DateTime<true> | DateTime<false> | null;
 
-function ItemsEditor({ event }: ItemsEditorProps) {
+function ItemsEditorToolbar({ event, categories, setRows, setRowModesModel }: ItemsEditorToolbarProps) {
+    const [state, setState] = React.useState<"add" | "view">("view");
+
+    const onAdd = () => {
+        const newItem = {
+            id: "new",
+            eventId: event?.id || 0,
+            itemNumber: 1,
+            itemDescription: "",
+            minimumBid: "",
+            categoryId: categories[0].id,
+            disqualified: false,
+            disqualificationReason: "",
+            createdAt: DateTime.now().toISO(),
+            createdBy: 0,
+            updatedAt: null,
+            updatedBy: null,
+            disqualifiedBy: null
+        } satisfies SerializedUncreatedItem;
+
+        setRows((oldRows) => [
+            newItem,
+            ...oldRows
+        ]);
+
+        setRowModesModel((oldModel) => ({
+            ...oldModel,
+            [newItem.id]: {
+                mode: GridRowModes.Edit,
+                fieldToFocus: 'description'
+            },
+        }));
+
+        setState("add");
+    };
+
+    const onSave = () => {
+        setRowModesModel((model) => ({ ...model, ["new"]: { mode: GridRowModes.View } }));
+        setState("view");
+    };
+
+    const onCancel = () => {
+        setRows((oldRows) => oldRows.filter(row => row.id !== "new"));
+
+        setRowModesModel((oldModel) => {
+            delete oldModel["new"];
+            return oldModel;
+        });
+
+        setState("view");
+    };
+
+    return (
+        <GridToolbarContainer>
+            <Button
+                onClick={state === "view" ? onAdd : onSave}
+                variant="outlined"
+            >{state === 'add' ? 'Save' : 'Add'}</Button>
+            {
+                state === "add" &&
+                <Button
+                    onClick={onCancel}
+                    variant="outlined"
+                    sx={{ ml: 1 }}
+                >Cancel</Button>
+            }
+        </GridToolbarContainer>
+    );
+}
+
+function ItemsEditor({ event, categories }: ItemsEditorProps) {
     if (!event) {
         return (
             <StyledBox id="image">
@@ -32,84 +116,235 @@ function ItemsEditor({ event }: ItemsEditorProps) {
     }
 
     const [uploadCsvModalOpen, setUploadCsvModalOpen] = React.useState(false);
+    const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+    const [rows, setRows] = React.useState<SerializedItem[]>(event?.items || []);
+    const [snackbar, setSnackbar] = React.useState<Pick<
+        AlertProps,
+        'children' | 'severity'
+    > | null>(null);
 
-    const rows: SerializedItem[] = event?.items || [];
+    // We use this fetcher to send requests to update/create items, and then
+    // we use an effect to listen for the response we get back
+    const itemFetcher = useFetcher<SerializedEventItemUpdateResult>();
+    React.useEffect(() => {
+        if (itemFetcher.state === "idle" && itemFetcher.data) {
+            if (itemFetcher.data.success) {
+                setRows(rows
+                    .filter(row => (row.id as any) !== "new")
+                    .concat(itemFetcher.data.items[0]));
+
+                setSnackbar({ children: 'User successfully saved', severity: 'success' });
+            } else {
+                throw new Error(itemFetcher.data.errors
+                    .flatMap(error => error.messages)
+                    .map(message => `- ${message}`)
+                    .join("\r\n"));
+            }
+        }
+    }, [itemFetcher]);
+
+    // We use this fetcher to send requests to delete items, and then
+    // we use an effect to listen for the response we get back
+    const itemDeleteFetcher = useFetcher<SerializedEventItemDeleteResult>();
+    React.useEffect(() => {
+        if (itemDeleteFetcher.state === "idle" && itemDeleteFetcher.data) {
+            const deleteData = itemDeleteFetcher.data as SerializedEventItemDeleteResult;
+            if (deleteData.success) {
+                setRows(rows.filter(row => row.id !== deleteData.deletedItemId));
+
+                setSnackbar({ children: 'Item successfully removed', severity: 'success' });
+            } else {
+                throw new Error(deleteData.errors
+                    .map(message => `- ${message}`)
+                    .join("\r\n"));
+            }
+        }
+    }, [itemDeleteFetcher]);
+
+    const onRowDelete = (id: GridRowId) => () => {
+        // We will process the result of this submission
+        // in the "useEffect" that listens to this "itemDeleteFetcher"
+        itemDeleteFetcher.submit({ id }, {
+            method: "POST",
+            action: `/admin/events/${event.id}/items/delete`
+        });
+    };
+
+    const onRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
+        if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+            event.defaultMuiPrevented = true;
+        }
+    };
+
+    const onRowUpdate = async function (newItem: SerializedItem, oldItem: SerializedItem) {
+        try {
+            // We will process the result of this submission
+            // in the "useEffect" that listens to this "itemFetcher"
+            itemFetcher.submit(newItem, {
+                method: "POST",
+                action: `/admin/events/${event.id}/items/update`
+            });
+            return newItem;
+        } catch (error) {
+            return oldItem;
+        }
+    };
+
+    const onRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+        setRowModesModel(newRowModesModel);
+    };
+
+    const onProcessRowUpdateError = (error: Error) => {
+        setSnackbar({ children: error.message, severity: 'error' });
+    };
+
+    const onCloseSnackbar = () => {
+        setSnackbar(null);
+    };
+
     const columns: GridColDef<SerializedItem>[] = [
         {
-            field: 'id',
-            headerName: 'Internal ID',
-            width: 150,
+            field: "delete",
+            headerName: "",
+            type: "actions",
+            getActions: ({ id }: GridRowParams<SerializedItem>) => {
+                const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+                return isInEditMode ? [] : [
+                    <GridActionsCellItem
+                        icon={<Delete />}
+                        label="Delete"
+                        color="inherit"
+                        onClick={onRowDelete(id)}
+                    />,
+                ];
+            }
+        },
+        {
+            field: "id",
+            headerName: "Internal ID",
             editable: false
         },
         {
-            field: 'itemNumber',
-            headerName: 'Item number',
-            width: 150,
+            field: "categoryId",
+            headerName: "Category ID",
+            flex: 1,
+            editable: true,
+            type: "singleSelect",
+            valueOptions: categories.map(category => category.id),
+            getOptionLabel: (value) => categories
+                .find(category => category.id === value)?.description || "(None)",
+            valueFormatter: (value) => categories.find(category => category.id === value)!.description,
+            valueSetter: (value, row) => {
+                row.categoryId = value;
+                return row;
+            }
+        },
+        {
+            field: "itemNumber",
+            headerName: "Item number",
             editable: true
         },
         {
-            field: 'categoryId',
-            headerName: 'Category ID',
-            width: 150,
-            editable: true
+            field: "tagNumber",
+            headerName: "Tag number",
+            editable: false,
+            valueFormatter: (_, row) => {
+                const associatedCategory = categories.find(category => category.id === row.categoryId);
+                return `${associatedCategory!.prefix}${row.itemNumber}`;
+            }
         },
         {
-            field: 'itemDescription',
-            headerName: 'Description',
-            width: 150,
-            editable: true
+            field: "itemDescription",
+            headerName: "Description",
+            editable: true,
+            flex: 2
         },
         {
-            field: 'minimumBid',
-            headerName: 'Minimum bid',
-            width: 150,
-            editable: true
+            field: "minimumBid",
+            headerName: "Minimum bid",
+            editable: true,
+            type: "number",
+            valueFormatter: (value) => {
+                const parsedValue = parseFloat(value);
+                return parsedValue ? new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD"
+                }).format(parsedValue) : "(None)";
+            }
         },
         {
-            field: 'createdAt',
-            headerName: 'Created at',
-            width: 150,
-            editable: true
+            field: "disqualified",
+            headerName: "Disqualified",
+            editable: true,
+            type: "boolean"
         },
         {
-            field: 'updatedAt',
-            headerName: 'Updated at',
-            width: 150,
-            editable: true
+            field: "disqualificationReason",
+            headerName: "Disqualification reason",
+            editable: true,
+            flex: 2,
+            valueFormatter: (value) => value || "",
+            valueSetter: (value, row) => {
+                row.disqualificationReason = value || "";
+                return row;
+            }
         }
     ];
 
     return (
-        <StyledBox id="image">
-            <FileUploadModal 
-                event={event}
-                open={uploadCsvModalOpen}
-                title="Upload file from CSV"
-                description="Select a CSV file to upload items with."
-                onClose={() => setUploadCsvModalOpen(false)}
-            />
-            <Typography variant={"h4"} gutterBottom>{"Items"}</Typography>
-            <Stack spacing={2}>
-                <ButtonGroup
-                    fullWidth
-                >
-                    <Button
-                        startIcon={<UploadFile />}
-                        color="primary"
-                        onClick={() => setUploadCsvModalOpen(true)}
-                    >Upload from CSV</Button>
-                </ButtonGroup>
-                <DataGrid
-                    columns={columns}
-                    rows={rows}
-                    disableRowSelectionOnClick
+        <>
+            <StyledBox id="image">
+                <FileUploadModal
+                    event={event}
+                    open={uploadCsvModalOpen}
+                    title="Upload file from CSV"
+                    description="Select a CSV file to upload items with."
+                    onClose={() => setUploadCsvModalOpen(false)}
                 />
-            </Stack>
-        </StyledBox>
+                <Typography variant={"h4"} gutterBottom>{"Items"}</Typography>
+                <Stack spacing={2}>
+                    <ButtonGroup
+                        fullWidth
+                    >
+                        <Button
+                            startIcon={<UploadFile />}
+                            color="primary"
+                            onClick={() => setUploadCsvModalOpen(true)}
+                        >Upload from CSV</Button>
+                    </ButtonGroup>
+                    <DataGrid
+                        columns={columns}
+                        rows={rows}
+                        density="compact"
+                        rowModesModel={rowModesModel}
+                        onRowModesModelChange={onRowModesModelChange}
+                        onRowEditStop={onRowEditStop}
+                        processRowUpdate={onRowUpdate}
+                        onProcessRowUpdateError={onProcessRowUpdateError}
+                        slots={{
+                            toolbar: ItemsEditorToolbar as GridSlots["toolbar"]
+                        }}
+                        slotProps={{
+                            toolbar: { event, categories, setRows, setRowModesModel },
+                        }}
+                    />
+                </Stack>
+            </StyledBox>
+            {
+                !!snackbar &&
+                <Snackbar
+                    open
+                    onClose={onCloseSnackbar}
+                    autoHideDuration={6000}
+                >
+                    <Alert {...snackbar} onClose={onCloseSnackbar} />
+                </Snackbar>
+            }
+        </>
     );
 }
 
-export function EventEditor({ event }: EventEditorProps) {
+export function EventEditor({ event, categories }: EventEditorProps) {
     const found = event !== null;
     if (!found) {
         return (
@@ -179,7 +414,10 @@ export function EventEditor({ event }: EventEditorProps) {
                         </Form>
                     </StyledBox>
 
-                    <ItemsEditor event={event} />
+                    <ItemsEditor
+                        event={event}
+                        categories={categories}
+                    />
                 </Stack>
             </LocalizationProvider>
         </>

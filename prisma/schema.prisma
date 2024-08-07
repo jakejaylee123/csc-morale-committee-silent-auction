@@ -37,8 +37,9 @@ model Bidder {
     disqualifiedBids Bid[] @relation(name: "disqualifyingBidder")
     createdBids      Bid[] @relation(name: "creatingBidder")
 
-    createdItems Item[] @relation(name: "creatingBidder")
-    updatedBids  Item[] @relation(name: "updatingBidder")
+    createdItems      Item[] @relation(name: "creatingBidder")
+    disqualifiedItems Item[] @relation(name: "disqualifyingBidder")
+    updatedItems      Item[] @relation(name: "updatingBidder")
 
     enabledBidders  Bidder[] @relation(name: "enablingBidder")
     disabledBidders Bidder[] @relation(name: "disablingBidder")
@@ -56,7 +57,7 @@ model AdministrationAssignment {
 }
 
 model Event {
-    id          Int      @id @default(autoincrement())
+    id          Int       @id @default(autoincrement())
     description String
     startsAt    DateTime
     endsAt      DateTime
@@ -64,9 +65,9 @@ model Event {
     createdBy   Int
     updatedAt   DateTime?
     updatedBy   Int?
-    enabled     Boolean  @default(false)
-    disabledAt   DateTime?
-    disabledBy   Int?
+    enabled     Boolean   @default(false)
+    disabledAt  DateTime?
+    disabledBy  Int?
 
     disabledByUser Bidder? @relation(name: "disablingBidder", fields: [disabledBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -84,20 +85,24 @@ model CategoryCode {
 }
 
 model Item {
-    id              Int          @id @default(autoincrement())
-    eventId         Int
-    event           Event        @relation(fields: [eventId], references: [id])
-    itemNumber      Int
-    itemDescription String
-    minimumBid      Decimal?
-    createdAt       DateTime     @default(now())
-    createdBy       Int
-    createdByUser   Bidder       @relation(name: "creatingBidder", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    updatedAt       DateTime?     @default(now())
-    updatedBy       Int?
-    updatedByUser   Bidder?       @relation(name: "updatingBidder", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    categoryId      Int
-    category        CategoryCode @relation(fields: [categoryId], references: [id])
+    id                     Int          @id @default(autoincrement())
+    eventId                Int
+    event                  Event        @relation(fields: [eventId], references: [id])
+    itemNumber             Int
+    itemDescription        String
+    minimumBid             Decimal?
+    createdAt              DateTime     @default(now())
+    createdBy              Int
+    createdByUser          Bidder       @relation(name: "creatingBidder", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    updatedAt              DateTime?    @default(now())
+    updatedBy              Int?
+    updatedByUser          Bidder?      @relation(name: "updatingBidder", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    categoryId             Int
+    category               CategoryCode @relation(fields: [categoryId], references: [id])
+    disqualified           Boolean      @default(false)
+    disqualificationReason String?
+    disqualifiedBy         Int?
+    disqualifiedByUser     Bidder?      @relation(name: "disqualifyingBidder", fields: [disqualifiedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Bid {

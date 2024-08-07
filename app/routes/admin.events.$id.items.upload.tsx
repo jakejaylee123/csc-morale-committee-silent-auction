@@ -80,7 +80,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         } satisfies EventItemUploadResult;
     }
 
-    const requestResult = await ItemService.createBulkCreationRequest({
+    const requestResult = await ItemService.createBulkChangeRequest({
         eventId: parseInt(id),
         bidderId: bidder.id,
         itemRowArrays: rowArrays
@@ -114,7 +114,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
 
 export default function EventItemUploadResults() {
     const result = useActionData<typeof action>() satisfies SerializedNullableEventUploadResult;
-    console.log(result);
+    
     return (
         <>
             <GleamingHeader

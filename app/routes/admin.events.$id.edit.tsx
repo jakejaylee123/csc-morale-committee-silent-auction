@@ -8,12 +8,16 @@ import { EventService, EventWithItems, SerializedNullableEventWithItems } from "
 import { Identifiers } from "~/services/common.server";
 import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
+import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
+import { CategoryCode } from "@prisma/client";
 
 interface EventEditLoaderFunctionData {
-    event: EventWithItems | null
+    event: EventWithItems | null,
+    categories: CategoryCode[]
 };
 interface SerializedEventEditLoaderFunctionData {
     event: SerializedNullableEventWithItems
+    categories: SerializedCategoryCode[]
 };
 
 export const loader = async function ({ request, params }) {
@@ -22,6 +26,7 @@ export const loader = async function ({ request, params }) {
     });
 
     const { id } = params;
+
     const currentDate = DateTime.now().toUTC().toJSDate();
     const event = await (async () => {
         if (Identifiers.isNew(id)) {
@@ -47,8 +52,11 @@ export const loader = async function ({ request, params }) {
         }
     })() satisfies EventWithItems | null;
 
+    const categories = await CategoryService.getAll();
+
     const data = {
-        event
+        event,
+        categories
     } satisfies EventEditLoaderFunctionData;
 
     return json(data);
@@ -94,7 +102,10 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
 } satisfies ActionFunction;
 
 export default function AdminEventEdit() {
-    const { event } = useLoaderData<typeof loader>() satisfies SerializedEventEditLoaderFunctionData;
+    const { 
+        event, 
+        categories 
+    } = useLoaderData<typeof loader>() satisfies SerializedEventEditLoaderFunctionData;
 
     return (
         <>
@@ -103,7 +114,8 @@ export default function AdminEventEdit() {
                 description=""
             />
             <EventEditor
-                event={event} />
+                event={event}
+                categories={categories} />
         </>
     );
 }
