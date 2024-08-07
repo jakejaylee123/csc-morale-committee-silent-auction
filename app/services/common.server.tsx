@@ -8,3 +8,11 @@ export class Identifiers {
         return !isNaN(test) && Number.isInteger(test);
     }
 }
+
+export type Result<TSuccessValue, TErrorValue> = {
+    success: true
+    value: TSuccessValue
+} | {
+    success: false
+    error: TErrorValue
+};

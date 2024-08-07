@@ -11,7 +11,6 @@ import { DataGrid, GridActionsCellItem, GridCellModes, GridCellModesModel, GridC
 import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
 import { SerializedCategoryCode } from "~/services/category.server";
-import { SerializedUncreatedItem } from "~/services/item.server";
 import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
 import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
 
@@ -53,7 +52,7 @@ function EventItemsEditorToolbar({
 
     const onAdd = () => {
         const newItem = {
-            id: "new",
+            id: 0,
             eventId: event?.id || 0,
             itemNumber: 1,
             itemDescription: "",
@@ -66,7 +65,7 @@ function EventItemsEditorToolbar({
             updatedAt: null,
             updatedBy: null,
             disqualifiedBy: null
-        } satisfies SerializedUncreatedItem;
+        };
 
         setRows((oldRows) => [
             newItem,
@@ -85,15 +84,15 @@ function EventItemsEditorToolbar({
     };
 
     const onSave = () => {
-        setRowModesModel((model) => ({ ...model, ["new"]: { mode: GridRowModes.View } }));
+        setRowModesModel((model) => ({ ...model, [0]: { mode: GridRowModes.View } }));
         setState("view");
     };
 
     const onCancel = () => {
-        setRows((oldRows) => oldRows.filter(row => row.id !== "new"));
+        setRows((oldRows) => oldRows.filter(row => row.id !== 0));
 
         setRowModesModel((oldModel) => {
-            delete oldModel["new"];
+            delete oldModel[0];
             return oldModel;
         });
 
@@ -130,7 +129,6 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     const [uploadCsvModalOpen, setUploadCsvModalOpen] = React.useState(false);
     const [rows, setRows] = React.useState<SerializedItem[]>(event?.items || []);
     const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
-    const [cellModesModel, setCellModesModel] = React.useState<GridCellModesModel>({});
     const [snackbar, setSnackbar] = React.useState<Pick<
         AlertProps,
         'children' | 'severity'
@@ -142,7 +140,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     React.useEffect(() => {
         if (itemFetcher.state === "idle" && itemFetcher.data) {
             const newRows = rows
-                .filter((row: any) => row.id !== "new");
+                .filter((row: any) => row.id !== 0);
 
             if (itemFetcher.data.success) {
                 // If there was a change in the amount of items we have,
@@ -257,7 +255,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
             flex: 1,
             editable: true,
             type: "singleSelect",
-            valueOptions: categories.map(category => category.id),
+            valueOptions: categories?.map(category => category.id) || [],
             getOptionLabel: (value) => categories
                 .find(category => category.id === value)?.description || "(None)",
             valueFormatter: (value) => categories

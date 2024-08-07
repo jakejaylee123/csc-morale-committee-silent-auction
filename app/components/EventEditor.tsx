@@ -4,7 +4,7 @@ import { Form } from "@remix-run/react";
 import { DateTime } from "luxon";
 
 import { SerializedNullableEventWithItems } from "~/services/event.server";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
+import { ButtonGroup, Checkbox, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import { Create, Save } from "@mui/icons-material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
@@ -12,6 +12,7 @@ import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { StyledBox } from "./StyledBox";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { EventItemsEditor } from "./EventItemsEditor";
+import { LoadingButton } from "@mui/lab";
 
 export interface EventEditorProps {
     event: SerializedNullableEventWithItems,
@@ -35,6 +36,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
         .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt));
     const [endDate, setEndDate] = React
         .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.startsAt));
+    const [saving, setSaving] = React.useState(false);
 
     return (
         <>
@@ -80,20 +82,25 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                     onChange={(newValue => setEndDate(newValue))}
                                 />
                                 <ButtonGroup fullWidth>
-                                    <Button
+                                    <LoadingButton
+                                        loading={saving}
+                                        loadingPosition="start"
                                         startIcon={isNew ? <Create /> : <Save />}
                                         color="primary"
                                         type="submit"
-                                    >{isNew ? "Create" : "Save"}</Button>
+                                    >{isNew ? "Create" : "Save"}</LoadingButton>
                                 </ButtonGroup>
                             </Stack>
                         </Form>
                     </StyledBox>
 
-                    <EventItemsEditor
-                        event={event}
-                        categories={categories}
-                    />
+                    {
+                        event.id !== 0 &&
+                        <EventItemsEditor
+                            event={event}
+                            categories={categories}
+                        />
+                    }
                 </Stack>
             </LocalizationProvider>
         </>

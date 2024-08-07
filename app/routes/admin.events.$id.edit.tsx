@@ -1,5 +1,5 @@
-import type { ActionFunction, ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
-import { json, redirect, useLoaderData } from "@remix-run/react";
+import type { ActionFunction, ActionFunctionArgs, LoaderFunction, SerializeFrom } from "@remix-run/node";
+import { json, redirect, useActionData, useLoaderData } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
@@ -9,7 +9,8 @@ import { Identifiers } from "~/services/common.server";
 import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
-import { CategoryCode } from "@prisma/client";
+import { CategoryCode, Event } from "@prisma/client";
+import { Alert, Snackbar } from "@mui/material";
 
 interface EventEditLoaderFunctionData {
     event: EventWithItems | null,
@@ -19,6 +20,16 @@ interface SerializedEventEditLoaderFunctionData {
     event: SerializedNullableEventWithItems
     categories: SerializedCategoryCode[]
 };
+
+export type EventUpdateResult = {
+    success: false,
+    error: string
+} | {
+    success: true,
+    event: Event
+};
+export type SerializedEventUpdateResult = SerializeFrom<EventUpdateResult>;
+export type SerializedNullableEventUpdateResult = SerializedEventUpdateResult | null | undefined;
 
 export const loader = async function ({ request, params }) {
     const { bidder } = await requireAuthenticatedBidder(request, {
@@ -52,14 +63,10 @@ export const loader = async function ({ request, params }) {
         }
     })() satisfies EventWithItems | null;
 
-    const categories = await CategoryService.getAll();
-
-    const data = {
+    return json({
         event,
-        categories
-    } satisfies EventEditLoaderFunctionData;
-
-    return json(data);
+        categories: await CategoryService.getAll()
+    } satisfies EventEditLoaderFunctionData);
 } satisfies LoaderFunction;
 
 export const action = async function ({ request, params }: ActionFunctionArgs) {
@@ -74,41 +81,81 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     const startDate = formData.get("startDate") as string;
     const endDate = formData.get("endDate") as string;
 
-    if (Identifiers.isNew(id)) {
-        const newEvent = await EventService.create({
-            creatorId: bidder.id,
-            event: {
-                description,
-                enabled,
-                startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
-                endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a")
-            }
-        });
-        throw redirect(`/admin/events/${newEvent.id}/edit`);
-    } else if (Identifiers.isIntegerId(id)) {
-        await EventService.update({
-            updatorId: bidder.id,
-            event: {
-                id: parseInt(id),
-                description,
-                enabled,
-                startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
-                endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a")
-            }
-        });
+    let changedEvent: Event | null = null;
+    try {
+        if (Identifiers.isNew(id)) {
+            changedEvent = await EventService.create({
+                creatorId: bidder.id,
+                event: {
+                    description,
+                    enabled,
+                    startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
+                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a")
+                }
+            });
+        } else if (Identifiers.isIntegerId(id)) {
+            changedEvent = await EventService.update({
+                updatorId: bidder.id,
+                event: {
+                    id: parseInt(id),
+                    description,
+                    enabled,
+                    startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
+                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a")
+                }
+            });
+        } else {
+            return json({
+                success: false,
+                error: `The passed event ID "${id}" was not valid`
+            } satisfies EventUpdateResult);
+        }
+    } catch (error) {
+        return json({
+            success: false,
+            error: (error as Error).message || "Unknown error occurred."
+        } satisfies EventUpdateResult);
     }
 
-    return null;
+    return json({
+        success: true,
+        event: changedEvent as Event
+    } satisfies EventUpdateResult);
 } satisfies ActionFunction;
 
 export default function AdminEventEdit() {
-    const { 
-        event, 
-        categories 
+    const {
+        event,
+        categories
     } = useLoaderData<typeof loader>() satisfies SerializedEventEditLoaderFunctionData;
+    const result = useActionData<typeof action>() satisfies SerializedNullableEventUpdateResult;
 
+    // If we successfully made an auction event, we can change the URL to
+    // the proper URL of the newly created auction
+    if (result?.success) {
+        window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);
+        if (event) event.id = result.event.id;
+    }
+    
     return (
         <>
+            {
+                result &&
+                <Snackbar
+                    open
+                    autoHideDuration={6000}
+                >
+                    <Alert 
+                        severity={result.success ? "success" : "error"}
+                    >
+                        {
+                            result.success 
+                                ? "Event successfully created."
+                                : `Error: ${result.error}`
+                        }
+                    </Alert>
+                </Snackbar>
+            }
             <GleamingHeader
                 title=""
                 description=""

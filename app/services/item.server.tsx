@@ -39,11 +39,6 @@ export type ItemCreationRequestsResult = {
     errors: { [key: string]: string[] }
 }
 
-export interface UncreatedItem extends Omit<Item, "id"> {
-    id: number | "new"
-};
-export type SerializedUncreatedItem = SerializeFrom<UncreatedItem>;
-
 export class ItemService {
     private static readonly client = new PrismaClient();
 
