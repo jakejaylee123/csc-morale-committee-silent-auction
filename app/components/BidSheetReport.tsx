@@ -107,64 +107,62 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
     const [leftSide, rightSide] = splitItems;
     return (
         <>
-            <StyledBox>
-                <Stack 
-                    spacing={2}
-                >
-                    <Typography
-                        variant="h5"
-                        align="center"
-                        sx={{
-                            display: "flex",
-                            fontWeight: "bold",
-                            flexDirection: { xs: "column", sm: "row" }
-                        }}
-                    >{title}</Typography>
-                    <TableContainer>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <BidSheetReportRangeHeaderFragment
-                                        items={leftSide}
-                                        categoryHash={categoryHash} />
-                                    <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
-                                    <BidSheetReportRangeHeaderFragment
-                                        items={rightSide}
-                                        categoryHash={categoryHash} />
-                                </TableRow>
-                                <TableRow>
-                                    <BidSheetReportHeaderFragment />
-                                    <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
-                                    <BidSheetReportHeaderFragment />
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    leftSide.map((_, index) => (
-                                        <TableRow>
-                                            {
-                                                <BidSheetReportRowFragment
-                                                    item={leftSide[index]}
-                                                    category={categoryHash[leftSide[index].categoryId]}
+            <Stack
+                spacing={2}
+            >
+                <Typography
+                    variant="h5"
+                    align="center"
+                    sx={{
+                        display: "flex",
+                        fontWeight: "bold",
+                        flexDirection: { xs: "column", sm: "row" }
+                    }}
+                >{title}</Typography>
+                <TableContainer>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <BidSheetReportRangeHeaderFragment
+                                    items={leftSide}
+                                    categoryHash={categoryHash} />
+                                <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                <BidSheetReportRangeHeaderFragment
+                                    items={rightSide}
+                                    categoryHash={categoryHash} />
+                            </TableRow>
+                            <TableRow>
+                                <BidSheetReportHeaderFragment />
+                                <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                <BidSheetReportHeaderFragment />
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {
+                                leftSide.map((_, index) => (
+                                    <TableRow>
+                                        {
+                                            <BidSheetReportRowFragment
+                                                item={leftSide[index]}
+                                                category={categoryHash[leftSide[index].categoryId]}
+                                            />
+                                        }
+                                        <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                        {
+                                            rightSide[index]
+                                                ? <BidSheetReportRowFragment
+                                                    item={rightSide[index]}
+                                                    category={categoryHash[rightSide[index].categoryId]}
                                                 />
-                                            }
-                                            <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
-                                            {
-                                                rightSide[index]
-                                                    ? <BidSheetReportRowFragment
-                                                        item={rightSide[index]}
-                                                        category={categoryHash[rightSide[index].categoryId]}
-                                                    />
-                                                    : <BidSheetReportEmptyRowFragment />
-                                            }
-                                        </TableRow>
-                                    ))
-                                }
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Stack>
-            </StyledBox>
+                                                : <BidSheetReportEmptyRowFragment />
+                                        }
+                                    </TableRow>
+                                ))
+                            }
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Stack>
         </>
     );
 }
