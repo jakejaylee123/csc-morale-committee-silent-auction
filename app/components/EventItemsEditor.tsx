@@ -14,27 +14,18 @@ import { SerializedCategoryCode } from "~/services/category.server";
 import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
 import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
 
-interface SelectedCellParams {
-    id: GridRowId;
-    field: string;
-};
-
 type GridRowsPropSetter = (
     newRows: (oldRows: GridRowsProp) => GridRowsProp
 ) => void;
 type GridRowModesModelSetter = (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
 ) => void;
-type GridCellModesModelSetter = (
-    newModel: (oldModel: GridCellModesModel) => GridCellModesModel
-) => void;
 
 export interface EventItemsEditorToolbarProps {
     event: SerializedNullableEventWithItems,
     categories: SerializedCategoryCode[],
     setRows: GridRowsPropSetter,
-    setRowModesModel: GridRowModesModelSetter,
-    // setCellModesModel: GridCellModesModelSetter
+    setRowModesModel: GridRowModesModelSetter
 }
 export interface EventItemsEditorProps {
     event: SerializedNullableEventWithItems,
@@ -45,8 +36,7 @@ function EventItemsEditorToolbar({
     event,
     categories,
     setRows,
-    setRowModesModel,
-    // setCellModesModel
+    setRowModesModel
 }: EventItemsEditorToolbarProps) {
     const [state, setState] = React.useState<"add" | "view">("view");
 
@@ -367,8 +357,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                                 event,
                                 categories,
                                 setRows,
-                                setRowModesModel,
-                                // setCellModesModel
+                                setRowModesModel
                             }
                         }}
                     />
