@@ -30,6 +30,7 @@ export function Footer() {
         <Container
             sx={{
                 display: "flex",
+                displayPrint: "none",
                 flexDirection: "column",
                 alignItems: "center",
                 gap: { xs: 4, sm: 8 },

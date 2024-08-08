@@ -1,23 +1,28 @@
 import * as React from "react";
 import {
     Box,
-    Button,
     Container,
-    InputLabel,
-    Link,
     Stack,
-    TextField,
     Typography
 } from "@mui/material";
+import { Variant } from "@mui/material/styles/createTypography";
 
 export interface GleamingHeaderProps {
-    title: string,
-    description: string
+    title?: string,
+    titleVariant?: Variant,
+    description?: string,
+    descriptionVariant?: Variant
 };
 
-export function GleamingHeader({ title, description }: GleamingHeaderProps) {
+export function GleamingHeader({ 
+    title, 
+    titleVariant,
+    description,
+    descriptionVariant
+}: GleamingHeaderProps) {
     return (
         <Box
+            displayPrint="none"
             id="hero"
             sx={(theme) => ({
                 width: "100%",
@@ -44,21 +49,22 @@ export function GleamingHeader({ title, description }: GleamingHeaderProps) {
                     useFlexGap
                     sx={{ alignItems: "center", width: { xs: "100%", sm: "70%" } }}
                 >
-                    <Typography
-                        variant="h1"
-                        sx={{
-                            display: "flex",
-                            fontWeight: "bold",
-                            flexDirection: { xs: "column", sm: "row" },
-                            alignItems: "center",
-                            fontSize: "clamp(3rem, 10vw, 3.5rem)",
-                        }}
-                    >
-                        {title}
-                    </Typography>
+                    {
+                        title &&
+                        <Typography
+                            variant={titleVariant || "h1"}
+                            sx={{
+                                display: "flex",
+                                fontWeight: "bold",
+                                flexDirection: { xs: "column", sm: "row" },
+                                alignItems: "center",
+                            }}
+                        >{title}</Typography>
+                    }
                     {
                         description &&
                         <Typography
+                            variant={descriptionVariant || "body1"}
                             sx={{
                                 textAlign: "center",
                                 color: "text.secondary",

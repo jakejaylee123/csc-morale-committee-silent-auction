@@ -75,11 +75,9 @@ export default function EventReportBidSheet() {
     const { event, categories } = result;
     return (
         <>
-            <GleamingHeader
-                title={`Bid Sheet`}
-                description={`For auction event: "${event.description}"`}
-            />
+            <GleamingHeader />
             <BidSheetReport
+                title={`Bid Sheet for Auction Event: "${event.description}"`}
                 event={event}
                 categories={categories}
             />

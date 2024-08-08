@@ -34,7 +34,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
     return (
         <AppBar
             position="fixed"
-            sx={{ boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", mt: 2 }}
+            sx={{ displayPrint: "none", boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", mt: 2 }}
         >
             <Container 
                 sx={(theme) => ({

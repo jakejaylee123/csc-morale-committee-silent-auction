@@ -2,13 +2,14 @@ import * as React from "react";
 
 import { SerializedEventWithItems, SerializedItem } from "~/services/event.server";
 import { StyledBox } from "./StyledBox";
-import { Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { CategoryCode } from "@prisma/client";
 
 type CategoryHash = { [key: number]: SerializedCategoryCode };
 
 export interface BidSheetReportProps {
+    title: string,
     event: SerializedEventWithItems,
     categories: SerializedCategoryCode[]
 };
@@ -64,21 +65,21 @@ function BidSheetReportRowFragment({ item, category }: BidSheetReportRowFragment
 function BidSheetReportRangeHeaderFragment({ items, categoryHash }: BidSheetReportRangeHeaderFragmentProps) {
     const firstItem = items.at(0);
     const lastItem = items.at(-1);
-    const rangeString = firstItem && lastItem 
+    const rangeString = firstItem && lastItem
         ? `Items ${categoryHash[firstItem.categoryId].prefix}${firstItem.itemNumber} `
-            + `through ${categoryHash[lastItem.categoryId].prefix}${lastItem.itemNumber}`
+        + `through ${categoryHash[lastItem.categoryId].prefix}${lastItem.itemNumber}`
         : "";
-    
+
     return (
-        <TableCell 
-            colSpan={4} 
+        <TableCell
+            colSpan={4}
             sx={{ fontWeight: "bold" }}
             align="center"
         >{rangeString}</TableCell>
     );
 }
 
-export function BidSheetReport({ event, categories }: BidSheetReportProps) {
+export function BidSheetReport({ title, event, categories }: BidSheetReportProps) {
     // We're gonna do a lot of category lookups for this report,
     // so let's index them
     const categoryHash: CategoryHash = {};
@@ -107,49 +108,62 @@ export function BidSheetReport({ event, categories }: BidSheetReportProps) {
     return (
         <>
             <StyledBox>
-                <TableContainer>
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <BidSheetReportRangeHeaderFragment
-                                    items={leftSide}
-                                    categoryHash={categoryHash} />
-                                <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
-                                <BidSheetReportRangeHeaderFragment
-                                    items={rightSide}
-                                    categoryHash={categoryHash} />
-                            </TableRow>
-                            <TableRow>
-                                <BidSheetReportHeaderFragment />
-                                <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
-                                <BidSheetReportHeaderFragment />
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                leftSide.map((_, index) => (
-                                    <TableRow>
-                                        {
-                                            <BidSheetReportRowFragment
-                                                item={leftSide[index]}
-                                                category={categoryHash[leftSide[index].categoryId]}
-                                            />
-                                        }
-                                        <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
-                                        {
-                                            rightSide[index]
-                                                ? <BidSheetReportRowFragment
-                                                    item={rightSide[index]}
-                                                    category={categoryHash[rightSide[index].categoryId]}
+                <Stack 
+                    spacing={2}
+                >
+                    <Typography
+                        variant="h5"
+                        align="center"
+                        sx={{
+                            display: "flex",
+                            fontWeight: "bold",
+                            flexDirection: { xs: "column", sm: "row" }
+                        }}
+                    >{title}</Typography>
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <BidSheetReportRangeHeaderFragment
+                                        items={leftSide}
+                                        categoryHash={categoryHash} />
+                                    <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                    <BidSheetReportRangeHeaderFragment
+                                        items={rightSide}
+                                        categoryHash={categoryHash} />
+                                </TableRow>
+                                <TableRow>
+                                    <BidSheetReportHeaderFragment />
+                                    <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                    <BidSheetReportHeaderFragment />
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {
+                                    leftSide.map((_, index) => (
+                                        <TableRow>
+                                            {
+                                                <BidSheetReportRowFragment
+                                                    item={leftSide[index]}
+                                                    category={categoryHash[leftSide[index].categoryId]}
                                                 />
-                                                : <BidSheetReportEmptyRowFragment />
-                                        }
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                            }
+                                            <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                            {
+                                                rightSide[index]
+                                                    ? <BidSheetReportRowFragment
+                                                        item={rightSide[index]}
+                                                        category={categoryHash[rightSide[index].categoryId]}
+                                                    />
+                                                    : <BidSheetReportEmptyRowFragment />
+                                            }
+                                        </TableRow>
+                                    ))
+                                }
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Stack>
             </StyledBox>
         </>
     );
