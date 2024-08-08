@@ -4,7 +4,7 @@ import { SerializedEvent } from "~/services/event.server";
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
 import { Button, ButtonGroup, Stack } from "@mui/material";
-import { PlayArrow } from "@mui/icons-material";
+import { PlayArrow, Article } from "@mui/icons-material";
 
 export interface DashboardProps {
     events: SerializedEvent[]
@@ -19,7 +19,7 @@ export function Dashboard({ events }: DashboardProps) {
 
     return (
         <>
-            <StyledBox id="image">
+            <StyledBox>
                 <Stack spacing={2}>
                     <EventSelect
                         events={events}
@@ -29,13 +29,22 @@ export function Dashboard({ events }: DashboardProps) {
                         emptyMessageStyle="h4"
                         onChange={onEventSelectionUpdated}
                     />
-                    <ButtonGroup fullWidth>
+                    <ButtonGroup 
+                        fullWidth
+                        orientation="vertical"
+                    >
                         <Button
                             disabled={undefined === selectedEventId}
                             startIcon={<PlayArrow />}
                             color="primary"
                             href={`/events/${selectedEventId || 0}/bid`}
                         >Begin bidding</Button>
+                        <Button
+                            disabled={undefined === selectedEventId}
+                            startIcon={<Article />}
+                            color="secondary"
+                            href={`/events/${selectedEventId || 0}/reports/bid-sheet`}
+                        >View bid sheet</Button>
                     </ButtonGroup>
                 </Stack>
             </StyledBox>

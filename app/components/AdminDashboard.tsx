@@ -19,7 +19,7 @@ export function AdminDashboard({ events }: AdminDashboardProps) {
 
     return (
         <>
-            <StyledBox id="image">
+            <StyledBox>
                 <Stack spacing={2}>
                     <EventSelect
                         events={events}

@@ -125,6 +125,13 @@ export class EventService {
         });
     }
 
+    public static isEnabledAndActive(event: Event): boolean {
+        const currentDate = DateTime.now().toUTC().toJSDate();
+        return event.enabled
+            && event.startsAt <= currentDate
+            && event.endsAt >= currentDate;
+    }
+
     private static defaultifyEventGetOptions(options?: EventGetOptions): EventGetOptions {
         return {
             withItems: options?.withItems || false

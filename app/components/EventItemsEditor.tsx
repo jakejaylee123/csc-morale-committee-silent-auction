@@ -120,7 +120,7 @@ function EventItemsEditorToolbar({
 export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     if (!event) {
         return (
-            <StyledBox id="image">
+            <StyledBox>
                 <Typography variant={"h5"} gutterBottom>{"Save your new event before adding items."}</Typography>
             </StyledBox>
         );
@@ -331,7 +331,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
 
     return (
         <>
-            <StyledBox id="image">
+            <StyledBox>
                 <FileUploadModal
                     event={event}
                     open={uploadCsvModalOpen}

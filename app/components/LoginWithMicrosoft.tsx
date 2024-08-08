@@ -8,7 +8,7 @@ import { LoginRounded } from "@mui/icons-material";
 export function LoginWithMicrosoft() {
     return (
         <>
-            <StyledBox id="image">
+            <StyledBox>
                 <Form action="/auth/microsoft" method="post">
                     <ButtonGroup fullWidth>
                         <Button

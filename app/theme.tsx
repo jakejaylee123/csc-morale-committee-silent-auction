@@ -1,5 +1,6 @@
 import { createTheme, ThemeOptions, alpha } from "@mui/material/styles";
 import { PaletteMode } from "@mui/material";
+import { BorderBottom } from "@mui/icons-material";
 
 declare module "@mui/material/styles/createPalette" {
     interface ColorRange {
@@ -794,6 +795,16 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
                             opacity: 1,
                         },
                     },
+                },
+            },
+            MuiTableCell: {
+                styleOverrides: {
+                    root: ({ theme }) => ({
+                        border: "1px solid black",
+                        ...theme.applyStyles("dark", {
+                            border: "1px solid white"
+                        }),
+                    }),
                 },
             },
             MuiToggleButtonGroup: {

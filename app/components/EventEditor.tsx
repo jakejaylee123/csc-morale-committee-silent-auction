@@ -42,7 +42,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
         <>
             <LocalizationProvider dateAdapter={AdapterLuxon}>
                 <Stack spacing={2}>
-                    <StyledBox id="image">
+                    <StyledBox>
                         <Typography variant={"h4"} gutterBottom>{"Main properties"}</Typography>
                         <Form
                             method="post"
