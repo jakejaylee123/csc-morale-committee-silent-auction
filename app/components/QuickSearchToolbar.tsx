@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, Stack } from '@mui/material';
-import Box from '@mui/material/Box';
-import { GridToolbarFilterButton, GridToolbarProps, GridToolbarQuickFilter } from '@mui/x-data-grid'
+import { Box } from '@mui/material';
+import { GridToolbarProps, GridToolbarQuickFilter } from '@mui/x-data-grid'
 
 export interface QuickSearchFilterCheckbox {
     label: string,

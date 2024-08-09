@@ -4,7 +4,7 @@ import { Form } from "@remix-run/react";
 import { DateTime } from "luxon";
 
 import { SerializedNullableEventWithItems } from "~/services/event.server";
-import { ButtonGroup, Checkbox, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
+import { Button, ButtonGroup, Checkbox, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import { Create, Save } from "@mui/icons-material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
@@ -12,7 +12,6 @@ import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { StyledBox } from "./StyledBox";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { EventItemsEditor } from "./EventItemsEditor";
-import { LoadingButton } from "@mui/lab";
 
 export interface EventEditorProps {
     event: SerializedNullableEventWithItems,
@@ -82,13 +81,11 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                     onChange={(newValue => setEndDate(newValue))}
                                 />
                                 <ButtonGroup fullWidth>
-                                    <LoadingButton
-                                        loading={saving}
-                                        loadingPosition="start"
+                                    <Button
                                         startIcon={isNew ? <Create /> : <Save />}
                                         color="primary"
                                         type="submit"
-                                    >{isNew ? "Create" : "Save"}</LoadingButton>
+                                    >{isNew ? "Create" : "Save"}</Button>
                                 </ButtonGroup>
                             </Stack>
                         </Form>
