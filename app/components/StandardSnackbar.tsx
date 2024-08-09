@@ -3,7 +3,6 @@ import { Snackbar, SnackbarProps } from "@mui/material";
 type StandardSnackbarProps = Omit<SnackbarProps, "autoHideDuration" | "anchorOrigin" | "open">;
 
 export function StandardSnackbar(props: StandardSnackbarProps) {
-    console.log("Snackbar children: ", props.children);
     return (
         <Snackbar 
             {...{
