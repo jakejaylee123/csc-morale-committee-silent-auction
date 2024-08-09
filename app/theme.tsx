@@ -222,4 +222,4 @@ const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
     };
 }
 
-export const theme = createTheme(getThemeOptions("dark"));
+export const theme = createTheme(getThemeOptions("light"));

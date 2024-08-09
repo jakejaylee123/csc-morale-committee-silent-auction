@@ -29,6 +29,7 @@ export function QuickSearchToolbar({ withFilterCheckboxes }: QuickSearchToolbarP
                 {
                     withFilterCheckboxes?.map(checkbox => (
                         <FormControlLabel
+                            key={checkbox.label}
                             control={
                                 <Checkbox
                                     value={checkbox.value}

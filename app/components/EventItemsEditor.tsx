@@ -4,17 +4,16 @@ import { useFetcher } from "@remix-run/react";
 import { DateTime } from "luxon";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
-import { Alert, AlertProps, Button, ButtonGroup, MenuItem, Select, Snackbar, Stack, Typography } from "@mui/material";
+import { Button, ButtonGroup, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { Delete, UploadFile } from "@mui/icons-material";
-import { DataGrid, GridActionsCellItem, GridCellModes, GridCellModesModel, GridColDef, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridRowModesModel, GridRowParams, GridRowsProp, GridSlots, GridToolbarContainer, MuiBaseEvent } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridColDef, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridRowModesModel, GridRowParams, GridRowsProp, GridSlots, GridToolbarContainer, MuiBaseEvent } from "@mui/x-data-grid";
 
 import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
 import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
-import { StandardSnackbar } from "./StandardSnackbar";
-import { StandardAlert } from "./StandardAlert";
+import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 
 type GridRowsPropSetter = (
     newRows: (oldRows: GridRowsProp) => GridRowsProp
@@ -121,10 +120,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     const [uploadCsvModalOpen, setUploadCsvModalOpen] = React.useState(false);
     const [rows, setRows] = React.useState<SerializedItem[]>(event?.items || []);
     const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
-    const [snackbar, setSnackbar] = React.useState<Pick<
-        AlertProps,
-        'children' | 'severity'
-    > | null>(null);
+    const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
 
     // We use this fetcher to send requests to update/create items, and then
     // we use an effect to listen for the response we get back
@@ -141,17 +137,17 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                     setRows(newRows.concat(itemFetcher.data.items[0]));
                 }
 
-                setSnackbar({ children: 'User successfully saved', severity: 'success' });
+                setSnackbar({ alerts: [{ message: 'User successfully saved', severity: 'success' }] });
             } else {
                 setRows(newRows);
 
-                setSnackbar({
-                    children: itemFetcher.data.errors
+                setSnackbar({ alerts: [{
+                    message: itemFetcher.data.errors
                         .flatMap(error => error.messages)
                         .map(message => `- ${message}`)
                         .join("\r\n"),
                     severity: "error"
-                });
+                }]});
             }
         }
     }, [itemFetcher]);
@@ -165,14 +161,14 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
             if (deleteData.success) {
                 setRows(rows.filter((row) => row.id !== deleteData.deletedItemId));
 
-                setSnackbar({ children: "Item successfully removed", severity: "success" });
+                setSnackbar({ alerts: [{ message: "Item successfully removed", severity: "success" }] });
             } else {
-                setSnackbar({
-                    children: deleteData.errors
+                setSnackbar({ alerts: [{
+                    message: deleteData.errors
                         .map(message => `- ${message}`)
                         .join("\r\n"),
                     severity: "error"
-                });
+                }]});
             }
         }
     }, [itemDeleteFetcher]);
@@ -212,7 +208,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     };
 
     const onProcessRowUpdateError = (error: Error) => {
-        setSnackbar({ children: error.message, severity: 'error' });
+        setSnackbar({ alerts: [{ message: error.message, severity: 'error' }] });
     };
 
     const onCloseSnackbar = () => {
@@ -368,10 +364,9 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
             {
                 !!snackbar &&
                 <StandardSnackbar
+                    {...snackbar}
                     onClose={onCloseSnackbar}
-                >
-                    <StandardAlert {...snackbar} onClose={onCloseSnackbar} />
-                </StandardSnackbar>
+                />
             }
         </>
     );

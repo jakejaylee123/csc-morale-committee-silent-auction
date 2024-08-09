@@ -10,10 +10,7 @@ import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
-import { Alert, Snackbar } from "@mui/material";
-import { StandardSnackbar } from "~/components/StandardSnackbar";
-import { StandardAlert, StandardAlertProps } from "~/components/StandardAlert";
-import React from "react";
+import { StandardSnackbar, StandardSnackbarProps } from "~/components/StandardSnackbar";
 
 interface EventEditLoaderFunctionData {
     event: EventWithItems | null,
@@ -150,21 +147,19 @@ export default function AdminEventEdit() {
     }
     
     const snackBarProps = result ? {
-        children: result?.success 
-            ? `Event successfully ${result?.type === "create" ? "created" : "updated"}.`
-            : `Error: ${result?.error}`,
-        severity: result?.success ? "success" : "error"
-    } satisfies StandardAlertProps : null;
+        alerts: [{
+            message: result?.success 
+                ? `Event successfully ${result?.type === "create" ? "created" : "updated"}.`
+                : `Error: ${result?.error}`,
+            severity: result?.success ? "success" : "error"
+        }]
+    } satisfies StandardSnackbarProps : null;
 
     return (
         <>
             {
                 result &&
-                <StandardSnackbar>
-                    <StandardAlert 
-                        {...snackBarProps}
-                    />
-                </StandardSnackbar>
+                <StandardSnackbar {...snackBarProps} />
             }
             <GleamingHeader
                 title=""

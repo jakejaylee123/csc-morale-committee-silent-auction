@@ -2,7 +2,7 @@ import * as React from "react";
 import { useFetcher } from "@remix-run/react";
 
 import { SerializedEventWithItems } from "~/services/event.server";
-import { Alert, AlertProps, Button, ButtonGroup, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Button, Stack, Typography } from "@mui/material";
 import { DataGrid, GridActionsCellItemProps, GridColDef, GridColumnVisibilityModel, GridEventListener, GridFilterModel, GridRowClassNameParams, GridRowEditStopReasons, GridRowParams } from "@mui/x-data-grid";
 
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
@@ -15,8 +15,7 @@ import { CategoryCommon } from "~/commons/category.common";
 import { StyledBox } from "./StyledBox";
 import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./QuickSearchToolbar";
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
-import { StandardSnackbar } from "./StandardSnackbar";
-import { StandardAlert } from "./StandardAlert";
+import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
 
 export interface BidEditorProps {
@@ -94,14 +93,12 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
 
 const createBidConfirmButton: BidConfirmButtonCreator = function ({ params, onClick }) {
     return [(
-        <ButtonGroup>
-            <Button
-                color="primary"
-                variant={(params.row.confirmed || !params.row.bidAmount) ? undefined : "contained"}
-                disabled={params.row.confirmed || !params.row.bidAmount}
-                onClick={onClick}
-            >{params.row.confirmed ? "Confirmed" : "Confirm"}</Button>
-        </ButtonGroup>
+        <Button
+            color="primary"
+            variant={(params.row.confirmed /*|| !params.row.bidAmount*/) ? undefined : "contained"}
+            disabled={params.row.confirmed /*|| !params.row.bidAmount*/}
+            onClick={onClick}
+        >{params.row.confirmed ? "Confirmed" : "Confirm"}</Button>
     )];
 };
 
@@ -122,17 +119,21 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     const [currentBids, setCurrentBids] = React.useState(bids || []);
     const [auctionConcludedModalOpen, setAuctionConcludedModalOpen] = React.useState(false);
-
+    
     const [rows, setRows] = React.useState<BidEditorDataSource>(createBidEditorDataSource({
         event,
         categoryHash: categoryHash.current,
         bids: currentBids
     }));
+    React.useEffect(() => {
+        setRows(() => createBidEditorDataSource({
+            event,
+            categoryHash: categoryHash.current,
+            bids: currentBids
+        }));
+    }, [currentBids]);
 
-    const [snackbar, setSnackbar] = React.useState<Pick<
-        AlertProps,
-        'children' | 'severity'
-    > | null>(null);
+    const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
 
     const [filterByConfirmed, setFilterByConfirmed] = React.useState(false);
     const filterModel: GridFilterModel = filterByConfirmed ? {
@@ -150,19 +151,15 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const bidFetcher = useFetcher<SerializedBidUpdateResult>();
     React.useEffect(() => {
         if (bidFetcher.state === "idle" && bidFetcher.data) {
+            console.log("Bid fetcher data: ", bidFetcher.data);
             if (true === bidFetcher.data.success) {
                 const newBid = bidFetcher.data.bid;
-                setCurrentBids(oldBids => oldBids.concat(newBid));
-                setRows(() => createBidEditorDataSource({
-                    event,
-                    categoryHash: categoryHash.current,
-                    bids
-                }));
-                setSnackbar({ children: "Bid confirmed", severity: "success" });
+                setCurrentBids((oldBids) => oldBids.concat(newBid));
+                setSnackbar({ alerts: [{ message: "Bid confirmed", severity: "success" }] });
             } else if (bidFetcher.data.concluded) {
                 setAuctionConcludedModalOpen(true);
             } else {
-                setSnackbar({ children: bidFetcher.data.error, severity: "success" });
+                setSnackbar({ alerts: [{ message: bidFetcher.data.error, severity: "error" }] });
             }
         }
     }, [bidFetcher]);
@@ -201,7 +198,6 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             editable: false,
             sortable: true
         },
-
         {
             field: "itemTagNumber",
             headerName: "Tag number",
@@ -330,10 +326,9 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             {
                 !!snackbar &&
                 <StandardSnackbar
+                    {...snackbar}
                     onClose={onCloseSnackbar}
-                >
-                    <StandardAlert {...snackbar} onClose={onCloseSnackbar} />
-                </StandardSnackbar>
+                />
             }
         </>
     );
