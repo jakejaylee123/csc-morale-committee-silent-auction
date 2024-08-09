@@ -257,11 +257,11 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                 <Stack
                     spacing={2}
                     sx={(theme) => ({
-                        '& .confirmed': {
-                            backgroundColor: theme.palette.mode === "dark"
+                        "& .confirmed, & .confirmed:hover, & .confirmed:active, & .confirmed.Mui-selected": {
+                            backgroundColor: (theme.palette.mode === "dark"
                                 ? theme.palette.success.dark
-                                : theme.palette.success.light
-                        },
+                                : theme.palette.success.light) + "!important"
+                        }
                     })}
                 >
                     <Stack
@@ -296,6 +296,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                         rows={rows}
                         getRowClassName={getRowClassName}
                         onRowEditStop={onRowEditStop}
+                        isCellEditable={(params) => !params.row.confirmed}
                         slots={{ toolbar: QuickSearchToolbar }}
                         slotProps={{
                             toolbar: {
