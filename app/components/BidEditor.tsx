@@ -15,6 +15,8 @@ import { CategoryCommon } from "~/commons/category.common";
 import { StyledBox } from "./StyledBox";
 import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./QuickSearchToolbar";
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
+import { StandardSnackbar } from "./StandardSnackbar";
+import { StandardAlert } from "./StandardAlert";
 
 export interface BidEditorProps {
     event: SerializedEventWithItems,
@@ -313,13 +315,11 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             </StyledBox>
             {
                 !!snackbar &&
-                <Snackbar
-                    open
+                <StandardSnackbar
                     onClose={onCloseSnackbar}
-                    autoHideDuration={6000}
                 >
-                    <Alert {...snackbar} onClose={onCloseSnackbar} />
-                </Snackbar>
+                    <StandardAlert {...snackbar} onClose={onCloseSnackbar} />
+                </StandardSnackbar>
             }
         </>
     );

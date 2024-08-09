@@ -13,6 +13,8 @@ import { FileUploadModal } from "./FileUploadModal";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
 import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
+import { StandardSnackbar } from "./StandardSnackbar";
+import { StandardAlert } from "./StandardAlert";
 
 type GridRowsPropSetter = (
     newRows: (oldRows: GridRowsProp) => GridRowsProp
@@ -365,13 +367,11 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
             </StyledBox>
             {
                 !!snackbar &&
-                <Snackbar
-                    open
+                <StandardSnackbar
                     onClose={onCloseSnackbar}
-                    autoHideDuration={6000}
                 >
-                    <Alert {...snackbar} onClose={onCloseSnackbar} />
-                </Snackbar>
+                    <StandardAlert {...snackbar} onClose={onCloseSnackbar} />
+                </StandardSnackbar>
             }
         </>
     );

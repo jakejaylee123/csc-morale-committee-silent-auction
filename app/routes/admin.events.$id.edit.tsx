@@ -11,6 +11,8 @@ import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
 import { Alert, Snackbar } from "@mui/material";
+import { StandardSnackbar } from "~/components/StandardSnackbar";
+import { StandardAlert } from "~/components/StandardAlert";
 
 interface EventEditLoaderFunctionData {
     event: EventWithItems | null,
@@ -141,11 +143,8 @@ export default function AdminEventEdit() {
         <>
             {
                 result &&
-                <Snackbar
-                    open
-                    autoHideDuration={6000}
-                >
-                    <Alert 
+                <StandardSnackbar>
+                    <StandardAlert 
                         severity={result.success ? "success" : "error"}
                     >
                         {
@@ -153,8 +152,8 @@ export default function AdminEventEdit() {
                                 ? "Event successfully created."
                                 : `Error: ${result.error}`
                         }
-                    </Alert>
-                </Snackbar>
+                    </StandardAlert>
+                </StandardSnackbar>
             }
             <GleamingHeader
                 title=""
