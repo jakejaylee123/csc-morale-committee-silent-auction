@@ -257,7 +257,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                 <Stack
                     spacing={2}
                     sx={(theme) => ({
-                        "& .confirmed, & .confirmed:hover, & .confirmed:active, & .confirmed.Mui-selected": {
+                        "& .confirmed": {
                             backgroundColor: (theme.palette.mode === "dark"
                                 ? theme.palette.success.dark
                                 : theme.palette.success.light) + "!important"
