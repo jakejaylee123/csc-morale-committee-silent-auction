@@ -37,7 +37,7 @@ export function Dashboard({ events }: DashboardProps) {
                             disabled={undefined === selectedEventId}
                             startIcon={<PlayArrow />}
                             color="primary"
-                            href={`/events/${selectedEventId || 0}/bid`}
+                            href={`/events/${selectedEventId || 0}/bids/edit`}
                         >Begin bidding</Button>
                         <Button
                             disabled={undefined === selectedEventId}

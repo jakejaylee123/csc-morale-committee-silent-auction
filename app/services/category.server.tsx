@@ -3,12 +3,7 @@ import { SerializeFrom } from "@remix-run/node";
 
 export type SerializedCategoryCode = SerializeFrom<CategoryCode>;
 
-export interface ItemCreation {
-    categoryId: string,
-    itemNumber: number,
-    description: string,
-    minimumBid?: number
-};
+export type CategoryHash = { [key: number]: SerializedCategoryCode };
 
 export class CategoryService {
     private static readonly client = new PrismaClient();

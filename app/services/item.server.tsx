@@ -4,7 +4,7 @@ import { PrismaClient, Event, Item, Prisma } from "@prisma/client";
 import { DateTime } from "luxon";
 
 import { Identifiers } from "./common.server";
-import { CategoryService } from "./category.server";
+import { CategoryHash, CategoryService } from "./category.server";
 
 export interface ItemBulkChangeRequestOptions {
     id?: number,
@@ -41,6 +41,12 @@ export type ItemCreationRequestsResult = {
 
 export class ItemService {
     private static readonly client = new PrismaClient();
+
+    public static async getForEvent(eventId: number): Promise<Item[]> {
+        return await ItemService.client.item.findMany({
+            where: { eventId }
+        });
+    }
 
     public static async delete(id: number): Promise<void> {
         await ItemService.client.item.delete({

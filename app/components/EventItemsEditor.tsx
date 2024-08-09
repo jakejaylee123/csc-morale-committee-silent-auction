@@ -130,7 +130,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     React.useEffect(() => {
         if (itemFetcher.state === "idle" && itemFetcher.data) {
             const newRows = rows
-                .filter((row: any) => row.id !== 0);
+                .filter((row) => row.id !== 0);
 
             if (itemFetcher.data.success) {
                 // If there was a change in the amount of items we have,
@@ -161,7 +161,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         if (itemDeleteFetcher.state === "idle" && itemDeleteFetcher.data) {
             const deleteData = itemDeleteFetcher.data as SerializedEventItemDeleteResult;
             if (deleteData.success) {
-                setRows(rows.filter((row: any) => row.id !== deleteData.deletedItemId));
+                setRows(rows.filter((row) => row.id !== deleteData.deletedItemId));
 
                 setSnackbar({ children: "Item successfully removed", severity: "success" });
             } else {
@@ -191,7 +191,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         }
     };
 
-    const onRowUpdate = async function (newItem: SerializedItem, oldItem: SerializedItem) {
+    const onRowUpdate = function (newItem: SerializedItem, oldItem: SerializedItem) {
         try {
             // We will process the result of this submission
             // in the "useEffect" that listens to this "itemFetcher"

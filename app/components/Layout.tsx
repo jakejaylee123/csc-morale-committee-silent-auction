@@ -8,9 +8,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return (
         <Container 
             disableGutters
-            sx={(theme) => ({
+            sx={{
                 padding: "20px"
-            })}
+            }}
         >
             <Box sx={{ }}>
                 {children}

@@ -51,7 +51,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         console.log({ error });
         return json({
             success: false,
-            errors: [(error as any).message || "An unknown error occurred."]
+            errors: [(error as Error).message || "An unknown error occurred."]
         } satisfies EventItemDeleteResult);
     }
 } satisfies ActionFunction;

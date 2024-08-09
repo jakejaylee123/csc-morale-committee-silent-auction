@@ -78,7 +78,7 @@ const defaultifyAuthenticationBidderOptions = function (options?: AuthenticatedB
 export const getAuthenticatedBidder = async function (request: Request): Promise<BidderAuthentication | undefined> {
     try {
         return await authenticator.authenticate("microsoft", request);
-    } catch (error: any) {
+    } catch (error) {
         return undefined;
     }
 };
