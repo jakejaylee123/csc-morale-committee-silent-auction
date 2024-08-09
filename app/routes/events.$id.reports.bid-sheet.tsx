@@ -39,17 +39,17 @@ export const loader = async function ({ request, params }) {
         return json({
             success: false,
             error: `Event "${id}" was not found.`
-        } as EventReportBidSheetLoaderFunctionData);
+        } satisfies EventReportBidSheetLoaderFunctionData);
     } else if (!EventService.isEnabledAndActive(event) && !bidder.adminAssignment) {
         return json({
             success: false,
             error: "Only administrators can view bid sheets for disabled/inactive auction events."
-        } as EventReportBidSheetLoaderFunctionData);
+        } satisfies EventReportBidSheetLoaderFunctionData);
     } else if (!event.items.length) {
         return json({
             success: false,
             error: `Event "${id}" does not have any items for a bid sheet report.`
-        } as EventReportBidSheetLoaderFunctionData);
+        } satisfies EventReportBidSheetLoaderFunctionData);
     }
 
     return json({

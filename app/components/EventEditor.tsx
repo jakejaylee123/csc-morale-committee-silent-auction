@@ -34,8 +34,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [startDate, setStartDate] = React
         .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt));
     const [endDate, setEndDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.startsAt));
-    const [saving, setSaving] = React.useState(false);
+        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt));
 
     return (
         <>
@@ -90,7 +89,6 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                             </Stack>
                         </Form>
                     </StyledBox>
-
                     {
                         event.id !== 0 &&
                         <EventItemsEditor

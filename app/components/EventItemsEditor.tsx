@@ -257,7 +257,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                 return row;
             },
             renderEditCell: (params) => (
-                <Select 
+                <Select
                     fullWidth
                     value={params.value.categoryId}
                     onChange={(event) => {

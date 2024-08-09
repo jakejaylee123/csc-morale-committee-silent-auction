@@ -25,7 +25,7 @@ export const loader = async function ({ request, params }) {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
-
+    
     const { id } = params;
     const event = await (async () => {
         if (Identifiers.isIntegerId(id)) {
@@ -40,17 +40,17 @@ export const loader = async function ({ request, params }) {
         return json({
             success: false,
             error: `Event "${id}" was not found.`
-        } as EventBidLoaderFunctionData);
+        } satisfies EventBidLoaderFunctionData);
     } else if (!EventService.isEnabledAndActive(event)) {
         return json({
             success: false,
-            error: `The auction event "${event.description}" was not found.`
-        } as EventBidLoaderFunctionData);
+            error: `The auction event "${event.description}" is disabled/inactive.`
+        } satisfies EventBidLoaderFunctionData);
     } else if (!event.items.length) {
         return json({
             success: false,
             error: `Event "${id}" does not have any items to bid on.`
-        } as EventBidLoaderFunctionData);
+        } satisfies EventBidLoaderFunctionData);
     }
 
     return json({

@@ -12,7 +12,8 @@ import { CategoryService, SerializedCategoryCode } from "~/services/category.ser
 import { CategoryCode, Event } from "@prisma/client";
 import { Alert, Snackbar } from "@mui/material";
 import { StandardSnackbar } from "~/components/StandardSnackbar";
-import { StandardAlert } from "~/components/StandardAlert";
+import { StandardAlert, StandardAlertProps } from "~/components/StandardAlert";
+import React from "react";
 
 interface EventEditLoaderFunctionData {
     event: EventWithItems | null,
@@ -23,11 +24,14 @@ interface SerializedEventEditLoaderFunctionData {
     categories: SerializedCategoryCode[]
 };
 
+export type EventUpdateType = "create" | "update" | "none";
 export type EventUpdateResult = {
     success: false,
+    type: EventUpdateType,
     error: string
 } | {
     success: true,
+    type: EventUpdateType,
     event: Event
 };
 export type SerializedEventUpdateResult = SerializeFrom<EventUpdateResult>;
@@ -83,9 +87,11 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     const startDate = formData.get("startDate") as string;
     const endDate = formData.get("endDate") as string;
 
+    let type: EventUpdateType = "none"; 
     let changedEvent: Event | null = null;
     try {
         if (Identifiers.isNew(id)) {
+            type = "create";
             changedEvent = await EventService.create({
                 creatorId: bidder.id,
                 event: {
@@ -96,6 +102,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                 }
             });
         } else if (Identifiers.isIntegerId(id)) {
+            type = "update";
             changedEvent = await EventService.update({
                 updatorId: bidder.id,
                 event: {
@@ -109,18 +116,21 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         } else {
             return json({
                 success: false,
+                type,
                 error: `The passed event ID "${id}" was not valid`
             } satisfies EventUpdateResult);
         }
     } catch (error) {
         return json({
             success: false,
+            type,
             error: (error as Error).message || "Unknown error occurred."
         } satisfies EventUpdateResult);
     }
 
     return json({
         success: true,
+        type,
         event: changedEvent as Event
     } satisfies EventUpdateResult);
 } satisfies ActionFunction;
@@ -139,20 +149,21 @@ export default function AdminEventEdit() {
         if (event) event.id = result.event.id;
     }
     
+    const snackBarProps = result ? {
+        children: result?.success 
+            ? `Event successfully ${result?.type === "create" ? "created" : "updated"}.`
+            : `Error: ${result?.error}`,
+        severity: result?.success ? "success" : "error"
+    } satisfies StandardAlertProps : null;
+
     return (
         <>
             {
                 result &&
                 <StandardSnackbar>
                     <StandardAlert 
-                        severity={result.success ? "success" : "error"}
-                    >
-                        {
-                            result.success 
-                                ? "Event successfully created."
-                                : `Error: ${result.error}`
-                        }
-                    </StandardAlert>
+                        {...snackBarProps}
+                    />
                 </StandardSnackbar>
             }
             <GleamingHeader

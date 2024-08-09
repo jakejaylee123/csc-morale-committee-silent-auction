@@ -17,6 +17,7 @@ import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./QuickSearchTool
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 import { StandardSnackbar } from "./StandardSnackbar";
 import { StandardAlert } from "./StandardAlert";
+import { StandardOkModal } from "./StandardModal";
 
 export interface BidEditorProps {
     event: SerializedEventWithItems,
@@ -120,6 +121,7 @@ const getConfirmedBidTotal = function ({ dataSource, asFormattedString }: GetCon
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     const [currentBids, setCurrentBids] = React.useState(bids || []);
+    const [auctionConcludedModalOpen, setAuctionConcludedModalOpen] = React.useState(false);
 
     const [rows, setRows] = React.useState<BidEditorDataSource>(createBidEditorDataSource({
         event,
@@ -157,6 +159,8 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                     bids
                 }));
                 setSnackbar({ children: "Bid confirmed", severity: "success" });
+            } else if (bidFetcher.data.concluded) {
+                setAuctionConcludedModalOpen(true);
             } else {
                 setSnackbar({ children: bidFetcher.data.error, severity: "success" });
             }
@@ -253,6 +257,15 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
 
     return (
         <>
+            <StandardOkModal
+                open={auctionConcludedModalOpen}
+                title="This auction has concluded"
+                description={"The bid you just made was not submitted "
+                    + "because this auction event is now over. Sorry! "
+                    + "You may now close this browser window/tab."}
+                onOk={() => setAuctionConcludedModalOpen(false)}
+                onClose={() => setAuctionConcludedModalOpen(false)}
+            />
             <StyledBox>
                 <Stack
                     spacing={2}
