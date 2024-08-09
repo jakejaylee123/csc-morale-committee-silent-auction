@@ -18,8 +18,8 @@ export function Dashboard({ events }: DashboardProps) {
     };
 
     return (
-        <>
-            <StyledBox>
+        <Stack alignContent="center">
+            <StyledBox sx={{ maxWidth: { sm: 400, xs: "100%" } }}>
                 <Stack spacing={2}>
                     <EventSelect
                         events={events}
@@ -29,7 +29,7 @@ export function Dashboard({ events }: DashboardProps) {
                         emptyMessageStyle="h4"
                         onChange={onEventSelectionUpdated}
                     />
-                    <ButtonGroup 
+                    <ButtonGroup
                         fullWidth
                         orientation="vertical"
                     >
@@ -48,6 +48,6 @@ export function Dashboard({ events }: DashboardProps) {
                     </ButtonGroup>
                 </Stack>
             </StyledBox>
-        </>
+        </Stack>
     );
 }

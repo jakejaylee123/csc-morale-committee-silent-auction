@@ -19,31 +19,36 @@ export function AdminDashboard({ events }: AdminDashboardProps) {
 
     return (
         <>
-            <StyledBox>
-                <Stack spacing={2}>
-                    <EventSelect
-                        events={events}
-                        value={selectedEventId}
-                        title="Select an auction event to edit"
-                        emptyMessage="There are no auction events for editting."
-                        emptyMessageStyle="h4"
-                        onChange={onEventSelectionUpdated}
-                    />
-                    <ButtonGroup fullWidth>
-                        <Button
-                            disabled={undefined === selectedEventId}
-                            startIcon={<Edit />}
-                            color="primary"
-                            href={`/admin/events/${selectedEventId || 0}/edit`}
-                        >Edit event</Button>
-                        <Button
-                            startIcon={<Add />}
-                            color="secondary"
-                            href="/admin/events/new/edit"
-                        >Create event</Button>
-                    </ButtonGroup>
-                </Stack>
-            </StyledBox>
+            <Stack alignContent="center">
+                <StyledBox sx={{ maxWidth: { sm: 400, xs: "100%" } }}>
+                    <Stack spacing={2}>
+                        <EventSelect
+                            events={events}
+                            value={selectedEventId}
+                            title="Select an auction event to administer"
+                            emptyMessage="There are no auction events to administer."
+                            emptyMessageStyle="h4"
+                            onChange={onEventSelectionUpdated}
+                        />
+                        <ButtonGroup 
+                            fullWidth
+                            orientation="vertical"
+                        >
+                            <Button
+                                disabled={undefined === selectedEventId}
+                                startIcon={<Edit />}
+                                color="primary"
+                                href={`/admin/events/${selectedEventId || 0}/edit`}
+                            >Edit event</Button>
+                            <Button
+                                startIcon={<Add />}
+                                color="secondary"
+                                href="/admin/events/new/edit"
+                            >Create event</Button>
+                        </ButtonGroup>
+                    </Stack>
+                </StyledBox>
+            </Stack>
         </>
     );
 }
