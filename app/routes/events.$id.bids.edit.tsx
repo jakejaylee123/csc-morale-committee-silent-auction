@@ -9,8 +9,6 @@ import { CategoryService } from "~/services/category.server";
 import { Bid, CategoryCode } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 import { BidEditor } from "~/components/BidEditor";
-import { Fab } from "@mui/material";
-import { DoneAll } from "@mui/icons-material";
 
 type EventBidLoaderFunctionData = {
     success: true,
@@ -88,10 +86,6 @@ export default function EventBidsEdit() {
                 event={event}
                 categories={categories}
                 bids={bids} />
-            <Fab variant="extended">
-                <DoneAll sx={{ mr: 1 }} />
-                Finish
-            </Fab>
         </>
     );
 }
