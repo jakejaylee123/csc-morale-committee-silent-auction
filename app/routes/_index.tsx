@@ -1,17 +1,15 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json, useLoaderData } from "@remix-run/react";
 
-import { Event } from "@prisma/client";
-
 import { Dashboard } from "~/components/Dashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, SerializedEvent } from "~/services/event.server";
+import { EventService, EventWithConvenience, SerializedEvent } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { BidderWithAdmin, SerializedBidderWithAdmin } from "~/services/users.server";
 
 interface IndexLoaderFunctionData {
     bidder: BidderWithAdmin,
-    events: Event[]
+    events: EventWithConvenience[]
 };
 interface SerializedIndexLoaderFunctionData {
     bidder: SerializedBidderWithAdmin,

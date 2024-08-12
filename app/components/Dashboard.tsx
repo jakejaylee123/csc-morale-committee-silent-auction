@@ -5,6 +5,7 @@ import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
 import { Button, ButtonGroup, Stack } from "@mui/material";
 import { PlayArrow, Article, AutoAwesome } from "@mui/icons-material";
+import { EventCommon } from "~/commons/event.common";
 
 export interface DashboardProps {
     events: SerializedEvent[]
@@ -16,6 +17,22 @@ export function Dashboard({ events }: DashboardProps) {
     const onEventSelectionUpdated = function (event: EventSelectChangeEvent, child: React.ReactNode) {
         setSelectedEventId(event.target.value);
     };
+
+    const getEvent = function (eventIdString: string | undefined): SerializedEvent | undefined {
+        return eventIdString 
+            ? events.find(event => event.id === parseInt(eventIdString))
+            : undefined;
+    };
+
+    const isEnabledAndActive = function (event: SerializedEvent | undefined): boolean {
+        if (!event) return false;
+        return EventCommon.isEnabledAndActive(event);
+    };
+
+    const isEnabledAndConcluded = function (event: SerializedEvent | undefined): boolean {
+        if (!event) return false;
+        return EventCommon.isEnabledAndConcluded(event);
+    }
 
     return (
         <Stack alignContent="center">
@@ -34,7 +51,7 @@ export function Dashboard({ events }: DashboardProps) {
                         orientation="vertical"
                     >
                         <Button
-                            disabled={undefined === selectedEventId}
+                            disabled={!isEnabledAndActive(getEvent(selectedEventId))}
                             startIcon={<PlayArrow />}
                             color="primary"
                             href={`/events/${selectedEventId || 0}/bids/edit`}
@@ -46,7 +63,7 @@ export function Dashboard({ events }: DashboardProps) {
                             href={`/events/${selectedEventId || 0}/reports/bid-sheet`}
                         >View bid sheet</Button>
                         <Button
-                            disabled={undefined === selectedEventId}
+                            disabled={!isEnabledAndConcluded(getEvent(selectedEventId))}
                             startIcon={<AutoAwesome />}
                             color="secondary"
                             href={`/events/${selectedEventId || 0}/winnings`}

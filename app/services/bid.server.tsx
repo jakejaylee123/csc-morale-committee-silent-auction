@@ -66,7 +66,7 @@ export class BidService {
         itemId, 
         withItem, 
         withBidder 
-    }: GetBidArgs): Promise<BidWithItem[]> {
+    }: GetBidArgs): Promise<(BidWithItemAndBidder | BidWithItem| Bid)[]> {
         const eventBids = await BidService.getMany({ 
             eventId, 
             withItem,
@@ -76,6 +76,10 @@ export class BidService {
         const eventBidsWithItems = eventBids.filter(bid => BidService.isBidWithItem(bid));
         const winningBidsHash: { [itemIdString: string]: BidWithItem } = {};
         eventBidsWithItems.forEach(bid => {
+            if (bid.disqualified || bid.item.disqualified) {
+                return;
+            }
+
             const bidItemKey = `${bid.itemId}`;
             if (!winningBidsHash[bidItemKey]) {
                 winningBidsHash[bidItemKey] = bid;

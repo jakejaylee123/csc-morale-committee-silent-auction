@@ -8,6 +8,7 @@ import { Identifiers } from "~/commons/general.common";
 import { Bid } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 import { EventService } from "~/services/event.server";
+import { EventCommon } from "~/commons/event.common";
 
 export type BidUpdateResult = {
     success: true,
@@ -39,7 +40,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             concluded: false,
             error: `Event "${id}" was not found.`
         } satisfies BidUpdateResult);
-    } else if (!EventService.isEnabledAndActive(event)) {
+    } else if (!EventCommon.isEnabledAndActive(event)) {
         return json({
             success: false,
             concluded: true,

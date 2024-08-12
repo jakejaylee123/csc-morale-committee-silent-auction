@@ -60,79 +60,77 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
         return lhs.tagNumber.localeCompare(rhs.tagNumber);
     });
 
+    if (!winningBids.length) {
+        return (
+            <StyledBox>
+                <Stack spacing={2} alignItems="center">
+                    <Typography variant={"h4"} gutterBottom>You have no winnings for this auction event.</Typography>
+                    <SentimentVeryDissatisfied
+                        sx={{ width: 100, height: 100 }}
+                        fontSize="large"
+                    />
+                </Stack>
+            </StyledBox>
+        );
+    }
+
     const [width, height] = useWindowSize();
     return (
         <>
-            {
-                winningBids.length && 
-                <WrappedConfetti
-                    width={width}
-                    height={height}
-                />
-            }
+            <WrappedConfetti
+                width={width}
+                height={height}
+            />
             <StyledBox>
-                {
-                    !winningBids.length &&
-                    <Stack alignItems="center">
-                        <Typography variant={"h4"} gutterBottom>You have no winnings for this auction event.</Typography>
-                        <SentimentVeryDissatisfied
-                            sx={{ width: 100, height: 100 }}
-                            fontSize="large"
-                        />
-                    </Stack>
-                }
-                {
-                    winningBids.length && 
+                <Stack
+                    spacing={2}
+                >
                     <Stack
                         spacing={2}
+                        direction="row"
                     >
-                        <Stack
-                            spacing={2}
-                            direction="row"
-                        >
-                            <Typography
-                                variant={"h4"}
-                                gutterBottom
-                            >{"Winnings"}</Typography>
-                            <Typography
-                                align="right"
-                                flex={1}
-                                variant={"h4"}
-                                gutterBottom
-                            >{"Winning total: " + getWinningBidTotal(winningBids)}</Typography>
-                        </Stack>
-                        <Alert
-                            severity="success"
-                            sx={{
-                                fontWeight: "bold"
-                            }}
-                        >Congratulations on your winnings!</Alert>
-                        <TableContainer>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Item tag number</TableCell>
-                                        <TableCell>Description</TableCell>
-                                        <TableCell>Winning bid amount</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {
-                                        winningBidsWithTagNumbers.map(bid => (
-                                            <TableRow key={`${bid.id}`}>
-                                                <TableCell>{bid.tagNumber}</TableCell>
-                                                <TableCell>{bid.item.itemDescription}</TableCell>
-                                                <TableCell>{MoneyFormatter.getFormattedMoney({
-                                                    amount: bid.bidAmount
-                                                })}</TableCell>
-                                            </TableRow>
-                                        ))
-                                    }
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        <Typography
+                            variant={"h4"}
+                            gutterBottom
+                        >{"Winnings"}</Typography>
+                        <Typography
+                            align="right"
+                            flex={1}
+                            variant={"h4"}
+                            gutterBottom
+                        >{"Winning total: " + getWinningBidTotal(winningBids)}</Typography>
                     </Stack>
-                }
+                    <Alert
+                        severity="success"
+                        sx={{
+                            fontWeight: "bold"
+                        }}
+                    >Congratulations on your winnings!</Alert>
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Item tag number</TableCell>
+                                    <TableCell>Description</TableCell>
+                                    <TableCell>Winning bid amount</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {
+                                    winningBidsWithTagNumbers.map(bid => (
+                                        <TableRow key={`${bid.id}`}>
+                                            <TableCell>{bid.tagNumber}</TableCell>
+                                            <TableCell>{bid.item.itemDescription}</TableCell>
+                                            <TableCell>{MoneyFormatter.getFormattedMoney({
+                                                amount: bid.bidAmount
+                                            })}</TableCell>
+                                        </TableRow>
+                                    ))
+                                }
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Stack>
             </StyledBox>
         </>
     );

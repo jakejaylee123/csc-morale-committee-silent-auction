@@ -2,16 +2,18 @@ import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService } from "~/services/event.server";
+import { EventService, EventWithConvenience } from "~/services/event.server";
 import { Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
-import { BidService, BidWithItem } from "~/services/bid.server";
+import { BidService, BidWithItem, BidWithItemAndBidder } from "~/services/bid.server";
 import { Winnings } from "~/components/Winnings";
+import { EventCommon } from "~/commons/event.common";
 
 type EventWinningsLoaderFunctionData = {
     success: true,
+    bidderId: number,
     event: Event,
     categories: CategoryCode[],
     winningBids: BidWithItem[]
@@ -27,7 +29,7 @@ export const loader = async function ({ request, params }) {
     const { id } = params;
     const event = await (async () => {
         if (Identifiers.isIntegerId(id)) {
-            return await EventService.get(parseInt(id)) as Event;
+            return await EventService.get(parseInt(id)) as EventWithConvenience;
         } else {
             return null;
         }
@@ -38,7 +40,7 @@ export const loader = async function ({ request, params }) {
             success: false,
             error: `Event "${id}" was not found.`
         } satisfies EventWinningsLoaderFunctionData);
-    } else if (!EventService.isEnabledAndConcluded(event)) {
+    } else if (!EventCommon.isEnabledAndConcluded(event)) {
         return json({
             success: false,
             error: `The auction event "${event.description}"is either disabled or not yet concluded.`
@@ -47,9 +49,14 @@ export const loader = async function ({ request, params }) {
 
     return json({
         success: true,
+        bidderId: bidder.id,
         event: event,
         categories: await CategoryService.getAll(),
-        winningBids: await BidService.getWinning({ eventId: event.id, bidderId: bidder.id })
+        winningBids: await BidService.getWinning({ 
+            eventId: event.id, 
+            bidderId: bidder.id,
+            withItem: true
+        }) as BidWithItem[]
     } satisfies EventWinningsLoaderFunctionData);
 } satisfies LoaderFunction;
 
@@ -65,7 +72,7 @@ export default function EventWinnings() {
             </>
         );
     }
-
+    
     return (
         <>
             <GleamingHeader

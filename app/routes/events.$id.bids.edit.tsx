@@ -9,6 +9,7 @@ import { CategoryService } from "~/services/category.server";
 import { Bid, CategoryCode } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 import { BidEditor } from "~/components/BidEditor";
+import { EventCommon } from "~/commons/event.common";
 
 type EventBidLoaderFunctionData = {
     success: true,
@@ -41,7 +42,7 @@ export const loader = async function ({ request, params }) {
             success: false,
             error: `Event "${id}" was not found.`
         } satisfies EventBidLoaderFunctionData);
-    } else if (!EventService.isEnabledAndActive(event)) {
+    } else if (!EventCommon.isEnabledAndActive(event)) {
         return json({
             success: false,
             error: `The auction event "${event.description}" is disabled/inactive.`

@@ -8,6 +8,7 @@ import { GleamingHeader } from "~/components/GleamingHeader";
 import { BidSheetReport } from "~/components/BidSheetReport";
 import { CategoryCode } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
+import { EventCommon } from "~/commons/event.common";
 
 type EventReportBidSheetLoaderFunctionData = {
     success: true,
@@ -38,7 +39,7 @@ export const loader = async function ({ request, params }) {
             success: false,
             error: `Event "${id}" was not found.`
         } satisfies EventReportBidSheetLoaderFunctionData);
-    } else if (!EventService.isEnabledAndActive(event) && !bidder.adminAssignment) {
+    } else if (!EventCommon.isEnabledAndActive(event) && !bidder.adminAssignment) {
         return json({
             success: false,
             error: "Only administrators can view bid sheets for disabled/inactive auction events."

@@ -24,10 +24,14 @@ export interface EventUpdateOptions {
     event: EventUpdate
 };
 
-export type EventWithItems = Event & { items: Item[] };
+export type EventWithConvenience = Event & {
+    active: boolean,
+    concluded: boolean
+};
+export type EventWithItems = EventWithConvenience & { items: Item[] };
 
-export type SerializedEvent = SerializeFrom<Event>;
-export type SerializedNullableEvent = SerializeFrom<Event | null>;
+export type SerializedEvent = SerializeFrom<EventWithConvenience>;
+export type SerializedNullableEvent = SerializeFrom<EventWithConvenience | null>;
 export type SerializedEventWithItems = SerializeFrom<EventWithItems>;
 export type SerializedNullableEventWithItems = SerializeFrom<EventWithItems | null>;
 
@@ -39,54 +43,58 @@ export class EventService {
     /**
      * @returns All auctions.
      */
-    public static async getAll(): Promise<Event[]> {
-        return await EventService.client.event.findMany({});
+    public static async getAll(): Promise<EventWithConvenience[]> {
+        return EventService.injectConvenienceProperties(await EventService.client.event.findMany({}));
     }
 
     /**
      * @returns All active auctions.
      */
-    public static async getEnabledActiveAndPast(): Promise<Event[]> {
+    public static async getEnabledActiveAndPast(): Promise<EventWithConvenience[]> {
         const currentDateTime = new Date().toISOString();
         
-        return await EventService.client.event.findMany({
-            where: { 
-                disabledAt: {
-                    equals: null
-                },
-                startsAt: {
-                    lte: currentDateTime
+        return EventService.injectConvenienceProperties(
+            await EventService.client.event.findMany({
+                where: { 
+                    disabledAt: {
+                        equals: null
+                    },
+                    startsAt: {
+                        lte: currentDateTime
+                    }
                 }
-            }
-        });
+            })
+        );
     }
 
     /**
      * @returns All active auctions.
      */
-    public static async getActive(): Promise<Event[]> {
+    public static async getActive(): Promise<EventWithConvenience[]> {
         const currentDateTime = new Date().toISOString();
         
-        return await EventService.client.event.findMany({
-            where: { 
-                startsAt: {
-                    lte: currentDateTime
-                },
-                endsAt: {
-                    gte: currentDateTime
+        return EventService.injectConvenienceProperties(
+            await EventService.client.event.findMany({
+                where: { 
+                    startsAt: {
+                        lte: currentDateTime
+                    },
+                    endsAt: {
+                        gte: currentDateTime
+                    }
                 }
-            }
-        });
+            })
+        );
     }
 
     /**
      * @param id ID of the corresponding event to get.
      * @returns Event that corresponds to passed ID.
      */
-    public static async get(id: number, options?: EventGetOptions): Promise<EventWithItems | Event | null> {
+    public static async get(id: number, options?: EventGetOptions): Promise<EventWithItems | EventWithConvenience | null> {
         options = EventService.defaultifyEventGetOptions(options);
 
-        return await EventService.client.event.findUnique({
+        const event = await EventService.client.event.findUnique({
             where: { id },
             ...(options.withItems && { 
                 include: { 
@@ -94,68 +102,72 @@ export class EventService {
                 }
             })
         });
+        return event
+            ? EventService.injectConvenienceProperties([event])[0]
+            : null;
     }
 
     /**
      * @param id ID of the corresponding event to get.
      * @returns Event that corresponds to passed ID.
      */
-    public static async create({ creatorId, event }: EventCreateOptions): Promise<Event> {
+    public static async create({ creatorId, event }: EventCreateOptions): Promise<EventWithConvenience> {
         const currentDate = DateTime.now().toUTC().toJSDate();
 
-        return await EventService.client.event.create({
-            data: {
-                description: event.description,
-                startsAt: event.startDate.toUTC().toJSDate(),
-                endsAt: event.endDate.toUTC().toJSDate(),
-                createdAt: currentDate,
-                createdBy: creatorId,
-                enabled: event.enabled,
-                disabledAt: null,
-                disabledBy: null,
-                ...(!event.enabled && {
-                    disabledAt: currentDate,
-                    disabledBy: creatorId
-                })
-            }
-        });
+        return EventService.injectConvenienceProperties([
+            await EventService.client.event.create({
+                data: {
+                    description: event.description,
+                    startsAt: event.startDate.toUTC().toJSDate(),
+                    endsAt: event.endDate.toUTC().toJSDate(),
+                    createdAt: currentDate,
+                    createdBy: creatorId,
+                    enabled: event.enabled,
+                    disabledAt: null,
+                    disabledBy: null,
+                    ...(!event.enabled && {
+                        disabledAt: currentDate,
+                        disabledBy: creatorId
+                    })
+                }
+            })
+        ])[0];
     }
 
     /**
      * @param id ID of the corresponding event to get.
      * @returns Event that corresponds to passed ID.
      */
-    public static async update({ updatorId, event }: EventUpdateOptions): Promise<Event> {
+    public static async update({ updatorId, event }: EventUpdateOptions): Promise<EventWithConvenience> {
         const currentDate = DateTime.now().toUTC().toJSDate();
 
-        return await EventService.client.event.update({
-            where: { id: event.id },
-            data: {
-                description: event.description,
-                startsAt: event.startDate.toUTC().toJSDate(),
-                endsAt: event.endDate.toUTC().toJSDate(),
-                createdAt: currentDate,
-                createdBy: updatorId,
-                enabled: event.enabled,
-                ...(!event.enabled && {
-                    disabledAt: currentDate,
-                    disabledBy: updatorId
-                })
-            }
-        });
+        return EventService.injectConvenienceProperties([
+            await EventService.client.event.update({
+                where: { id: event.id },
+                data: {
+                    description: event.description,
+                    startsAt: event.startDate.toUTC().toJSDate(),
+                    endsAt: event.endDate.toUTC().toJSDate(),
+                    createdAt: currentDate,
+                    createdBy: updatorId,
+                    enabled: event.enabled,
+                    ...(!event.enabled && {
+                        disabledAt: currentDate,
+                        disabledBy: updatorId
+                    })
+                }
+            })
+        ])[0];
     }
 
-    public static isEnabledAndActive(event: Event): boolean {
+    private static injectConvenienceProperties(events: Event[]): EventWithConvenience[] {
         const currentDate = DateTime.now().toUTC().toJSDate();
-        return event.enabled
-            && event.startsAt <= currentDate
-            && event.endsAt >= currentDate;
-    }
 
-    public static isEnabledAndConcluded(event: Event): boolean {
-        const currentDate = DateTime.now().toUTC().toJSDate();
-        return event.enabled
-            && event.endsAt < currentDate;
+        return events.map(event => ({
+            ...event,
+            active: event.startsAt <= currentDate && event.endsAt >=currentDate,
+            concluded: event.endsAt <= currentDate
+        }));
     }
 
     private static defaultifyEventGetOptions(options?: EventGetOptions): EventGetOptions {
