@@ -219,6 +219,18 @@ const getDesignTokens = (mode: PaletteMode) => ({
 const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
     return {
         ...getDesignTokens(mode),
+        components: {
+            MuiTableCell: {
+                styleOverrides: {
+                    root: ({ theme }) => ({
+                        border: "1px solid black",
+                        ...theme.applyStyles("dark", {
+                            border: "1px solid white"
+                        }),
+                    }),
+                },
+            }
+        }
     };
 }
 
