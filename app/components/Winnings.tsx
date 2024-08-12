@@ -112,7 +112,7 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
                                 <TableRow>
                                     <TableCell>Item tag number</TableCell>
                                     <TableCell>Description</TableCell>
-                                    <TableCell>Winning bid amount</TableCell>
+                                    <TableCell sx={{ textAlign: "right" }}>Winning bid amount</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -121,7 +121,7 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
                                         <TableRow key={`${bid.id}`}>
                                             <TableCell>{bid.tagNumber}</TableCell>
                                             <TableCell>{bid.item.itemDescription}</TableCell>
-                                            <TableCell>{MoneyFormatter.getFormattedMoney({
+                                            <TableCell sx={{ textAlign: "right" }}>{MoneyFormatter.getFormattedMoney({
                                                 amount: bid.bidAmount
                                             })}</TableCell>
                                         </TableRow>
