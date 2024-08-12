@@ -1,10 +1,8 @@
-import { SerializeFrom } from "@remix-run/node";
-
-import { PrismaClient, Event, Item, Prisma } from "@prisma/client";
+import { PrismaClient, Item } from "@prisma/client";
 import { DateTime } from "luxon";
 
 import { Identifiers } from "./common.server";
-import { CategoryHash, CategoryService } from "./category.server";
+import { CategoryService } from "./category.server";
 
 export interface ItemBulkChangeRequestOptions {
     id?: number,

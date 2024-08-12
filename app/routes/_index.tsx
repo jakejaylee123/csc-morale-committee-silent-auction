@@ -22,7 +22,7 @@ export const loader = async function ({ request }) {
     const { bidder } = await requireAuthenticatedBidder(request);
     const data = {
         bidder,
-        events: await EventService.getActive()
+        events: await EventService.getEnabledActiveAndPast()
     } satisfies IndexLoaderFunctionData;
 
     return json(data);

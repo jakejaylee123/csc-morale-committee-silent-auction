@@ -103,6 +103,8 @@ model Item {
     disqualificationReason String?
     disqualifiedBy         Int?
     disqualifiedByUser     Bidder?      @relation(name: "disqualifyingBidder", fields: [disqualifiedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+    bids Bid[] @relation(name: "item")
 }
 
 model Bid {
@@ -112,6 +114,7 @@ model Bid {
     bidderId           Int
     bidder             Bidder    @relation(name: "bidder", fields: [bidderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     itemId             Int
+    item               Item      @relation(name: "item", fields: [itemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     bidAmount          Decimal
     createdAt          DateTime
     createdBy          Int

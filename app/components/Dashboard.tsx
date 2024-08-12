@@ -4,7 +4,7 @@ import { SerializedEvent } from "~/services/event.server";
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
 import { Button, ButtonGroup, Stack } from "@mui/material";
-import { PlayArrow, Article } from "@mui/icons-material";
+import { PlayArrow, Article, AutoAwesome } from "@mui/icons-material";
 
 export interface DashboardProps {
     events: SerializedEvent[]
@@ -45,6 +45,12 @@ export function Dashboard({ events }: DashboardProps) {
                             color="secondary"
                             href={`/events/${selectedEventId || 0}/reports/bid-sheet`}
                         >View bid sheet</Button>
+                        <Button
+                            disabled={undefined === selectedEventId}
+                            startIcon={<AutoAwesome />}
+                            color="secondary"
+                            href={`/events/${selectedEventId || 0}/winnings`}
+                        >View winnings</Button>
                     </ButtonGroup>
                 </Stack>
             </StyledBox>

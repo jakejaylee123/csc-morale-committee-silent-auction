@@ -46,6 +46,24 @@ export class EventService {
     /**
      * @returns All active auctions.
      */
+    public static async getEnabledActiveAndPast(): Promise<Event[]> {
+        const currentDateTime = new Date().toISOString();
+        
+        return await EventService.client.event.findMany({
+            where: { 
+                disabledAt: {
+                    equals: null
+                },
+                startsAt: {
+                    lte: currentDateTime
+                }
+            }
+        });
+    }
+
+    /**
+     * @returns All active auctions.
+     */
     public static async getActive(): Promise<Event[]> {
         const currentDateTime = new Date().toISOString();
         
@@ -93,6 +111,8 @@ export class EventService {
                 createdAt: currentDate,
                 createdBy: creatorId,
                 enabled: event.enabled,
+                disabledAt: null,
+                disabledBy: null,
                 ...(!event.enabled && {
                     disabledAt: currentDate,
                     disabledBy: creatorId
@@ -130,6 +150,12 @@ export class EventService {
         return event.enabled
             && event.startsAt <= currentDate
             && event.endsAt >= currentDate;
+    }
+
+    public static isEnabledAndConcluded(event: Event): boolean {
+        const currentDate = DateTime.now().toUTC().toJSDate();
+        return event.enabled
+            && event.endsAt < currentDate;
     }
 
     private static defaultifyEventGetOptions(options?: EventGetOptions): EventGetOptions {
