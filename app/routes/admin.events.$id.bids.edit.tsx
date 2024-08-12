@@ -2,66 +2,65 @@ import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithItems } from "~/services/event.server";
+import { EventService, EventWithConvenience, EventWithItems } from "~/services/event.server";
 import { Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
 import { Bid, CategoryCode } from "@prisma/client";
-import { BidService } from "~/services/bid.server";
+import { BidService, BidWithItem, BidWithItemAndBidder } from "~/services/bid.server";
 import { BidEditor } from "~/components/BidEditor";
 import { EventCommon } from "~/commons/event.common";
+import { AdminBidEditor } from "~/components/AdminBidEditor";
 
-type EventBidLoaderFunctionData = {
+type AdminEventBidLoaderFunctionData = {
     success: true,
-    event: EventWithItems,
+    event: EventWithConvenience,
     categories: CategoryCode[],
-    bids: Bid[]
+    bids: BidWithItemAndBidder[]
 } | {
     success: false,
     error: string
 };
-type SerializedEventBidLoaderFunctionData = SerializeFrom<EventBidLoaderFunctionData>;
+type SerializedAdminEventBidLoaderFunctionData = SerializeFrom<AdminEventBidLoaderFunctionData>;
 
 export const loader = async function ({ request, params }) {
-    const { bidder } = await requireAuthenticatedBidder(request);
+    const { bidder } = await requireAuthenticatedBidder(request, {
+        mustBeAdmin: true
+    });
     
     const { id } = params;
     const event = await (async () => {
         if (Identifiers.isIntegerId(id)) {
             return await EventService
-                .get(parseInt(id), { withItems: true }) as EventWithItems;
+                .get(parseInt(id), { withItems: true }) as EventWithConvenience;
         } else {
             return null;
         }
-    })() satisfies EventWithItems | null;
+    })() satisfies EventWithConvenience | null;
 
     if (!event) {
         return json({
             success: false,
             error: `Event "${id}" was not found.`
-        } satisfies EventBidLoaderFunctionData);
-    } else if (!EventCommon.isEnabledAndActive(event)) {
-        return json({
-            success: false,
-            error: `The auction event "${event.description}" is disabled/inactive.`
-        } satisfies EventBidLoaderFunctionData);
-    } else if (!event.items.length) {
-        return json({
-            success: false,
-            error: `Event "${id}" does not have any items to bid on.`
-        } satisfies EventBidLoaderFunctionData);
+        } satisfies AdminEventBidLoaderFunctionData);
     }
 
     return json({
         success: true,
         event: event as EventWithItems,
         categories: await CategoryService.getAll(),
-        bids: await BidService.getMany({ eventId: event.id, bidderId: bidder.id })
-    } satisfies EventBidLoaderFunctionData);
+        bids: await BidService.getMany({ 
+            eventId: event.id, 
+            bidderId: 
+            bidder.id,
+            withBidder: true,
+            withItem: true
+        }) as BidWithItemAndBidder[]
+    } satisfies AdminEventBidLoaderFunctionData);
 } satisfies LoaderFunction;
 
-export default function EventBidsEdit() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedEventBidLoaderFunctionData;
+export default function AdminEventBidsEdit() {
+    const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventBidLoaderFunctionData;
     if (!result?.success) {
         return (
             <>
@@ -81,7 +80,7 @@ export default function EventBidsEdit() {
                 titleVariant="h4"
                 description=""
             />
-            <BidEditor
+            <AdminBidEditor
                 event={event}
                 categories={categories}
                 bids={bids} />

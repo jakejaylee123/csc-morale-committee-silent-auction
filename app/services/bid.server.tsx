@@ -4,13 +4,14 @@ import { DateTime } from "luxon";
 
 export type SerializedBid = SerializeFrom<Bid>;
 
-export interface GetBidArgs {
+export type GetBidArgs = {
+    bidId?: number,
     eventId?: number,
     bidderId?: number,
     itemId?: number,
     withItem?: boolean,
     withBidder?: boolean
-};
+}
 
 export interface BidCreation {
     eventId: number,
@@ -44,7 +45,8 @@ export class BidService {
         });
     }
 
-    public static async getMany({ 
+    public static async getMany({
+        bidId,
         eventId, 
         bidderId, 
         itemId, 
@@ -52,7 +54,7 @@ export class BidService {
         withBidder
     }: GetBidArgs): Promise<(Bid | BidWithItem | BidWithItemAndBidder)[]> {
         return await BidService.client.bid.findMany({
-            where: { eventId, bidderId, itemId },
+            where: { id: bidId, eventId, bidderId, itemId },
             include: {
                 ...(withItem && { item: true }),
                 ...(withBidder && { bidder: true })
@@ -60,7 +62,7 @@ export class BidService {
         });
     }
 
-    public static async getWinning({ 
+    public static async getWinning({
         eventId, 
         bidderId, 
         itemId, 
@@ -109,7 +111,20 @@ export class BidService {
                 createdBy: bidderId,
                 disqualified: false
             }
-        })
+        });
+    }
+
+    public static async disqualify(disqualifyingBidderId: number, { bidId, eventId, bidderId, itemId }: GetBidArgs): Promise<Bid> {
+        const currentDate = DateTime.now().toUTC().toJSDate();
+
+        return await BidService.client.bid.update({
+            where: { id: bidId, eventId, bidderId, itemId }, 
+            data: {
+                disqualified: true,
+                disqualifiedBy: disqualifyingBidderId,
+                disqualifiedAt: currentDate
+            }
+        });
     }
 
     public static isBidWithItem(bid: Bid): bid is BidWithItem {
