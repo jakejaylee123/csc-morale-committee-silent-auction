@@ -2,14 +2,14 @@ import * as React from "react";
 
 import type { ActionFunction, ActionFunctionArgs, LoaderFunction, SerializeFrom } from "@remix-run/node";
 
-import { requireAuthenticatedBidder } from "../services/auth.server";
+import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { useActionData } from "@remix-run/react";
 
-import { StyledBox } from "../components/StyledBox";
-import { GleamingHeader } from "../components/GleamingHeader";
+import { StyledBox } from "~/components/StyledBox";
+import { GleamingHeader } from "~/components/GleamingHeader";
 import { List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { ItemService } from "../services/item.server";
-import { Identifiers } from "../services/common.server";
+import { ItemService } from "~/services/item.server";
+import { Identifiers } from "~/commons/general.common";
 
 export type EventItemUploadResult = {
     success: true

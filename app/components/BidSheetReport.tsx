@@ -1,10 +1,11 @@
 import * as React from "react";
 
 import { SerializedEventWithItems, SerializedItem } from "~/services/event.server";
-import { StyledBox } from "./StyledBox";
 import { Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { SerializedCategoryCode } from "~/services/category.server";
-import { CategoryCode } from "@prisma/client";
+import { CategoryCommon } from "~/commons/category.common";
+import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
+import { MoneyFormatter } from "~/commons/general.common";
 
 type CategoryHash = { [key: number]: SerializedCategoryCode };
 
@@ -19,7 +20,7 @@ interface BidSheetReportRowFragmentProps {
 };
 interface BidSheetReportRangeHeaderFragmentProps {
     items: SerializedItem[],
-    categoryHash: CategoryHash
+    itemTagNumberGenerator: ItemTagNumberGenerator
 };
 
 function BidSheetReportHeaderFragment() {
@@ -51,10 +52,10 @@ function BidSheetReportRowFragment({ item, category }: BidSheetReportRowFragment
             <TableCell>{item.itemDescription}</TableCell>
             <TableCell>
                 {
-                    item.minimumBid ? new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD"
-                    }).format(parseFloat(item.minimumBid)) : ""
+                    MoneyFormatter.getFormattedMoney({ 
+                        amount: item.minimumBid,
+                        emptyPlaceholder: ""
+                    })
                 }
             </TableCell>
             <TableCell>{/* People would enter their bid here. */}</TableCell>
@@ -62,13 +63,17 @@ function BidSheetReportRowFragment({ item, category }: BidSheetReportRowFragment
     );
 }
 
-function BidSheetReportRangeHeaderFragment({ items, categoryHash }: BidSheetReportRangeHeaderFragmentProps) {
+function BidSheetReportRangeHeaderFragment({ items, itemTagNumberGenerator }: BidSheetReportRangeHeaderFragmentProps) {
     const firstItem = items.at(0);
     const lastItem = items.at(-1);
     const rangeString = firstItem && lastItem
-        ? `Items ${categoryHash[firstItem.categoryId].prefix}${firstItem.itemNumber} `
-        + `through ${categoryHash[lastItem.categoryId].prefix}${lastItem.itemNumber}`
-        : "";
+        ? `Items ${itemTagNumberGenerator.getItemTagNumber({ 
+            categoryId: firstItem.categoryId,
+            itemNumber: firstItem.itemNumber
+        })} through ${itemTagNumberGenerator.getItemTagNumber({ 
+            categoryId: firstItem.categoryId,
+            itemNumber: firstItem.itemNumber
+        })}` : "";
 
     return (
         <TableCell
@@ -82,19 +87,11 @@ function BidSheetReportRangeHeaderFragment({ items, categoryHash }: BidSheetRepo
 export function BidSheetReport({ title, event, categories }: BidSheetReportProps) {
     // We're gonna do a lot of category lookups for this report,
     // so let's index them
-    const categoryHash: CategoryHash = {};
-    categories.forEach(category => {
-        categoryHash[category.id] = category;
-    });
+    const categoryHash = CategoryCommon.convertCategoryArrayToHash(categories);
+    const generator = new ItemTagNumberGenerator(categoryHash);
+    const sorter = new ItemTagNumberSorter(categoryHash);
 
-    const sortedItems = event.items.sort((lhs, rhs) => {
-        const lhsCategory = categoryHash[lhs.categoryId];
-        const rhsCategory = categoryHash[rhs.categoryId];
-        const prefixComparison = lhsCategory!.prefix.localeCompare(rhsCategory!.prefix);
-        return 0 === prefixComparison
-            ? rhs.itemNumber - lhs.itemNumber
-            : prefixComparison;
-    });
+    const sortedItems = sorter.getSortedItems(event.items);
 
     // This should split our items in half so they can
     // fit into two columns
@@ -125,11 +122,11 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
                             <TableRow>
                                 <BidSheetReportRangeHeaderFragment
                                     items={leftSide}
-                                    categoryHash={categoryHash} />
+                                    itemTagNumberGenerator={generator} />
                                 <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
                                 <BidSheetReportRangeHeaderFragment
                                     items={rightSide}
-                                    categoryHash={categoryHash} />
+                                    itemTagNumberGenerator={generator} />
                             </TableRow>
                             <TableRow>
                                 <BidSheetReportHeaderFragment />

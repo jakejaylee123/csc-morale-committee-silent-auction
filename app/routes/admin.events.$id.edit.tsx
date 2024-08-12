@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems, SerializedNullableEventWithItems } from "~/services/event.server";
-import { Identifiers } from "~/services/common.server";
+import { Identifiers } from "~/commons/general.common";
 import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService, SerializedCategoryCode } from "~/services/category.server";

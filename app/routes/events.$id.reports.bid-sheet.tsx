@@ -3,10 +3,8 @@ import { json, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
-import { Identifiers } from "~/services/common.server";
-import { EventEditor } from "~/components/EventEditor";
+import { Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { Alert, Snackbar } from "@mui/material";
 import { BidSheetReport } from "~/components/BidSheetReport";
 import { CategoryCode } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";

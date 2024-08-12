@@ -8,7 +8,7 @@ import { DataGrid, GridActionsCellItemProps, GridColDef, GridColumnVisibilityMod
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
 import { SerializedBid } from "~/services/bid.server";
 
-import { ItemTagNumberGenerator } from "~/commons/item.common";
+import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 
@@ -59,8 +59,9 @@ type GetConfirmedBidTotalArgs = {
 
 function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataSourceArgs) {
     const generator = new ItemTagNumberGenerator(categoryHash);
+    const sorter = new ItemTagNumberSorter(categoryHash);
 
-    return event.items.map(item => {
+    const precursor = event.items.map(item => {
         const currentBid = bids.find(bid => bid.itemId === item.id);
         const minimumBid = item.minimumBid
             ? parseFloat(item.minimumBid) : undefined;
@@ -69,6 +70,7 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
 
         return {
             itemId: item.id,
+            categoryId: item.categoryId,
             categoryPrefix: categoryHash[item.categoryId].prefix,
             itemNumber: item.itemNumber,
             itemTagNumber: generator.getItemTagNumber({
@@ -80,12 +82,10 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
             confirmed: !!currentBid,
             bidAmount
         };
-    }).sort((lhs, rhs) => {
-        const prefixComparison = lhs.categoryPrefix.localeCompare(rhs.categoryPrefix);
-        return 0 === prefixComparison
-            ? rhs.itemNumber - lhs.itemNumber
-            : prefixComparison;
-    }).map((item, index) => ({
+    });
+    
+    const sortedPrecursor = sorter.getSortedItems(precursor);
+    return sortedPrecursor.map((item, index) => ({
         ...item,
         id: index + 1
     } satisfies BidEditorDataSourceItem));
@@ -95,8 +95,8 @@ const createBidConfirmButton: BidConfirmButtonCreator = function ({ params, onCl
     return [(
         <Button
             color="primary"
-            variant={(params.row.confirmed /*|| !params.row.bidAmount*/) ? undefined : "contained"}
-            disabled={params.row.confirmed /*|| !params.row.bidAmount*/}
+            variant={(params.row.confirmed) ? undefined : "contained"}
+            disabled={params.row.confirmed}
             onClick={onClick}
         >{params.row.confirmed ? "Confirmed" : "Confirm"}</Button>
     )];

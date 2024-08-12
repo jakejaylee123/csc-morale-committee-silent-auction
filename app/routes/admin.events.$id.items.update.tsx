@@ -2,10 +2,10 @@ import * as React from "react";
 
 import { json, type ActionFunction, type ActionFunctionArgs, type SerializeFrom } from "@remix-run/node";
 
-import { requireAuthenticatedBidder } from "../services/auth.server";
+import { requireAuthenticatedBidder } from "~/services/auth.server";
 
-import { ItemCreate, ItemService, ItemUpdate } from "../services/item.server";
-import { Identifiers } from "../services/common.server";
+import { ItemCreate, ItemService, ItemUpdate } from "~/services/item.server";
+import { Identifiers } from "~/commons/general.common";
 import { Item } from "@prisma/client";
 
 export type EventItemUpdateResult = {

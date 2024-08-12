@@ -14,6 +14,7 @@ import { SerializedCategoryCode } from "~/services/category.server";
 import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
 import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
+import { MoneyFormatter } from "~/commons/general.common";
 
 type GridRowsPropSetter = (
     newRows: (oldRows: GridRowsProp) => GridRowsProp
@@ -290,13 +291,10 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
             headerName: "Minimum bid",
             editable: true,
             type: "number",
-            valueFormatter: (value) => {
-                const parsedValue = parseFloat(value);
-                return parsedValue ? new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD"
-                }).format(parsedValue) : "(None)";
-            }
+            valueFormatter: (value) => MoneyFormatter.getFormattedMoney({
+                amount: parseFloat(value),
+                emptyPlaceholder: "(None)"
+            })
         },
         {
             field: "disqualified",

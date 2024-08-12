@@ -2,9 +2,9 @@ import * as React from "react";
 
 import { json, type ActionFunction, type ActionFunctionArgs, type SerializeFrom } from "@remix-run/node";
 
-import { requireAuthenticatedBidder } from "../services/auth.server";
+import { requireAuthenticatedBidder } from "~/services/auth.server";
 
-import { Identifiers } from "../services/common.server";
+import { Identifiers } from "~/commons/general.common";
 import { Bid } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 import { EventService } from "~/services/event.server";

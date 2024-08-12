@@ -1,7 +1,7 @@
 import { PrismaClient, Item } from "@prisma/client";
 import { DateTime } from "luxon";
 
-import { Identifiers } from "./common.server";
+import { Identifiers } from "~/commons/general.common";
 import { CategoryService } from "./category.server";
 
 export interface ItemBulkChangeRequestOptions {
