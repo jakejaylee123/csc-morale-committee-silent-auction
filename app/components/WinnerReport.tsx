@@ -1,13 +1,13 @@
 import * as React from "react";
 
-import { SerializedEvent, SerializedEventWithItems, SerializedItem } from "~/services/event.server";
+import { SerializedEvent } from "~/services/event.server";
 import { Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
 import { CategoryCommon } from "~/commons/category.common";
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { MoneyFormatter } from "~/commons/general.common";
 import { SerializedBidWithItemAndBidder } from "~/services/bid.server";
-import { SerializedBidder, SerializedBidderWithAdmin } from "~/services/users.server";
+import { SerializedBidder } from "~/services/users.server";
 
 export interface WinnerReportProps {
     title: string,
