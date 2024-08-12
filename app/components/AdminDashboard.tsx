@@ -4,7 +4,7 @@ import { SerializedEvent } from "~/services/event.server";
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
 import { Button, ButtonGroup, Stack } from "@mui/material";
-import { Add, Edit } from "@mui/icons-material";
+import { Add, AutoAwesome, Edit } from "@mui/icons-material";
 
 export interface AdminDashboardProps {
     events: SerializedEvent[]
@@ -40,6 +40,12 @@ export function AdminDashboard({ events }: AdminDashboardProps) {
                                 color="primary"
                                 href={`/admin/events/${selectedEventId || 0}/edit`}
                             >Edit event</Button>
+                            <Button
+                                disabled={undefined === selectedEventId}
+                                startIcon={<AutoAwesome />}
+                                color="secondary"
+                                href={`/admin/events/${selectedEventId || 0}/reports/winners`}
+                            >View winners</Button>
                             <Button
                                 startIcon={<Add />}
                                 color="secondary"

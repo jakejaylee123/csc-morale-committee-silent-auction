@@ -60,7 +60,7 @@ function createWinnerReportDataSource({ winningBids, categoryHash }: WinnerRepor
     });
 }
 
-export function WinnerReport({ title, event, categories, winningBids }: WinnerReportProps) {
+export function WinnerReport({ title, categories, winningBids }: WinnerReportProps) {
     const categoryHash = CategoryCommon.convertCategoryArrayToHash(categories);
     const source = createWinnerReportDataSource({ winningBids, categoryHash });
     const generator = new ItemTagNumberGenerator(categoryHash);
