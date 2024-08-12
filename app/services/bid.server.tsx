@@ -1,4 +1,4 @@
-import { PrismaClient, Bid, Item } from "@prisma/client";
+import { PrismaClient, Bid, Item, Bidder } from "@prisma/client";
 import { SerializeFrom } from "@remix-run/node";
 import { DateTime } from "luxon";
 
@@ -8,7 +8,8 @@ export interface GetBidArgs {
     eventId?: number,
     bidderId?: number,
     itemId?: number,
-    withItem?: boolean
+    withItem?: boolean,
+    withBidder?: boolean
 };
 
 export interface BidCreation {
@@ -22,6 +23,11 @@ export type BidWithItem = Bid & {
     item: Item
 };
 export type SerializedBidWithItem = SerializeFrom<BidWithItem>;
+
+export type BidWithItemAndBidder = BidWithItem & {
+    bidder: Bidder
+};
+export type SerializedBidWithItemAndBidder = SerializeFrom<BidWithItemAndBidder>;
 
 type BidComparisonField = keyof Bid;
 const DefaultBidComparisonFields: readonly BidComparisonField[] = [
@@ -38,21 +44,36 @@ export class BidService {
         });
     }
 
-    public static async getMany({ eventId, bidderId, itemId, withItem }: GetBidArgs): Promise<(Bid | BidWithItem)[]> {
+    public static async getMany({ 
+        eventId, 
+        bidderId, 
+        itemId, 
+        withItem,
+        withBidder
+    }: GetBidArgs): Promise<(Bid | BidWithItem | BidWithItemAndBidder)[]> {
         return await BidService.client.bid.findMany({
             where: { eventId, bidderId, itemId },
-            ...(withItem && {
-                include: {
-                    item: true
-                }
-            })
+            include: {
+                ...(withItem && { item: true }),
+                ...(withBidder && { bidder: true })
+            }
         });
     }
 
-    public static async getWinning({ eventId, bidderId, itemId }: GetBidArgs): Promise<BidWithItem[]> {
-        const eventBids = await BidService.getMany({ eventId, withItem: true });
-        const eventBidsWithItems = eventBids.filter(bid => BidService.isBidWithItem(bid));
+    public static async getWinning({ 
+        eventId, 
+        bidderId, 
+        itemId, 
+        withItem, 
+        withBidder 
+    }: GetBidArgs): Promise<BidWithItem[]> {
+        const eventBids = await BidService.getMany({ 
+            eventId, 
+            withItem,
+            withBidder
+        });
 
+        const eventBidsWithItems = eventBids.filter(bid => BidService.isBidWithItem(bid));
         const winningBidsHash: { [itemIdString: string]: BidWithItem } = {};
         eventBidsWithItems.forEach(bid => {
             const bidItemKey = `${bid.itemId}`;
@@ -89,6 +110,10 @@ export class BidService {
 
     public static isBidWithItem(bid: Bid): bid is BidWithItem {
         return !!(bid as BidWithItem).item;
+    }
+
+    public static isBidWithItemAndBidder(bid: Bid): bid is BidWithItemAndBidder {
+        return BidService.isBidWithItem(bid) && !!(bid as BidWithItemAndBidder).bidder;
     }
 
     public static compareBids(lhs: Bid, rhs: Bid): number {

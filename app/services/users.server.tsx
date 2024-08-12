@@ -9,6 +9,8 @@ export interface BidderFindOrCreateOptions {
     lastName: string
 };
 
+export type SerializedBidder = SerializeFrom<Bidder>;
+
 export type BidderWithAdmin = Bidder & {
     adminAssignment: AdministrationAssignment | null
 };
