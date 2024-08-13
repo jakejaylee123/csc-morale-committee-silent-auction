@@ -71,8 +71,8 @@ function BidSheetReportRangeHeaderFragment({ items, itemTagNumberGenerator }: Bi
             categoryId: firstItem.categoryId,
             itemNumber: firstItem.itemNumber
         })} through ${itemTagNumberGenerator.getItemTagNumber({ 
-            categoryId: firstItem.categoryId,
-            itemNumber: firstItem.itemNumber
+            categoryId: lastItem.categoryId,
+            itemNumber: lastItem.itemNumber
         })}` : "";
 
     return (
@@ -90,7 +90,6 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
     const categoryHash = CategoryCommon.convertCategoryArrayToHash(categories);
     const generator = new ItemTagNumberGenerator(categoryHash);
     const sorter = new ItemTagNumberSorter(categoryHash);
-
     const sortedItems = sorter.getSortedItems(event.items);
 
     // This should split our items in half so they can

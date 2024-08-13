@@ -37,9 +37,9 @@ export class ItemTagNumberSorter {
         return items.sort((lhs, rhs) => {
             const lhsCategory = this.categoryHash[lhs.categoryId];
             const rhsCategory = this.categoryHash[rhs.categoryId];
-            const prefixComparison = lhsCategory!.prefix.localeCompare(rhsCategory!.prefix);
+            const prefixComparison = lhsCategory.prefix.localeCompare(rhsCategory.prefix);
             return 0 === prefixComparison
-                ? rhs.itemNumber - lhs.itemNumber
+                ? lhs.itemNumber-  rhs.itemNumber
                 : prefixComparison;
         });
     }
