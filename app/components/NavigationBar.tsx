@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Avatar, Link, PaletteMode } from "@mui/material";
+import { Avatar, Link, PaletteMode, Stack, useColorScheme } from "@mui/material";
 import {
     AppBar,
     Box,
@@ -19,6 +19,7 @@ import {
 
 import { SerializedBidderWithAdmin } from "~/services/users.server";
 import { CscIcon } from "./CscIcon";
+import { ToggleColorMode } from "./ToggleColorMode";
 
 interface NavigationBarProps {
     bidder?: SerializedBidderWithAdmin
@@ -26,6 +27,7 @@ interface NavigationBarProps {
 
 export function NavigationBar({ bidder }: NavigationBarProps) {
     const [open, setOpen] = React.useState(false);
+    const { mode, setMode } = useColorScheme();
 
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpen(newOpen);
@@ -36,10 +38,10 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
             position="fixed"
             sx={{ displayPrint: "none", boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", mt: 2 }}
         >
-            <Container 
-                sx={(theme) => ({
+            <Container
+                sx={{
                     px: 0
-                })}
+                }}
                 maxWidth="lg"
             >
                 <Toolbar
@@ -64,6 +66,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                         }),
                     })}
                 >
+                    
                     <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", px: 0 }}>
                         <CscIcon />
                         <Box sx={{ display: { xs: "none", md: "flex" } }}>
@@ -74,7 +77,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                                 href={bidder ? "/" : "/login"}
                             >{bidder ? "Dashboard" : "Login"}</Button>
                             {
-                                !!bidder?.adminAssignment && 
+                                !!bidder?.adminAssignment &&
                                 <Button
                                     variant="text"
                                     color="info"
@@ -85,7 +88,7 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                                 </Button>
                             }
                             {
-                                !!bidder && 
+                                !!bidder &&
                                 <Button
                                     variant="text"
                                     color="info"
@@ -97,20 +100,28 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                             }
                         </Box>
                     </Box>
-                    <Box
-                        sx={{
-                            display: { xs: "none", md: "flex" },
-                            gap: 0.5,
-                            alignItems: "center",
-                        }}
-                    >
-                    </Box>
                     {
-                        bidder && 
-                        <Avatar>{
+                        bidder &&
+                        <Avatar sx={{ alignContent: "end" }}>{
                             `${bidder.firstName.toUpperCase()[0]}${bidder.lastName.toUpperCase()[0]}`
                         }</Avatar>
                     }
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'end',
+                            mx: 1,
+
+                        }}
+                    >
+                        <ToggleColorMode 
+                            mode={mode || "light"} 
+                            toggleColorMode={() => {
+                                setMode(mode === "light" ? "dark" : "light");
+                            }} 
+                        />
+                    </Box>
                     <Box sx={{ display: { sm: "flex", md: "none" } }}>
                         <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
                             <Menu />

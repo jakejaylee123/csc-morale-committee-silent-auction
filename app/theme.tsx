@@ -1,6 +1,8 @@
-import { createTheme, ThemeOptions, alpha } from "@mui/material/styles";
-import { PaletteMode } from "@mui/material";
-import { BorderBottom } from "@mui/icons-material";
+import {
+    experimental_extendTheme as extendTheme,
+    createTheme,
+    alpha
+} from "@mui/material/styles";
 
 declare module "@mui/material/styles/createPalette" {
     interface ColorRange {
@@ -18,8 +20,6 @@ declare module "@mui/material/styles/createPalette" {
 
     interface PaletteColor extends ColorRange { }
 }
-
-const customTheme = createTheme();
 
 export const brand = {
     50: "hsl(210, 100%, 97%)",
@@ -86,152 +86,171 @@ export const red = {
     900: "hsl(0, 93%, 12%)",
 };
 
-const getDesignTokens = (mode: PaletteMode) => ({
-    palette: {
-        mode,
-        primary: {
-            light: brand[200],
-            main: brand[500],
-            dark: brand[800],
-            contrastText: brand[50],
-            ...(mode === "dark" && {
-                contrastText: brand[50],
-                light: brand[300],
-                main: brand[400],
-                dark: brand[800],
-            }),
+const placeholderTheme = createTheme();
+export const theme = extendTheme({
+    colorSchemes: {
+        light: {
+            palette: {
+                primary: {
+                    light: brand[200],
+                    main: brand[500],
+                    dark: brand[800],
+                    contrastText: brand[50]
+                },
+                info: {
+                    light: brand[100],
+                    main: brand[300],
+                    dark: brand[600],
+                    contrastText: gray[50],
+                },
+                warning: {
+                    light: orange[300],
+                    main: orange[400],
+                    dark: orange[800],
+                },
+                error: {
+                    light: red[300],
+                    main: red[400],
+                    dark: red[800],
+                },
+                success: {
+                    light: green[300],
+                    main: green[400],
+                    dark: green[800],
+                },
+                grey: {
+                    ...gray,
+                },
+                divider: alpha(gray[300], 0.5),
+                background: {
+                    default: "hsl(0, 0%, 100%)",
+                    paper: gray[100],
+                },
+                text: {
+                    primary: gray[800],
+                    secondary: gray[600],
+                },
+                action: {
+                    selected: `${alpha(brand[200], 0.2)}`,
+                },
+            }
         },
-        info: {
-            light: brand[100],
-            main: brand[300],
-            dark: brand[600],
-            contrastText: gray[50],
-            ...(mode === "dark" && {
-                contrastText: brand[300],
-                light: brand[500],
-                main: brand[700],
-                dark: brand[900],
-            }),
-        },
-        warning: {
-            light: orange[300],
-            main: orange[400],
-            dark: orange[800],
-            ...(mode === "dark" && {
-                light: orange[400],
-                main: orange[500],
-                dark: orange[700],
-            }),
-        },
-        error: {
-            light: red[300],
-            main: red[400],
-            dark: red[800],
-            ...(mode === "dark" && {
-                light: red[400],
-                main: red[500],
-                dark: red[700],
-            }),
-        },
-        success: {
-            light: green[300],
-            main: green[400],
-            dark: green[800],
-            ...(mode === "dark" && {
-                light: green[400],
-                main: green[500],
-                dark: green[700],
-            }),
-        },
-        grey: {
-            ...gray,
-        },
-        divider: mode === "dark" ? alpha(gray[600], 0.3) : alpha(gray[300], 0.5),
-        background: {
-            default: "hsl(0, 0%, 100%)",
-            paper: gray[100],
-            ...(mode === "dark" && { default: "hsl(220, 30%, 3%)", paper: gray[900] }),
-        },
-        text: {
-            primary: gray[800],
-            secondary: gray[600],
-            ...(mode === "dark" && { primary: "hsl(0, 0%, 100%)", secondary: gray[400] }),
-        },
-        action: {
-            selected: `${alpha(brand[200], 0.2)}`,
-            ...(mode === "dark" && {
-                selected: alpha(brand[800], 0.2),
-            }),
-        },
+        dark: {
+            palette: {
+                primary: {
+                    contrastText: brand[50],
+                    light: brand[300],
+                    main: brand[400],
+                    dark: brand[800],
+                },
+                info: {
+                    contrastText: brand[300],
+                    light: brand[500],
+                    main: brand[700],
+                    dark: brand[900],
+                },
+                warning: {
+                    light: orange[400],
+                    main: orange[500],
+                    dark: orange[700],
+                },
+                error: {
+                    light: red[400],
+                    main: red[500],
+                    dark: red[700],
+                },
+                success: {
+                    light: green[400],
+                    main: green[500],
+                    dark: green[700],
+                },
+                grey: {
+                    ...gray,
+                },
+                divider: alpha(gray[600], 0.3),
+                background: {
+                    default: "hsl(220, 30%, 3%)",
+                    paper: gray[900],
+                },
+                text: {
+                    primary: "hsl(0, 0%, 100%)",
+                    secondary: gray[400],
+                },
+                action: {
+                    selected: alpha(brand[800], 0.2),
+                },
+            }
+        }
     },
     typography: {
         h1: {
-            fontSize: customTheme.typography.pxToRem(60),
+            fontSize: placeholderTheme.typography.pxToRem(60),
             fontWeight: 600,
             lineHeight: 1.2,
             letterSpacing: -0.5,
         },
         h2: {
-            fontSize: customTheme.typography.pxToRem(48),
+            fontSize: placeholderTheme.typography.pxToRem(48),
             fontWeight: 600,
             lineHeight: 1.2,
         },
         h3: {
-            fontSize: customTheme.typography.pxToRem(42),
+            fontSize: placeholderTheme.typography.pxToRem(42),
             lineHeight: 1.2,
         },
         h4: {
-            fontSize: customTheme.typography.pxToRem(36),
+            fontSize: placeholderTheme.typography.pxToRem(36),
             fontWeight: 500,
             lineHeight: 1.5,
         },
         h5: {
-            fontSize: customTheme.typography.pxToRem(20),
+            fontSize: placeholderTheme.typography.pxToRem(20),
             fontWeight: 600,
         },
         h6: {
-            fontSize: customTheme.typography.pxToRem(18),
+            fontSize: placeholderTheme.typography.pxToRem(18),
         },
         subtitle1: {
-            fontSize: customTheme.typography.pxToRem(18),
+            fontSize: placeholderTheme.typography.pxToRem(18),
         },
         subtitle2: {
-            fontSize: customTheme.typography.pxToRem(16),
+            fontSize: placeholderTheme.typography.pxToRem(16),
         },
         body1: {
-            fontSize: customTheme.typography.pxToRem(15),
+            fontSize: placeholderTheme.typography.pxToRem(15),
             fontWeight: 400,
         },
         body2: {
-            fontSize: customTheme.typography.pxToRem(14),
+            fontSize: placeholderTheme.typography.pxToRem(14),
             fontWeight: 400,
         },
         caption: {
-            fontSize: customTheme.typography.pxToRem(12),
+            fontSize: placeholderTheme.typography.pxToRem(12),
             fontWeight: 400,
         },
     },
     shape: {
         borderRadius: 12,
     },
+    components: {
+        MuiContainer: {
+            styleOverrides: {
+                root: {
+                    padding: "0px"
+                }
+            }
+        },
+        MuiTableCell: {
+            styleOverrides: {
+                root: ({ theme }) => ({
+                    border: "1px solid black",
+                    ...theme.applyStyles('dark', {
+                        border: "1px solid white",
+                    }),
+                }),
+            },
+        }
+    }
 });
 
-const getThemeOptions = function (mode: PaletteMode): ThemeOptions {
-    return {
-        ...getDesignTokens(mode),
-        components: {
-            MuiTableCell: {
-                styleOverrides: {
-                    root: ({ theme }) => ({
-                        border: "1px solid black",
-                        ...theme.applyStyles("dark", {
-                            border: "1px solid white"
-                        }),
-                    }),
-                },
-            }
-        }
-    };
-}
-
-export const theme = createTheme(getThemeOptions("light"));
+//export const theme = extendTheme() createTheme(getThemeOptions("dark"));

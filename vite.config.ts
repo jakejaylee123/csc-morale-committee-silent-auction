@@ -22,7 +22,7 @@ export default defineConfig({
         tsconfigPaths(),
     ],
     resolve: {
-        alias: process.env.NODE_ENV === "development" ? [] : [{
+        alias: process.env.NODE_ENV === "development" ? staticResolutions : [{
             find: "@mui",
             replacement: "@mui",
             customResolver: function (this, source): string | null {

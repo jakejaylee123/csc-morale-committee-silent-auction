@@ -1,7 +1,6 @@
 import * as React from "react";
 import {
     Links,
-    LiveReload,
     Meta,
     Outlet,
     Scripts,
@@ -13,9 +12,15 @@ import {
 } from "@remix-run/react";
 
 import { withEmotionCache } from "@emotion/react";
-import { 
-    unstable_useEnhancedEffect as useEnhancedEffect 
+import {
+    CssBaseline,
+    unstable_useEnhancedEffect as useEnhancedEffect,
 } from "@mui/material";
+
+import { Experimental_CssVarsProvider as CssVarsProvider, useColorScheme } from "@mui/material/styles";
+import { theme } from "./theme";
+
+import { InitColorSchemeScript } from "./components/danger/InitColorSchemeScript";
 
 import { ClientStyleContext } from "./components/ClientStyleContext";
 import { Layout } from "./components/Layout";
@@ -52,6 +57,8 @@ export const loader = async function ({ request }) {
 
 const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCache) => {
     const clientStyleData = React.useContext(ClientStyleContext);
+    const { mode, setMode } = useColorScheme();
+    
     const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
     const authentication = loaderData?.authentication;
 
@@ -75,10 +82,10 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
     }, []);
 
     return (
-        <html lang="en">
+        <html lang="en" data-mui-color-scheme={mode}>
             <head suppressHydrationWarning>
                 <meta charSet="utf-8" suppressHydrationWarning />
-                <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />                
+                <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />
                 {title ? <title>{title}</title> : null}
                 <Meta />
                 <Links />
@@ -91,6 +98,10 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
                 <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
+                <InitColorSchemeScript 
+                    modeStorageKey="mui-mode" 
+                    attribute="data-mui-color-scheme"
+                />
                 <NavigationBar bidder={authentication?.bidder} />
                 {children}
                 <Footer />
@@ -102,12 +113,19 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
 });
 
 export default function App() {
+    const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
+    const authentication = loaderData?.authentication;
+
     return (
-        <Document>
-            <Layout>
-                <Outlet />
-            </Layout>
-        </Document>
+        <CssVarsProvider theme={theme}>
+            <CssBaseline />
+            <Document>
+                <Layout>
+                    
+                    <Outlet />
+                </Layout>
+            </Document>
+        </CssVarsProvider>
     );
 }
 
