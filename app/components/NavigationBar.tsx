@@ -23,11 +23,12 @@ import { ToggleColorMode } from "./ToggleColorMode";
 
 interface NavigationBarProps {
     bidder?: SerializedBidderWithAdmin
+    colorSchemeState: ReturnType<typeof useColorScheme>
 }
 
-export function NavigationBar({ bidder }: NavigationBarProps) {
+export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) {
     const [open, setOpen] = React.useState(false);
-    const { mode, setMode } = useColorScheme();
+    const { mode, setMode } = colorSchemeState;
 
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpen(newOpen);

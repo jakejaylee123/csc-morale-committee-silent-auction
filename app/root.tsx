@@ -57,7 +57,7 @@ export const loader = async function ({ request }) {
 
 const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCache) => {
     const clientStyleData = React.useContext(ClientStyleContext);
-    const { mode, setMode } = useColorScheme();
+    const colorSchemeState = useColorScheme();
     
     const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
     const authentication = loaderData?.authentication;
@@ -82,7 +82,7 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
     }, []);
 
     return (
-        <html lang="en" data-mui-color-scheme={mode}>
+        <html lang="en" data-mui-color-scheme={colorSchemeState.mode}>
             <head suppressHydrationWarning>
                 <meta charSet="utf-8" suppressHydrationWarning />
                 <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />
@@ -102,7 +102,10 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
                     modeStorageKey="mui-mode" 
                     attribute="data-mui-color-scheme"
                 />
-                <NavigationBar bidder={authentication?.bidder} />
+                <NavigationBar 
+                    bidder={authentication?.bidder} 
+                    colorSchemeState={colorSchemeState}
+                />
                 {children}
                 <Footer />
                 <ScrollRestoration />
