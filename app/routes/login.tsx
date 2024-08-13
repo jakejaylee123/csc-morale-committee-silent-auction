@@ -5,7 +5,7 @@ export default function Login() {
     return (
         <>
             <GleamingHeader
-                title="Welcome!"
+                title="Welcome CSC Morale Committee Silent Auction Area!"
                 description="Sign into your Microsoft work account to continue to your bidding dashboard."
             />
             <LoginWithMicrosoft />

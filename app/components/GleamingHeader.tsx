@@ -58,6 +58,7 @@ export function GleamingHeader({
                                 fontWeight: "bold",
                                 flexDirection: { xs: "column", sm: "row" },
                                 alignItems: "center",
+                                textAlign: "center"
                             }}
                         >{title}</Typography>
                     }

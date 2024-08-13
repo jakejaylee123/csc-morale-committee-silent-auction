@@ -64,20 +64,23 @@ authenticator.use(microsoftStrategy);
 
 
 export interface AuthenticatedBidderOptions {
-    mustBeAdmin?: boolean,
-    noSessionCheck?: boolean
+    mustBeAdmin?: boolean
 };
 
 const defaultifyAuthenticationBidderOptions = function (options?: AuthenticatedBidderOptions): AuthenticatedBidderOptions {
     return {
-        mustBeAdmin: options?.mustBeAdmin || false,
-        noSessionCheck: options?.noSessionCheck || false
+        mustBeAdmin: options?.mustBeAdmin || false
     };
 };
 
 export const getAuthenticatedBidder = async function (request: Request): Promise<BidderAuthentication | undefined> {
     try {
-        return await authenticator.authenticate("microsoft", request);
+        const authentication = await authenticator.isAuthenticated(request);
+        if (!authentication) {
+            return undefined;
+        }
+        
+        return authentication;
     } catch (error) {
         return undefined;
     }
@@ -86,13 +89,10 @@ export const getAuthenticatedBidder = async function (request: Request): Promise
 export const requireAuthenticatedBidder = async function (request: Request, options?: AuthenticatedBidderOptions): Promise<BidderAuthentication> {
     options = defaultifyAuthenticationBidderOptions(options);
 
-    if (!options.noSessionCheck && !sessionStorage) {
+    const authentication = await authenticator.isAuthenticated(request);
+    if (!authentication) {
         throw redirect("/login");
     }
-
-    const authentication = await authenticator.authenticate("microsoft", request, {
-        failureRedirect: "/login",
-    });
 
     if (options.mustBeAdmin && !authentication.bidder.adminAssignment) {
         throw redirect("/");

@@ -74,13 +74,25 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                                 href={bidder ? "/" : "/login"}
                             >{bidder ? "Dashboard" : "Login"}</Button>
                             {
-                                !!bidder?.adminAssignment && <Button
+                                !!bidder?.adminAssignment && 
+                                <Button
                                     variant="text"
                                     color="info"
                                     size="small"
                                     href="/admin"
                                 >
                                     Admin
+                                </Button>
+                            }
+                            {
+                                !!bidder && 
+                                <Button
+                                    variant="text"
+                                    color="info"
+                                    size="small"
+                                    href="/logout"
+                                >
+                                    Logout
                                 </Button>
                             }
                         </Box>
@@ -128,6 +140,14 @@ export function NavigationBar({ bidder }: NavigationBarProps) {
                                         <Link
                                             href="/admin"
                                         >Admin</Link>
+                                    </MenuItem>
+                                }
+                                {
+                                    !!bidder &&
+                                    <MenuItem>
+                                        <Link
+                                            href="/logout"
+                                        >Logout</Link>
                                     </MenuItem>
                                 }
                             </Box>
