@@ -56,7 +56,9 @@ export const loader = async function ({ request, params }) {
                 enabled: true,
                 disabledAt: null,
                 disabledBy: null,
-                items: []
+                items: [],
+                concluded: false,
+                active: false
             } satisfies EventWithItems;
         } else if (Identifiers.isIntegerId(id)) {
             return await EventService

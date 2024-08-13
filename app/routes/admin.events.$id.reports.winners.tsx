@@ -2,18 +2,17 @@ import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithItems } from "~/services/event.server";
+import { EventService, EventWithConvenience, EventWithItems } from "~/services/event.server";
 import { Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { BidSheetReport } from "~/components/BidSheetReport";
 import { CategoryCode, Event } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
-import { BidService, BidWithItem, BidWithItemAndBidder } from "~/services/bid.server";
+import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { WinnerReport } from "~/components/WinnerReport";
 
 type AdminEventReportWinnersLoaderFunctionData = {
     success: true,
-    event: Event,
+    event: EventWithConvenience,
     categories: CategoryCode[],
     winningBids: BidWithItemAndBidder[]
 } | {
@@ -31,8 +30,7 @@ export const loader = async function ({ request, params }) {
     const { id } = params;
     const event = await (async () => {
         if (Identifiers.isIntegerId(id)) {
-            return await EventService
-                .get(parseInt(id)) as Event;
+            return await EventService.get(parseInt(id));
         } else {
             return null;
         }
@@ -72,7 +70,7 @@ export default function AdminEventReportWinners() {
         );
     }
     
-    const { event, categories } = result;
+    const { event } = result;
     return (
         <>
             <GleamingHeader />
