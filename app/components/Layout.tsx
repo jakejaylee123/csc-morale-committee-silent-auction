@@ -9,7 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Container 
             disableGutters
         >
-            <Box sx={{ }}>
+            <Box sx={{ mb: "100px" }}>
                 {children}
             </Box>
         </Container>

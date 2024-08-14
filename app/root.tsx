@@ -38,6 +38,7 @@ import {
 } from "./services/auth.server";
 import { LoaderFunction } from "@remix-run/node";
 import { Footer } from "./components/Footer";
+import { DefaultTransition } from "./components/DefaultTransition";
 
 export interface RootLoaderFunctionData {
     authentication?: BidderAuthentication
@@ -58,7 +59,7 @@ export const loader = async function ({ request }) {
 const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCache) => {
     const clientStyleData = React.useContext(ClientStyleContext);
     const colorSchemeState = useColorScheme();
-    
+
     const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
     const authentication = loaderData?.authentication;
 
@@ -98,15 +99,17 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
                 <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
-                <InitColorSchemeScript 
-                    modeStorageKey="mui-mode" 
+                <InitColorSchemeScript
+                    modeStorageKey="mui-mode"
                     attribute="data-mui-color-scheme"
                 />
-                <NavigationBar 
-                    bidder={authentication?.bidder} 
+                <NavigationBar
+                    bidder={authentication?.bidder}
                     colorSchemeState={colorSchemeState}
                 />
-                {children}
+                <DefaultTransition>
+                    {children}
+                </DefaultTransition>
                 <Footer />
                 <ScrollRestoration />
                 <Scripts />
@@ -116,15 +119,11 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
 });
 
 export default function App() {
-    const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
-    const authentication = loaderData?.authentication;
-
     return (
         <CssVarsProvider theme={theme}>
             <CssBaseline />
             <Document>
                 <Layout>
-                    
                     <Outlet />
                 </Layout>
             </Document>
@@ -150,30 +149,34 @@ export function ErrorBoundary() {
         }
 
         return (
-            <Document title={`${error.status} ${error.statusText}`}>
-                <Layout>
-                    <h1>
-                        {error.status}: {error.statusText}
-                    </h1>
-                    {message}
-                </Layout>
-            </Document>
+            <CssVarsProvider theme={theme}>
+                <Document title={`${error.status} ${error.statusText}`}>
+                    <Layout>
+                        <h1>
+                            {error.status}: {error.statusText}
+                        </h1>
+                        {message}
+                    </Layout>
+                </Document>
+            </CssVarsProvider>
         );
     }
 
     if (error instanceof Error) {
         console.error(error);
         return (
-            <Document title="Error!">
-                <Layout>
-                    <div>
-                        <h1>There was an error</h1>
-                        <p>{error.message}</p>
-                        <hr />
-                        <p>Hey, developer, you should replace this with what you want your users to see.</p>
-                    </div>
-                </Layout>
-            </Document>
+            <CssVarsProvider theme={theme}>
+                <Document title="Error!">
+                    <Layout>
+                        <div>
+                            <h1>There was an error</h1>
+                            <p>{error.message}</p>
+                            <hr />
+                            <p>Hey, developer, you should replace this with what you want your users to see.</p>
+                        </div>
+                    </Layout>
+                </Document>
+            </CssVarsProvider>
         );
     }
 

@@ -232,6 +232,21 @@ export const theme = extendTheme({
     shape: {
         borderRadius: 12,
     },
+    transitions: {
+        duration: {
+            shortest: 200,
+            shorter: 300,
+            short: 400,
+            // most basic recommended timing
+            standard: 500,
+            // this is to be used in complex animations
+            complex: 700,
+            // recommended when something is entering screen
+            enteringScreen: 500,
+            // recommended when something is leaving screen
+            leavingScreen: 500,
+        }
+    },
     components: {
         MuiContainer: {
             styleOverrides: {
