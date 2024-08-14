@@ -237,13 +237,9 @@ export const theme = extendTheme({
             shortest: 200,
             shorter: 300,
             short: 400,
-            // most basic recommended timing
             standard: 500,
-            // this is to be used in complex animations
             complex: 700,
-            // recommended when something is entering screen
             enteringScreen: 500,
-            // recommended when something is leaving screen
             leavingScreen: 500,
         }
     },
@@ -258,9 +254,13 @@ export const theme = extendTheme({
         MuiTableCell: {
             styleOverrides: {
                 root: ({ theme }) => ({
+                    padding: "6px",
                     border: "1px solid black",
                     ...theme.applyStyles('dark', {
                         border: "1px solid white",
+                        "@media print": {
+                            border: "1px solid black",
+                        }
                     }),
                 }),
             },

@@ -122,14 +122,14 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
                                 <BidSheetReportRangeHeaderFragment
                                     items={leftSide}
                                     itemTagNumberGenerator={generator} />
-                                <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                <TableCell sx={{ border: "none !important" }}>{/* Splits the left and right side of the report */}</TableCell>
                                 <BidSheetReportRangeHeaderFragment
                                     items={rightSide}
                                     itemTagNumberGenerator={generator} />
                             </TableRow>
                             <TableRow>
                                 <BidSheetReportHeaderFragment />
-                                <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                <TableCell sx={{ border: "none !important" }}>{/* Splits the left and right side of the report */}</TableCell>
                                 <BidSheetReportHeaderFragment />
                             </TableRow>
                         </TableHead>
@@ -143,7 +143,7 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
                                                 category={categoryHash[leftSide[index].categoryId]}
                                             />
                                         }
-                                        <TableCell sx={{ border: "none" }}>{/* Splits the left and right side of the report */}</TableCell>
+                                        <TableCell sx={{ border: "none !important" }}>{/* Splits the left and right side of the report */}</TableCell>
                                         {
                                             rightSide[index]
                                                 ? <BidSheetReportRowFragment
