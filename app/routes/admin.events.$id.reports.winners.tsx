@@ -1,9 +1,9 @@
 import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, useLoaderData } from "@remix-run/react";
+import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithConvenience, EventWithItems } from "~/services/event.server";
-import { Identifiers } from "~/commons/general.common";
+import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryCode, Event } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
@@ -56,6 +56,10 @@ export const loader = async function ({ request, params }) {
         winningBids: winningBids.filter(bid => BidService.isBidWithItemAndBidder(bid))
     } satisfies AdminEventReportWinnersLoaderFunctionData);
 } satisfies LoaderFunction;
+
+export const meta: MetaFunction<typeof loader> = function ({ data }) {
+    return [{ title: `${APP_NAME}: Event winners report` }];
+};
 
 export default function AdminEventReportWinners() {
     const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventReportWinnersLoaderFunctionData;

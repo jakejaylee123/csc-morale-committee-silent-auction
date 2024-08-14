@@ -1,9 +1,9 @@
 import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, useLoaderData } from "@remix-run/react";
+import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
-import { Identifiers } from "~/commons/general.common";
+import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
 import { Bid, CategoryCode } from "@prisma/client";
@@ -59,6 +59,10 @@ export const loader = async function ({ request, params }) {
         bids: await BidService.getMany({ eventId: event.id, bidderId: bidder.id })
     } satisfies EventBidLoaderFunctionData);
 } satisfies LoaderFunction;
+
+export const meta: MetaFunction<typeof loader> = function ({ data }) {
+    return [{ title: `${APP_NAME}: Bid` }];
+};
 
 export default function EventBidsEdit() {
     const result = useLoaderData<typeof loader>() satisfies SerializedEventBidLoaderFunctionData;

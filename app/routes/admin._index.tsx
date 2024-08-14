@@ -1,5 +1,5 @@
 import type { LoaderFunction } from "@remix-run/node";
-import { json, useLoaderData } from "@remix-run/react";
+import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { Event } from "@prisma/client";
 
@@ -7,6 +7,7 @@ import { AdminDashboard } from "~/components/AdminDashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, SerializedEvent } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
+import { APP_NAME } from "~/commons/general.common";
 
 interface AdminLoaderFunctionData {
     events: Event[]
@@ -26,6 +27,10 @@ export const loader = async function ({ request }) {
 
     return json(data);
 } satisfies LoaderFunction;
+
+export const meta: MetaFunction<typeof loader> = function ({ data }) {
+    return [{ title: `${APP_NAME}: Administration` }];
+};
 
 export default function Admin() {
     const { events } = useLoaderData<typeof loader>() satisfies SerializedAdminLoaderFunctionData;

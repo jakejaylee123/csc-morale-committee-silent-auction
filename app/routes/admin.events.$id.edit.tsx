@@ -1,11 +1,11 @@
 import type { ActionFunction, ActionFunctionArgs, LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, redirect, useActionData, useLoaderData } from "@remix-run/react";
+import { json, MetaFunction, redirect, useActionData, useLoaderData } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems, SerializedNullableEventWithItems } from "~/services/event.server";
-import { Identifiers } from "~/commons/general.common";
+import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
@@ -73,6 +73,10 @@ export const loader = async function ({ request, params }) {
         categories: await CategoryService.getAll()
     } satisfies EventEditLoaderFunctionData);
 } satisfies LoaderFunction;
+
+export const meta: MetaFunction<typeof loader> = function ({ data }) {
+    return [{ title: `${APP_NAME}: Manage event` }];
+};
 
 export const action = async function ({ request, params }: ActionFunctionArgs) {
     const { bidder } = await requireAuthenticatedBidder(request, {

@@ -1,3 +1,5 @@
+export const APP_NAME = "CSC Silent Auction"
+
 export class Identifiers {
     public static isNew(id: any): id is string {
         return id === "new"
