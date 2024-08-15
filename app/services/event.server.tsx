@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 export interface EventGetOptions {
     withItems?: boolean,
     withQualifiedItems?: boolean
+    withDisqualifiedItems?: boolean
 };
 export interface EventCreation {
     description: string,
@@ -106,6 +107,15 @@ export class EventService {
                 include: {
                     items: {
                         where: {
+                            disqualified: false
+                        }
+                    }
+                }
+            })),
+            ...(options.withDisqualifiedItems && ({
+                include: {
+                    items: {
+                        where: {
                             disqualified: true
                         }
                     }
@@ -183,7 +193,8 @@ export class EventService {
     private static defaultifyEventGetOptions(options?: EventGetOptions): EventGetOptions {
         return {
             withItems: options?.withItems || false,
-            withQualifiedItems: options?.withQualifiedItems || false
+            withQualifiedItems: options?.withQualifiedItems || false,
+            withDisqualifiedItems: options?.withDisqualifiedItems || false
         };
     }
 };

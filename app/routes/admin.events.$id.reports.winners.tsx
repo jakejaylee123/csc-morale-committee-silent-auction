@@ -2,19 +2,20 @@ import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithConvenience, EventWithItems } from "~/services/event.server";
+import { EventService, EventWithItems } from "~/services/event.server";
 import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { CategoryCode, Event } from "@prisma/client";
+import { CategoryCode, Event, Item } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
 import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { WinnerReport } from "~/components/WinnerReport";
 
 type AdminEventReportWinnersLoaderFunctionData = {
     success: true,
-    event: EventWithConvenience,
+    event: Event,
     categories: CategoryCode[],
-    winningBids: BidWithItemAndBidder[]
+    winningBids: BidWithItemAndBidder[],
+    disqualifiedItems: Item[]
 } | {
     success: false,
     error: string
@@ -30,11 +31,12 @@ export const loader = async function ({ request, params }) {
     const { id } = params;
     const event = await (async () => {
         if (Identifiers.isIntegerId(id)) {
-            return await EventService.get(parseInt(id));
+            return await EventService
+                .get(parseInt(id), { withDisqualifiedItems: true }) as EventWithItems;
         } else {
             return null;
         }
-    })() satisfies Event | null;
+    })() satisfies EventWithItems | null;
 
     if (!event) {
         return json({
@@ -51,7 +53,8 @@ export const loader = async function ({ request, params }) {
 
     return json({
         success: true,
-        event: event,
+        event: event as Event,
+        disqualifiedItems: event.items,
         categories: await CategoryService.getAll(),
         winningBids: winningBids.filter(bid => BidService.isBidWithItemAndBidder(bid))
     } satisfies AdminEventReportWinnersLoaderFunctionData);
@@ -63,6 +66,7 @@ export const meta: MetaFunction<typeof loader> = function ({ data }) {
 
 export default function AdminEventReportWinners() {
     const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventReportWinnersLoaderFunctionData;
+    console.log(result);
     if (!result?.success) {
         return (
             <>
