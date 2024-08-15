@@ -40,6 +40,12 @@ export type ItemCreationRequestsResult = {
 export class ItemService {
     private static readonly client = new PrismaClient();
 
+    public static async get(itemId: number): Promise<Item | null> {
+        return await ItemService.client.item.findUnique({
+            where: { id: itemId }
+        });
+    }
+
     public static async getForEvent(eventId: number): Promise<Item[]> {
         return await ItemService.client.item.findMany({
             where: { eventId }

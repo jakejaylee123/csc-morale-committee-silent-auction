@@ -29,7 +29,7 @@ export const loader = async function ({ request, params }) {
     const event = await (async () => {
         if (Identifiers.isIntegerId(id)) {
             return await EventService
-                .get(parseInt(id), { withItems: true }) as EventWithItems;
+                .get(parseInt(id), { withQualifiedItems: true }) as EventWithItems;
         } else {
             return null;
         }
@@ -54,7 +54,7 @@ export const loader = async function ({ request, params }) {
 
     return json({
         success: true,
-        event: event as EventWithItems,
+        event: event,
         categories: await CategoryService.getAll(),
         bids: await BidService.getMany({ eventId: event.id, bidderId: bidder.id })
     } satisfies EventBidLoaderFunctionData);

@@ -4,7 +4,8 @@ import { PrismaClient, Event, Item } from "@prisma/client";
 import { DateTime } from "luxon";
 
 export interface EventGetOptions {
-    withItems?: boolean
+    withItems?: boolean,
+    withQualifiedItems?: boolean
 };
 export interface EventCreation {
     description: string,
@@ -100,7 +101,16 @@ export class EventService {
                 include: { 
                     items: true
                 }
-            })
+            }),
+            ...(options.withQualifiedItems && ({
+                include: {
+                    items: {
+                        where: {
+                            disqualified: true
+                        }
+                    }
+                }
+            }))
         });
         return event
             ? EventService.injectConvenienceProperties([event])[0]
@@ -172,7 +182,8 @@ export class EventService {
 
     private static defaultifyEventGetOptions(options?: EventGetOptions): EventGetOptions {
         return {
-            withItems: options?.withItems || false
+            withItems: options?.withItems || false,
+            withQualifiedItems: options?.withQualifiedItems || false
         };
     }
 };

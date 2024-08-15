@@ -9,6 +9,7 @@ import { Bid } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 import { EventService } from "~/services/event.server";
 import { EventCommon } from "~/commons/event.common";
+import { ItemService } from "~/services/item.server";
 
 export type BidUpdateResult = {
     success: true,
@@ -59,6 +60,24 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             error: `The passed item ID "${itemId}" was not valid`
         } satisfies BidUpdateResult);
     }
+
+    const parsedItemId = parseInt(itemId);
+    const item = await ItemService.get(parsedItemId);
+    if (!item) {
+        return json({
+            success: false,
+            concluded: false,
+            error: `Item "${itemId}" was not found.`
+        } satisfies BidUpdateResult);
+    } else if (item.disqualified) {
+        return json({
+            success: false,
+            concluded: true,
+            error: "This item has been disqualified" + item.disqualificationReason 
+                ? `: ${item.disqualificationReason}`
+                : "."
+        } satisfies BidUpdateResult);
+    }
     
     const bidAmount = formData.get("bidAmount") as string;
     const parsedBidAmount = parseFloat(bidAmount);
@@ -70,7 +89,6 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         } satisfies BidUpdateResult);
     }
     
-    const parsedItemId = parseInt(itemId);
     const currentBid = await BidService.get({
         eventId: parsedEventId,
         bidderId: bidder.id,
