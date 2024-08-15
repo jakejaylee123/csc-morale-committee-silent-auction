@@ -52,7 +52,7 @@ function BidSheetReportRowFragment({ item, category }: BidSheetReportRowFragment
             <TableCell>{item.itemDescription}</TableCell>
             <TableCell>
                 {
-                    MoneyFormatter.getFormattedMoney({ 
+                    MoneyFormatter.getFormattedMoney({
                         amount: item.minimumBid,
                         emptyPlaceholder: ""
                     })
@@ -67,10 +67,10 @@ function BidSheetReportRangeHeaderFragment({ items, itemTagNumberGenerator }: Bi
     const firstItem = items.at(0);
     const lastItem = items.at(-1);
     const rangeString = firstItem && lastItem
-        ? `Items ${itemTagNumberGenerator.getItemTagNumber({ 
+        ? `Items ${itemTagNumberGenerator.getItemTagNumber({
             categoryId: firstItem.categoryId,
             itemNumber: firstItem.itemNumber
-        })} through ${itemTagNumberGenerator.getItemTagNumber({ 
+        })} through ${itemTagNumberGenerator.getItemTagNumber({
             categoryId: lastItem.categoryId,
             itemNumber: lastItem.itemNumber
         })}` : "";
@@ -82,6 +82,39 @@ function BidSheetReportRangeHeaderFragment({ items, itemTagNumberGenerator }: Bi
             align="center"
         >{rangeString}</TableCell>
     );
+}
+
+function NameAndDate() {
+    return (
+        <TableContainer sx={{ display: "flex" }}>
+            <Table size="small">
+                <TableHead>
+                    <TableRow sx={{ display: "flex" }}>
+                        <TableCell sx={{ border: "none" }}>Name:</TableCell>
+                        <TableCell 
+                            sx={{ 
+                                borderWidth: "0px 0px 1px 0px",
+                                flexGrow: 2
+                            }}
+                        >{/* Name field */}</TableCell>
+                        <TableCell 
+                            sx={{ 
+                                border: "none", 
+                                flexGrow: 1
+                            }}
+                        >{/* Spacing */}</TableCell>
+                        <TableCell sx={{ border: "none" }}>Date:</TableCell>
+                        <TableCell 
+                            sx={{ 
+                                borderWidth: "0px 0px 1px 0px",
+                                flexGrow: 2
+                            }}
+                        >{/* Date field */}</TableCell>
+                    </TableRow>
+                </TableHead>
+            </Table>
+        </TableContainer>
+    )
 }
 
 export function BidSheetReport({ title, event, categories }: BidSheetReportProps) {
@@ -113,6 +146,9 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
                         fontWeight: "bold",
                     }}
                 >{title}</Typography>
+
+                <NameAndDate />
+
                 <TableContainer>
                     <Table size="small">
                         <TableHead>
