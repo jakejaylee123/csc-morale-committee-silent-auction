@@ -3,18 +3,9 @@ BEGIN TRY
 BEGIN TRAN;
 
 -- CreateTable
-CREATE TABLE [dbo].[Administration] (
-    [id] INT NOT NULL IDENTITY(1,1),
-    [password] NVARCHAR(1000) NOT NULL,
-    [passwordSalt] NVARCHAR(1000) NOT NULL,
-    [createdAt] DATETIME2 NOT NULL CONSTRAINT [Administration_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
-    [updatedAt] DATETIME2,
-    CONSTRAINT [Administration_pkey] PRIMARY KEY CLUSTERED ([id])
-);
-
--- CreateTable
 CREATE TABLE [dbo].[Bidder] (
     [id] INT NOT NULL IDENTITY(1,1),
+    [displayName] NVARCHAR(1000) NOT NULL,
     [firstName] NVARCHAR(1000) NOT NULL,
     [lastName] NVARCHAR(1000) NOT NULL,
     [windowsId] NVARCHAR(1000) NOT NULL,
@@ -30,6 +21,14 @@ CREATE TABLE [dbo].[Bidder] (
 );
 
 -- CreateTable
+CREATE TABLE [dbo].[AdministrationAssignment] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [bidderId] INT NOT NULL,
+    CONSTRAINT [AdministrationAssignment_pkey] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [AdministrationAssignment_bidderId_key] UNIQUE NONCLUSTERED ([bidderId])
+);
+
+-- CreateTable
 CREATE TABLE [dbo].[Event] (
     [id] INT NOT NULL IDENTITY(1,1),
     [description] NVARCHAR(1000) NOT NULL,
@@ -37,11 +36,12 @@ CREATE TABLE [dbo].[Event] (
     [endsAt] DATETIME2 NOT NULL,
     [createdAt] DATETIME2 NOT NULL,
     [createdBy] INT NOT NULL,
-    [updatedAt] DATETIME2 NOT NULL,
-    [updatedBy] INT NOT NULL,
-    [deleted] BIT NOT NULL CONSTRAINT [Event_deleted_df] DEFAULT 0,
-    [deletedAt] DATETIME2 NOT NULL,
-    [deletedBy] INT NOT NULL,
+    [updatedAt] DATETIME2,
+    [updatedBy] INT,
+    [releaseWinners] BIT NOT NULL CONSTRAINT [Event_releaseWinners_df] DEFAULT 0,
+    [enabled] BIT NOT NULL CONSTRAINT [Event_enabled_df] DEFAULT 0,
+    [disabledAt] DATETIME2,
+    [disabledBy] INT,
     CONSTRAINT [Event_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
@@ -59,14 +59,17 @@ CREATE TABLE [dbo].[CategoryCode] (
 CREATE TABLE [dbo].[Item] (
     [id] INT NOT NULL IDENTITY(1,1),
     [eventId] INT NOT NULL,
-    [itemNumber] NVARCHAR(1000) NOT NULL,
+    [itemNumber] INT NOT NULL,
     [itemDescription] NVARCHAR(1000) NOT NULL,
     [minimumBid] DECIMAL(32,16),
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [Item_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     [createdBy] INT NOT NULL,
-    [updatedAt] DATETIME2 NOT NULL CONSTRAINT [Item_updatedAt_df] DEFAULT CURRENT_TIMESTAMP,
-    [updatedBy] INT NOT NULL,
+    [updatedAt] DATETIME2 CONSTRAINT [Item_updatedAt_df] DEFAULT CURRENT_TIMESTAMP,
+    [updatedBy] INT,
     [categoryId] INT NOT NULL,
+    [disqualified] BIT NOT NULL CONSTRAINT [Item_disqualified_df] DEFAULT 0,
+    [disqualificationReason] NVARCHAR(1000),
+    [disqualifiedBy] INT,
     CONSTRAINT [Item_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
@@ -95,6 +98,12 @@ ALTER TABLE [dbo].[Bidder] ADD CONSTRAINT [Bidder_disabledBy_fkey] FOREIGN KEY (
 ALTER TABLE [dbo].[Bidder] ADD CONSTRAINT [Bidder_updatedBy_fkey] FOREIGN KEY ([updatedBy]) REFERENCES [dbo].[Bidder]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE [dbo].[AdministrationAssignment] ADD CONSTRAINT [AdministrationAssignment_bidderId_fkey] FOREIGN KEY ([bidderId]) REFERENCES [dbo].[Bidder]([id]) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Event] ADD CONSTRAINT [Event_disabledBy_fkey] FOREIGN KEY ([disabledBy]) REFERENCES [dbo].[Bidder]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Item] ADD CONSTRAINT [Item_eventId_fkey] FOREIGN KEY ([eventId]) REFERENCES [dbo].[Event]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -107,10 +116,16 @@ ALTER TABLE [dbo].[Item] ADD CONSTRAINT [Item_updatedBy_fkey] FOREIGN KEY ([upda
 ALTER TABLE [dbo].[Item] ADD CONSTRAINT [Item_categoryId_fkey] FOREIGN KEY ([categoryId]) REFERENCES [dbo].[CategoryCode]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE [dbo].[Item] ADD CONSTRAINT [Item_disqualifiedBy_fkey] FOREIGN KEY ([disqualifiedBy]) REFERENCES [dbo].[Bidder]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Bid] ADD CONSTRAINT [Bid_eventId_fkey] FOREIGN KEY ([eventId]) REFERENCES [dbo].[Event]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[Bid] ADD CONSTRAINT [Bid_bidderId_fkey] FOREIGN KEY ([bidderId]) REFERENCES [dbo].[Bidder]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Bid] ADD CONSTRAINT [Bid_itemId_fkey] FOREIGN KEY ([itemId]) REFERENCES [dbo].[Item]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[Bid] ADD CONSTRAINT [Bid_createdBy_fkey] FOREIGN KEY ([createdBy]) REFERENCES [dbo].[Bidder]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
