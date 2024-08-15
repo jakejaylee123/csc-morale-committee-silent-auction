@@ -77,7 +77,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                             onChange={(_, newValue) => setReleaseWinners(newValue)}
                                         />
                                     }
-                                    label="Enabled"
+                                    label="Release winners"
                                 />
                                 <DateTimePicker
                                     label="Start date"

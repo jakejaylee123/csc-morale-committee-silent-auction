@@ -23,8 +23,10 @@ function Copyright() {
 
 export function Footer() {
     return (
-        <Paper 
+        <Paper
+            className="footer" 
             sx={{ 
+                displayPrint: "none",
                 borderRadius: "0px",
                 display: "flex",
                 position: 'fixed', 

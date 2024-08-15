@@ -251,17 +251,6 @@ export const theme = extendTheme({
                 }
             }
         },
-        MuiTypography: {
-            styleOverrides: {
-                root: ({ theme }) => ({
-                    ...theme.applyStyles('dark', {
-                        "@media print": {
-                            color: "black",
-                        }
-                    }),
-                })
-            }
-        },
         MuiTableCell: {
             styleOverrides: {
                 root: ({ theme }) => ({
@@ -276,7 +265,18 @@ export const theme = extendTheme({
                     }),
                 }),
             },
-        }
+        },
+        MuiTypography: {
+            styleOverrides: {
+                root: ({ theme }) => ({
+                    ...theme.applyStyles('dark', {
+                        "@media print": {
+                            color: "black",
+                        }
+                    }),
+                })
+            }
+        },
     }
 });
 
