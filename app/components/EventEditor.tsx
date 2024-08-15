@@ -31,6 +31,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const isNew = event.id === 0;
     const [description, setDescription] = React.useState(isNew ? "" : event.description);
     const [enabled, setEnabled] = React.useState(isNew ? true : event.enabled);
+    const [releaseWinners, setReleaseWinners] = React.useState(isNew ? false : event.releaseWinners)
     const [startDate, setStartDate] = React
         .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt));
     const [endDate, setEndDate] = React
@@ -63,6 +64,17 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                             value={enabled}
                                             checked={enabled}
                                             onChange={(_, newValue) => setEnabled(newValue)}
+                                        />
+                                    }
+                                    label="Enabled"
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            name="releaseWinners"
+                                            value={releaseWinners}
+                                            checked={releaseWinners}
+                                            onChange={(_, newValue) => setReleaseWinners(newValue)}
                                         />
                                     }
                                     label="Enabled"

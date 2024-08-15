@@ -57,17 +57,18 @@ model AdministrationAssignment {
 }
 
 model Event {
-    id          Int       @id @default(autoincrement())
-    description String
-    startsAt    DateTime
-    endsAt      DateTime
-    createdAt   DateTime
-    createdBy   Int
-    updatedAt   DateTime?
-    updatedBy   Int?
-    enabled     Boolean   @default(false)
-    disabledAt  DateTime?
-    disabledBy  Int?
+    id             Int       @id @default(autoincrement())
+    description    String
+    startsAt       DateTime
+    endsAt         DateTime
+    createdAt      DateTime
+    createdBy      Int
+    updatedAt      DateTime?
+    updatedBy      Int?
+    releaseWinners Boolean   @default(false)
+    enabled        Boolean   @default(false)
+    disabledAt     DateTime?
+    disabledBy     Int?
 
     disabledByUser Bidder? @relation(name: "disablingBidder", fields: [disabledBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
