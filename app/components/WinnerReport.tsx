@@ -60,6 +60,12 @@ function createWinnerReportDataSource({ winningBids, categoryHash }: WinnerRepor
     });
 }
 
+function getAuctionEventGrossProfit(bids: SerializedBidWithItemAndBidder[]): number {
+    return bids.reduce((accumulator, bid) => {
+        return accumulator + parseFloat(bid.bidAmount);
+    }, 0);
+}
+
 export function WinnerReport({ title, categories, winningBids }: WinnerReportProps) {
     const categoryHash = CategoryCommon.convertCategoryArrayToHash(categories);
     const source = createWinnerReportDataSource({ winningBids, categoryHash });
@@ -74,11 +80,18 @@ export function WinnerReport({ title, categories, winningBids }: WinnerReportPro
                     variant="h5"
                     align="center"
                     sx={{
-                        display: "flex",
-                        fontWeight: "bold",
-                        flexDirection: { xs: "column", sm: "row" }
+                        fontWeight: "bold"
                     }}
                 >{title}</Typography>
+                <Typography
+                    align="center"
+                    sx={{
+                        fontWeight: "bold"
+                    }}
+                >{`Auction event gross profit: ${MoneyFormatter.getFormattedMoney({
+                    amount: getAuctionEventGrossProfit(winningBids),
+                    emptyPlaceholder: "$0.00"
+                })}`}</Typography>
                 {
                     source.map(({ bidderString, winningBids, total }) => {
                         return (

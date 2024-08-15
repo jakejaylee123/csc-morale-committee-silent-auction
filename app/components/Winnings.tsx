@@ -4,7 +4,7 @@ import { Alert, Stack, Table, TableBody, TableCell, TableContainer, TableHead, T
 
 import { default as Confetti } from "react-confetti";
 
-import { SerializedBid, SerializedBidWithItem } from "~/services/bid.server";
+import { SerializedBidWithItem } from "~/services/bid.server";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { SerializedEvent } from "~/services/event.server";
 

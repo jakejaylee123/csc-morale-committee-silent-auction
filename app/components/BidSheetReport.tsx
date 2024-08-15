@@ -110,9 +110,7 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
                     variant="h5"
                     align="center"
                     sx={{
-                        display: "flex",
                         fontWeight: "bold",
-                        flexDirection: { xs: "column", sm: "row" }
                     }}
                 >{title}</Typography>
                 <TableContainer>
