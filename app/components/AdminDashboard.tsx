@@ -42,6 +42,12 @@ export function AdminDashboard({ events }: AdminDashboardProps) {
                             >Edit event</Button>
                             <Button
                                 disabled={undefined === selectedEventId}
+                                startIcon={<Edit />}
+                                color="primary"
+                                href={`/admin/events/${selectedEventId || 0}/bids/edit`}
+                            >Manage bids</Button>
+                            <Button
+                                disabled={undefined === selectedEventId}
                                 startIcon={<AutoAwesome />}
                                 color="secondary"
                                 href={`/admin/events/${selectedEventId || 0}/reports/winners`}
