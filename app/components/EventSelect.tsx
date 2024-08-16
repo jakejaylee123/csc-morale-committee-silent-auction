@@ -61,7 +61,14 @@ export function EventSelect({
                     onChange={onChange}
                     fullWidth
                 >
-                    {events.map(event => <MenuItem value={event.id}>{event.description}</MenuItem>)}
+                    {
+                        events.map(event => (
+                            <MenuItem 
+                                key={`menu-item-event-${event.id}`}
+                                value={event.id}
+                            >{event.description}</MenuItem>
+                        ))
+                    }
                 </Select>
             </Stack>
         </FormControl>

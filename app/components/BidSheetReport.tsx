@@ -170,7 +170,7 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
                         <TableBody>
                             {
                                 leftSide.map((_, index) => (
-                                    <TableRow>
+                                    <TableRow key={`table-row-${index}`}>
                                         {
                                             <BidSheetReportRowFragment
                                                 item={leftSide[index]}

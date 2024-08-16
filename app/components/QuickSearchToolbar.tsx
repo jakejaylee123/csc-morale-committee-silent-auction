@@ -27,9 +27,9 @@ export function QuickSearchToolbar({ withFilterCheckboxes }: QuickSearchToolbarP
             >
                 <GridToolbarQuickFilter />
                 {
-                    withFilterCheckboxes?.map(checkbox => (
+                    withFilterCheckboxes?.map((checkbox, index) => (
                         <FormControlLabel
-                            key={checkbox.label}
+                            key={`filter-check-box-${index}`}
                             control={
                                 <Checkbox
                                     value={checkbox.value}

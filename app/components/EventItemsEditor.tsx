@@ -262,7 +262,14 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                         params.value = event.target.value;
                     }}
                 >
-                    {categories.map(category => <MenuItem value={category.id}>{category.description}</MenuItem>)}
+                    {
+                        categories.map(category => (
+                            <MenuItem 
+                                key={`menu-item-category-${category.id}`} 
+                                value={category.id}
+                            >{category.description}</MenuItem>
+                        ))
+                    }
                 </Select>
             )
         },

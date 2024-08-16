@@ -118,7 +118,9 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
                             <TableBody>
                                 {
                                     winningBidsWithTagNumbers.map(bid => (
-                                        <TableRow key={`${bid.id}`}>
+                                        <TableRow 
+                                            key={`table-row-bid-${bid.id}`}
+                                        >
                                             <TableCell>{bid.tagNumber}</TableCell>
                                             <TableCell>{bid.item.itemDescription}</TableCell>
                                             <TableCell sx={{ textAlign: "right" }}>{MoneyFormatter.getFormattedMoney({

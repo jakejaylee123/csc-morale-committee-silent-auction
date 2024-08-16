@@ -27,8 +27,9 @@ export function StandardSnackbar(props: StandardSnackbarProps) {
         >
             <div>
                 {
-                    props.alerts?.map(alert => (
+                    props.alerts?.map((alert, index) => (
                         <Alert 
+                            key={`snack-bar-alert-${index}`}
                             children={alert.message} 
                             severity={alert.severity}
                             variant="filled" 
