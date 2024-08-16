@@ -1,19 +1,29 @@
 import { Checkbox, FormControlLabel, Stack } from '@mui/material';
 import { Box } from '@mui/material';
-import { GridToolbarProps, GridToolbarQuickFilter } from '@mui/x-data-grid'
+import { GridFilterItem, GridToolbarProps, GridToolbarQuickFilter } from '@mui/x-data-grid'
 
-export interface QuickSearchFilterCheckbox {
+export type GridQuickSearchFilterCheckboxState = {
+    apply: boolean,
+    filter: Omit<GridFilterItem, "id" | "label"> & {
+        id: string,
+        label: string
+    }
+};
+export type GridQuickSearchFilterCheckboxStates = { [id: string]: GridQuickSearchFilterCheckboxState };
+
+export interface GridQuickSearchFilterCheckbox {
+    id: string,
     label: string,
     value: boolean,
     checked: boolean,
     onInput: React.FormEventHandler<HTMLButtonElement>
 };
 
-export interface QuickSearchToolbarProps extends GridToolbarProps {
-    withFilterCheckboxes?: QuickSearchFilterCheckbox[]
+export interface GridQuickSearchToolbarProps extends GridToolbarProps {
+    withFilterCheckboxes?: GridQuickSearchFilterCheckbox[]
 };
 
-export function QuickSearchToolbar({ withFilterCheckboxes }: QuickSearchToolbarProps) {
+export function GridQuickSearchToolbar({ withFilterCheckboxes }: GridQuickSearchToolbarProps) {
     return (
         <Box
             sx={{
@@ -32,6 +42,7 @@ export function QuickSearchToolbar({ withFilterCheckboxes }: QuickSearchToolbarP
                             key={`filter-check-box-${index}`}
                             control={
                                 <Checkbox
+                                    id={checkbox.id}
                                     value={checkbox.value}
                                     checked={checkbox.checked}
                                     onInput={checkbox.onInput}

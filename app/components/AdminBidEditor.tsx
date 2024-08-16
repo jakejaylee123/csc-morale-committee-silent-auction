@@ -13,7 +13,7 @@ import { MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 
 import { StyledBox } from "./StyledBox";
-import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./QuickSearchToolbar";
+import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./GridQuickSearchToolbar";
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";

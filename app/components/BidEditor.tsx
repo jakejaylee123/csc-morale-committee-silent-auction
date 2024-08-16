@@ -3,7 +3,7 @@ import { useFetcher } from "@remix-run/react";
 
 import { SerializedEventWithItems } from "~/services/event.server";
 import { Alert, Button, Stack, Typography } from "@mui/material";
-import { DataGrid, GridActionsCellItemProps, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, GridEventListener, GridFilterModel, GridRowClassNameParams, GridRowEditStopReasons, GridRowParams } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItemProps, GridColDef, GridColumnVisibilityModel, GridEventListener, GridFilterModel, GridRowClassNameParams, GridRowEditStopReasons, GridRowParams } from "@mui/x-data-grid";
 
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
 import { SerializedBid } from "~/services/bid.server";
@@ -13,7 +13,7 @@ import { MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 
 import { StyledBox } from "./StyledBox";
-import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./QuickSearchToolbar";
+import { GridQuickSearchFilterCheckbox, GridQuickSearchToolbar, GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
@@ -129,6 +129,7 @@ const getConfirmedBidFilter = function () {
 
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
+    
     const [currentBids, setCurrentBids] = React.useState(bids || []);
     const [auctionConcludedModalOpen, setAuctionConcludedModalOpen] = React.useState(false);
     
@@ -147,23 +148,38 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
 
     const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
 
-    const [filterByConfirmed, setFilterByConfirmed] = React.useState(false);
+    const checkboxFilterStatesRef = React.useRef<GridQuickSearchFilterCheckboxStates>({
+        [FILTER_ID_CONFIRMED_BIDS]: {
+            apply: false,
+            filter: { 
+                id: FILTER_ID_CONFIRMED_BIDS,
+                field: "confirmed", 
+                operator: "is", 
+                value: "true",
+                label: "Show confirmed only"
+            }
+        }
+    });
     const [filterModel, setFilterModel] = React.useState<GridFilterModel>({
         items: []
     });
-    const onFilterModelChange = function (model: GridFilterModel, _?: GridCallbackDetails<"filter">) {
+    const onFilterModelChange = function (model?: GridFilterModel) {
+        const states = Object.values(checkboxFilterStatesRef.current);
+        const stateIds = Object.keys(checkboxFilterStatesRef.current);
+
+        model = model || filterModel;
         setFilterModel({
+            ...model,
             items: [
-                ...model.items,
-                ...(filterByConfirmed ? [getConfirmedBidFilter()] : [])
+                ...model.items
+                    .filter(item => typeof item.id !== "string"
+                        || !stateIds.includes(item.id || "")),
+                ...(states.flatMap(value => value.apply 
+                    ? [value.filter] 
+                    : []))
             ]
         });
     };
-    React.useEffect(() => {
-        onFilterModelChange({
-            items: filterModel.items.filter(item => item.id !== FILTER_ID_CONFIRMED_BIDS)
-        });
-    }, [filterModel]);
 
     const columnVisibilityModel: GridColumnVisibilityModel = {
         "confirmed": false
@@ -334,18 +350,19 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                         getRowClassName={getRowClassName}
                         onRowEditStop={onRowEditStop}
                         isCellEditable={(params) => !params.row.confirmed}
-                        slots={{ toolbar: QuickSearchToolbar }}
+                        slots={{ toolbar: GridQuickSearchToolbar }}
                         slotProps={{
                             toolbar: {
-                                withFilterCheckboxes: [{
-                                    value: filterByConfirmed,
-                                    checked: filterByConfirmed,
-                                    label: "Show confirmed only",
+                                withFilterCheckboxes: Object.values(checkboxFilterStatesRef.current).map(state => ({
+                                    id: state.filter.id,
+                                    value: state.apply,
+                                    checked: state.apply,
+                                    label: state.filter.label,
                                     onInput: () => {
-                                        console.log("Changing filter model...")
-                                        setFilterByConfirmed((oldValue) => !oldValue);
+                                        state.apply = !state.apply
+                                        onFilterModelChange();
                                     }
-                                }] satisfies QuickSearchFilterCheckbox[]
+                                } satisfies GridQuickSearchFilterCheckbox))
                             }
                         }}
                     />
