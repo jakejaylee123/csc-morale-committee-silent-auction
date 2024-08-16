@@ -42,7 +42,7 @@ export const loader = async function ({ request, params }) {
     } else if (!EventCommon.isEnabledAndActive(event) && !bidder.adminAssignment) {
         return json({
             success: false,
-            error: "Only administrators can view bid sheets for disabled/inactive auction events."
+            error: "Only administrators can view bid sheets for disabled/inactive  events."
         } satisfies EventReportBidSheetLoaderFunctionData);
     } else if (!event.items.length) {
         return json({
