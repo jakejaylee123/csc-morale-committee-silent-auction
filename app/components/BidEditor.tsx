@@ -195,7 +195,11 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
 
     const onBidConfirm = async function (bid: BidEditorDataSourceItem): Promise<void> {
         try {
-            if (!bid.confirmed) {
+            if (bid.confirmed) {
+                setSnackbar({ alerts: [{ message: "This bid is already confirmed.", severity: "error" }] });
+            } else if ((bid.bidAmount || 0) <= 0) {
+                setSnackbar({ alerts: [{ message: "Bid must be greater than $0.00", severity: "error" }] });
+            } else {
                 // We will process the result of this submission
                 // in the "useEffect" that listens to this "bidFetcher"
                 bidFetcher.submit(bid as any, {

@@ -73,15 +73,15 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: true,
-            error: "This item has been disqualified" + item.disqualificationReason 
-                ? `: ${item.disqualificationReason}`
-                : "."
+            error: "This item has been disqualified." + item.disqualificationReason 
+                ? ` Reason: ${item.disqualificationReason}`
+                : ""
         } satisfies BidUpdateResult);
     }
     
     const bidAmount = formData.get("bidAmount") as string;
     const parsedBidAmount = parseFloat(bidAmount);
-    if (isNaN(parsedBidAmount)) {
+    if (isNaN(parsedBidAmount) || parsedBidAmount <= 0) {
         return json({
             success: false,
             concluded: false,
