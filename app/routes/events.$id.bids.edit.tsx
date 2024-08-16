@@ -43,12 +43,12 @@ export const loader = async function ({ request, params }) {
     } else if (!EventCommon.isEnabledAndActive(event)) {
         return json({
             success: false,
-            error: `The auction event "${event.description}" is disabled/inactive.`
+            error: `The event "${event.description}" is disabled/inactive.`
         } satisfies EventBidLoaderFunctionData);
     } else if (!event.items.length) {
         return json({
             success: false,
-            error: `Event "${id}" does not have any items to bid on.`
+            error: `Event "${event.description}" does not have any items to bid on.`
         } satisfies EventBidLoaderFunctionData);
     }
 

@@ -29,7 +29,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: false,
-            error: `The passed event ID "${id}" was not valid`
+            error: `The passed event ID "${id}" was not valid.`
         } satisfies BidUpdateResult);
     }
 
@@ -45,7 +45,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: true,
-            error: "Event is no longer active"
+            error: `Event "${event.description}" is not active/enabled.`
         } satisfies BidUpdateResult);
     }
 
@@ -57,7 +57,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: false,
-            error: `The passed item ID "${itemId}" was not valid`
+            error: `The passed item ID "${itemId}" was not valid.`
         } satisfies BidUpdateResult);
     }
 
@@ -85,7 +85,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: false,
-            error: `The passed bid amount "${bidAmount}" was not valid`
+            error: `The passed bid amount "${bidAmount || "$0.00"}" was not valid.`
         } satisfies BidUpdateResult);
     }
     
@@ -98,7 +98,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: false,
-            error: `There is already a confirmed bid of ${currentBid.bidAmount} for this item`
+            error: `There is already a confirmed bid of ${currentBid.bidAmount} for this item.`
         } satisfies BidUpdateResult);
     }
 

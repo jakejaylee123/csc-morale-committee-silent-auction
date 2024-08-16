@@ -47,7 +47,7 @@ export const loader = async function ({ request, params }) {
     } else if (!event.items.length) {
         return json({
             success: false,
-            error: `Event "${id}" does not have any items for a bid sheet report.`
+            error: `Event "${event.description}" does not have any items for a bid sheet report.`
         } satisfies EventReportBidSheetLoaderFunctionData);
     }
 

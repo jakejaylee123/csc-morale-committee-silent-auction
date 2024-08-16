@@ -24,7 +24,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     if (!Identifiers.isIntegerId(id)) {
         return json({
             success: false,
-            error: `The passed event ID "${id}" was not valid`
+            error: `The passed event ID "${id}" was not valid.`
         } satisfies AdminEventBidDisqualifyResult);
     }
 
@@ -33,7 +33,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     if (!Identifiers.isIntegerId(bidId)) {
         return json({
             success: false,
-            error: `The passed bid ID "${bidId}" was not valid`
+            error: `The passed bid ID "${bidId}" was not valid.`
         } satisfies AdminEventBidDisqualifyResult);
     }
 
@@ -44,7 +44,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     if (!currentBid) {
         return json({
             success: false,
-            error: `The bid referenced by ID "${bidId}" was not found`
+            error: `The bid referenced by ID "${bidId}" was not found.`
         } satisfies AdminEventBidDisqualifyResult);
     }
 

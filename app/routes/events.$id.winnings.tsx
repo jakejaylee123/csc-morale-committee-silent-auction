@@ -43,12 +43,12 @@ export const loader = async function ({ request, params }) {
     } else if (!EventCommon.isEnabledAndConcluded(event)) {
         return json({
             success: false,
-            error: `The auction event "${event.description}" is either disabled or not yet concluded.`
+            error: `The event "${event.description}" is either disabled or not yet concluded.`
         } satisfies EventWinningsLoaderFunctionData);
     } else if (!event.releaseWinners) {
         return json({
             success: false,
-            error: `The winners for auction event "${event.description}" have not been released.`
+            error: `The winners for event "${event.description}" have not been released.`
         } satisfies EventWinningsLoaderFunctionData);
     }
 

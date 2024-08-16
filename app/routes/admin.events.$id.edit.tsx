@@ -120,7 +120,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             return json({
                 success: false,
                 type,
-                error: `The passed event ID "${id}" was not valid`
+                error: `The passed event ID "${id}" was not valid.`
             } satisfies EventUpdateResult);
         }
     } catch (error) {
