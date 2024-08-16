@@ -3,7 +3,7 @@ import { useFetcher } from "@remix-run/react";
 
 import { SerializedEventWithItems } from "~/services/event.server";
 import { Alert, Button, Stack, Typography } from "@mui/material";
-import { DataGrid, GridActionsCellItemProps, GridColDef, GridColumnVisibilityModel, GridEventListener, GridFilterModel, GridRowClassNameParams, GridRowEditStopReasons, GridRowParams } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItemProps, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, GridEventListener, GridFilterModel, GridRowClassNameParams, GridRowEditStopReasons, GridRowParams } from "@mui/x-data-grid";
 
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
 import { SerializedBid } from "~/services/bid.server";
@@ -17,6 +17,8 @@ import { QuickSearchFilterCheckbox, QuickSearchToolbar } from "./QuickSearchTool
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
+
+const FILTER_ID_CONFIRMED_BIDS = "confirmed-bids-filter";
 
 export interface BidEditorProps {
     event: SerializedEventWithItems,
@@ -111,8 +113,18 @@ const getConfirmedBidTotal = function ({ dataSource, asFormattedString }: GetCon
         .filter(item => item.confirmed && item.bidAmount)
         .reduce((accumulator, item) => accumulator + (item.bidAmount || 0), 0);
     return asFormattedString ? MoneyFormatter.getFormattedMoney({
-        amount: sum
+        amount: sum,
+        emptyPlaceholder: "$0.00"
     }) : sum;
+};
+
+const getConfirmedBidFilter = function () {
+    return { 
+        id: FILTER_ID_CONFIRMED_BIDS,
+        field: "confirmed", 
+        operator: "is", 
+        value: "true" 
+    };
 };
 
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
@@ -136,11 +148,22 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
 
     const [filterByConfirmed, setFilterByConfirmed] = React.useState(false);
-    const filterModel: GridFilterModel = filterByConfirmed ? {
-        items: [
-            { field: "confirmed", operator: "is", value: "true" }
-        ]
-    } : { items: [] };
+    const [filterModel, setFilterModel] = React.useState<GridFilterModel>({
+        items: []
+    });
+    const onFilterModelChange = function (model: GridFilterModel, _?: GridCallbackDetails<"filter">) {
+        setFilterModel({
+            items: [
+                ...model.items,
+                ...(filterByConfirmed ? [getConfirmedBidFilter()] : [])
+            ]
+        });
+    };
+    React.useEffect(() => {
+        onFilterModelChange({
+            items: filterModel.items.filter(item => item.id !== FILTER_ID_CONFIRMED_BIDS)
+        });
+    }, [filterModel]);
 
     const columnVisibilityModel: GridColumnVisibilityModel = {
         "confirmed": false
@@ -297,6 +320,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                     >NOTE: Once confirmed, all bids are final.</Alert>
                     <DataGrid
                         filterModel={filterModel}
+                        onFilterModelChange={onFilterModelChange}
                         disableColumnFilter
                         disableColumnSelector
                         disableDensitySelector
