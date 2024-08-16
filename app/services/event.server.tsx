@@ -15,7 +15,8 @@ export interface EventCreation {
     enabled: boolean
 };
 export interface EventUpdate extends EventCreation {
-    id: number
+    id: number,
+    releaseWinners: boolean
 };
 export interface EventCreateOptions {
     creatorId: number,
@@ -171,6 +172,7 @@ export class EventService {
                     createdAt: currentDate,
                     createdBy: updatorId,
                     enabled: event.enabled,
+                    releaseWinners: event.releaseWinners,
                     ...(!event.enabled && {
                         disabledAt: currentDate,
                         disabledBy: updatorId

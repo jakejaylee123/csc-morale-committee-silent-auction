@@ -58,7 +58,8 @@ export const loader = async function ({ request, params }) {
                 disabledBy: null,
                 items: [],
                 concluded: false,
-                active: false
+                active: false,
+                releaseWinners: false
             } satisfies EventWithItems;
         } else if (Identifiers.isIntegerId(id)) {
             return await EventService
@@ -89,6 +90,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     const enabled = "true" === formData.get("enabled");
     const startDate = formData.get("startDate") as string;
     const endDate = formData.get("endDate") as string;
+    const releaseWinners = formData.get("releaseWinners") as string;
 
     let type: EventUpdateType = "none"; 
     let changedEvent: Event | null = null;
@@ -101,7 +103,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                     description,
                     enabled,
                     startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
-                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a")
+                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a"),
                 }
             });
         } else if (Identifiers.isIntegerId(id)) {
@@ -113,7 +115,8 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                     description,
                     enabled,
                     startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
-                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a")
+                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a"),
+                    releaseWinners: releaseWinners === "true"
                 }
             });
         } else {
