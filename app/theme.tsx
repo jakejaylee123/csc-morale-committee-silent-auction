@@ -1,5 +1,5 @@
 import {
-    experimental_extendTheme as extendTheme,
+    extendTheme,
     createTheme,
     alpha
 } from "@mui/material/styles";
@@ -87,7 +87,7 @@ export const red = {
 };
 
 const placeholderTheme = createTheme();
-export const theme = extendTheme({
+export default extendTheme({
     colorSchemes: {
         light: {
             palette: {

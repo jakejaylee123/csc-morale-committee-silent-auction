@@ -9,9 +9,10 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlserver"
+    provider = "mysql"
 
     // Example: sqlserver://HOST[:PORT];database=DATABASE;user=USER;password=PASSWORD;encrypt=true
+    // Example: mysql://USER:PASSWORD@HOST:PORT/DATABASE
     url = env("PRISMA_DATABASE_URL")
 }
 

@@ -1,44 +1,37 @@
-import * as React from "react";
+import { 
+    LoaderFunction,
+    LinksFunction 
+} from "@remix-run/node";
 import {
     Links,
     Meta,
     Outlet,
     Scripts,
     ScrollRestoration,
-    useRouteError,
-    isRouteErrorResponse,
     json,
-    useLoaderData,
+    useLoaderData
 } from "@remix-run/react";
 
-import { withEmotionCache } from "@emotion/react";
-import {
-    CssBaseline,
-    unstable_useEnhancedEffect as useEnhancedEffect,
-} from "@mui/material";
+import { 
+    Experimental_CssVarsProvider as CssVarsProvider, 
+    useColorScheme 
+} from "@mui/material/styles";
 
-import { Experimental_CssVarsProvider as CssVarsProvider, useColorScheme } from "@mui/material/styles";
-import { theme } from "./theme";
+import theme from "./theme";
 
+import { getMuiLinks } from "./components/getMuiLinks";
+import { MuiDocument } from "./components/MuiDocument";
+
+import { DefaultTransition } from "./components/DefaultTransition";
 import { InitColorSchemeScript } from "./components/danger/InitColorSchemeScript";
-
-import { ClientStyleContext } from "./components/ClientStyleContext";
-import { Layout } from "./components/Layout";
 import { NavigationBar } from "./components/NavigationBar";
-
-interface DocumentProps {
-    children: React.ReactNode;
-    title?: string;
-}
+import { Footer } from "./components/Footer";
 
 import {
     BidderAuthentication,
     getAuthenticatedBidder,
     SerializedBidderAuthentication
 } from "./services/auth.server";
-import { LoaderFunction } from "@remix-run/node";
-import { Footer } from "./components/Footer";
-import { DefaultTransition } from "./components/DefaultTransition";
 
 export interface RootLoaderFunctionData {
     authentication?: BidderAuthentication
@@ -46,6 +39,8 @@ export interface RootLoaderFunctionData {
 export interface SerializedRootLoaderFunctionData {
     authentication?: SerializedBidderAuthentication
 };
+
+export const links: LinksFunction = () => [...getMuiLinks()];
 
 export const loader = async function ({ request }) {
     const authentication = await getAuthenticatedBidder(request);
@@ -56,31 +51,11 @@ export const loader = async function ({ request }) {
     return json(data);
 } satisfies LoaderFunction;
 
-const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCache) => {
-    const clientStyleData = React.useContext(ClientStyleContext);
+function LayoutInner({ title, children }: { title: string, children: React.ReactNode }) {
     const colorSchemeState = useColorScheme();
 
     const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
     const authentication = loaderData?.authentication;
-
-    // Only executed on client
-    useEnhancedEffect(() => {
-        // re-link sheet container
-        emotionCache.sheet.container = document.head;
-
-        // re-inject tags
-        const tags = emotionCache.sheet.tags;
-        emotionCache.sheet.flush();
-        tags.forEach((tag) => {
-            // eslint-disable-next-line no-underscore-dangle
-            (emotionCache.sheet as any)._insertTag(tag);
-        });
-
-        // reset cache to reapply global styles
-        clientStyleData.reset();
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return (
         <html lang="en" data-mui-color-scheme={colorSchemeState.mode}>
@@ -89,13 +64,8 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
                 <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />
                 {title ? <title>{title}</title> : null}
                 <Meta />
+                {/* <MuiMeta /> */}
                 <Links />
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-                <link
-                    rel="stylesheet"
-                    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
-                />
                 <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
@@ -116,69 +86,24 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
             </body>
         </html>
     );
-});
+}
 
-export default function App() {
+export function Layout({ title, children }: { title: string, children: React.ReactNode }) {
     return (
         <CssVarsProvider theme={theme}>
-            <CssBaseline />
-            <Document>
-                <Layout>
-                    <Outlet />
-                </Layout>
-            </Document>
+            <LayoutInner
+                title={title}
+                children={children} />
         </CssVarsProvider>
     );
 }
 
-export function ErrorBoundary() {
-    const error = useRouteError();
-
-    if (isRouteErrorResponse(error)) {
-        let message;
-        switch (error.status) {
-            case 401:
-                message = <p>Oops! Looks like you tried to visit a page that you do not have access to.</p>;
-                break;
-            case 404:
-                message = <p>Oops! Looks like you tried to visit a page that does not exist.</p>;
-                break;
-
-            default:
-                throw new Error(error.data || error.statusText);
-        }
-
-        return (
-            <CssVarsProvider theme={theme}>
-                <Document title={`${error.status} ${error.statusText}`}>
-                    <Layout>
-                        <h1>
-                            {error.status}: {error.statusText}
-                        </h1>
-                        {message}
-                    </Layout>
-                </Document>
-            </CssVarsProvider>
-        );
-    }
-
-    if (error instanceof Error) {
-        console.error(error);
-        return (
-            <CssVarsProvider theme={theme}>
-                <Document title="Error!">
-                    <Layout>
-                        <div>
-                            <h1>There was an error</h1>
-                            <p>{error.message}</p>
-                            <hr />
-                            <p>Hey, developer, you should replace this with what you want your users to see.</p>
-                        </div>
-                    </Layout>
-                </Document>
-            </CssVarsProvider>
-        );
-    }
-
-    return <h1>Unknown Error</h1>;
+export default function App() {
+    return (
+        <>
+            <MuiDocument>
+                <Outlet />
+            </MuiDocument>
+        </>
+    );
 }
