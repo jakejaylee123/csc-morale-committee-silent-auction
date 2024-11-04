@@ -1,21 +1,21 @@
 import * as React from "react";
-import { Avatar, Link, PaletteMode, Stack, useColorScheme } from "@mui/material";
-import {
-    AppBar,
-    Box,
-    Button,
-    Container,
-    Divider,
-    Drawer,
-    MenuItem,
-    IconButton,
-    Toolbar,
-} from "@mui/material";
-import {
-    CloseRounded,
-    Image,
-    Menu
-} from "@mui/icons-material";
+
+import Avatar from "@mui/material/Avatar";
+import Link from "@mui/material/Link";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
+
+import { useColorScheme } from "@mui/material";
+
+import { CloseRounded } from "@mui/icons-material";
+import Menu from "@mui/icons-material/Menu";
 
 import { SerializedBidderWithAdmin } from "~/services/users.server";
 import { CscIcon } from "./CscIcon";

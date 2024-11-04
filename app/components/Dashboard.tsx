@@ -1,11 +1,19 @@
 import * as React from "react";
 
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
+
+import PlayArrow from "@mui/icons-material/PlayArrow";
+import Article from "@mui/icons-material/Article";
+import AutoAwesome from "@mui/icons-material/AutoAwesome";
+
+import { EventCommon } from "~/commons/event.common";
 import { SerializedEvent } from "~/services/event.server";
+
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
-import { Button, ButtonGroup, Stack } from "@mui/material";
-import { PlayArrow, Article, AutoAwesome } from "@mui/icons-material";
-import { EventCommon } from "~/commons/event.common";
+
 
 export interface DashboardProps {
     events: SerializedEvent[]

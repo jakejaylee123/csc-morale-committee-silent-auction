@@ -3,14 +3,24 @@ import { Form } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import { SerializedNullableEventWithItems } from "~/services/event.server";
-import { Button, ButtonGroup, Checkbox, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
-import { Create, Save } from "@mui/icons-material";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+
+import Create from "@mui/icons-material/Create";
+import Save from "@mui/icons-material/Save";
+
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
-import { StyledBox } from "./StyledBox";
+import { SerializedNullableEventWithItems } from "~/services/event.server";
 import { SerializedCategoryCode } from "~/services/category.server";
+
+import { StyledBox } from "./StyledBox";
 import { EventItemsEditor } from "./EventItemsEditor";
 
 export interface EventEditorProps {

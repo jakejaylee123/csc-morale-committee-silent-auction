@@ -1,20 +1,35 @@
 import * as React from "react";
 import { useFetcher } from "@remix-run/react";
 
-import { SerializedEventWithItems } from "~/services/event.server";
-import { Alert, Button, Stack, Typography } from "@mui/material";
-import { DataGrid, GridActionsCellItemProps, GridColDef, GridColumnVisibilityModel, GridEventListener, GridFilterModel, GridRowClassNameParams, GridRowEditStopReasons, GridRowParams } from "@mui/x-data-grid";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+
+import { 
+    DataGrid, 
+    GridActionsCellItemProps, 
+    GridColDef, 
+    GridColumnVisibilityModel, 
+    GridEventListener, 
+    GridFilterModel, 
+    GridRowClassNameParams, 
+    GridRowEditStopReasons, 
+    GridRowParams 
+} from "@mui/x-data-grid";
 
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
 import { SerializedBid } from "~/services/bid.server";
+import { SerializedEventWithItems } from "~/services/event.server";
 
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 
+import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
+
 import { StyledBox } from "./StyledBox";
 import { GridQuickSearchFilterCheckbox, GridQuickSearchToolbar, GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
-import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
 

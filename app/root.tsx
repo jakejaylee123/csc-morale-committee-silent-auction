@@ -13,7 +13,7 @@ import {
 } from "@remix-run/react";
 
 import { 
-    Experimental_CssVarsProvider as CssVarsProvider, 
+    ThemeProvider,
     useColorScheme 
 } from "@mui/material/styles";
 
@@ -64,7 +64,6 @@ function LayoutInner({ title, children }: { title: string, children: React.React
                 <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />
                 {title ? <title>{title}</title> : null}
                 <Meta />
-                {/* <MuiMeta /> */}
                 <Links />
                 <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
@@ -90,11 +89,11 @@ function LayoutInner({ title, children }: { title: string, children: React.React
 
 export function Layout({ title, children }: { title: string, children: React.ReactNode }) {
     return (
-        <CssVarsProvider theme={theme}>
+        <ThemeProvider theme={theme}>
             <LayoutInner
                 title={title}
                 children={children} />
-        </CssVarsProvider>
+        </ThemeProvider>
     );
 }
 

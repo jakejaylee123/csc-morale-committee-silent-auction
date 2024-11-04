@@ -1,9 +1,12 @@
 import * as React from "react";
+import { Form } from "@remix-run/react";
+
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+
+import LoginRounded from "@mui/icons-material/LoginRounded";
 
 import { StyledBox } from "./StyledBox";
-import { Form } from "@remix-run/react";
-import { Button, ButtonGroup, Typography } from "@mui/material";
-import { LoginRounded } from "@mui/icons-material";
 
 export function LoginWithMicrosoft() {
     return (

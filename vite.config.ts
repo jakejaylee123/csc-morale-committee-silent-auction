@@ -14,6 +14,12 @@ export default defineConfig({
     server: {
         port: 8080
     },
+    ssr: {
+        noExternal: [
+            "@mui/icons-material",
+            "@mui/material"
+        ]
+    },
     plugins: [
         remix({
             future: {

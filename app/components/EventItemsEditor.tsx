@@ -3,18 +3,40 @@ import { useFetcher } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
-import { Button, ButtonGroup, MenuItem, Select, Stack, Typography } from "@mui/material";
-import { Delete, UploadFile } from "@mui/icons-material";
-import { DataGrid, GridActionsCellItem, GridColDef, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridRowModesModel, GridRowParams, GridRowsProp, GridSlots, GridToolbarContainer, MuiBaseEvent } from "@mui/x-data-grid";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 
-import { StyledBox } from "./StyledBox";
-import { FileUploadModal } from "./FileUploadModal";
+import Delete from "@mui/icons-material/Delete";
+import UploadFile from "@mui/icons-material/UploadFile";
+
+import { 
+    DataGrid, 
+    GridActionsCellItem, 
+    GridColDef, 
+    GridEventListener, 
+    GridRowEditStopReasons, 
+    GridRowId, 
+    GridRowModes, 
+    GridRowModesModel, 
+    GridRowParams, 
+    GridRowsProp, 
+    GridSlots,
+    GridToolbarContainer,  
+} from "@mui/x-data-grid";
+
+import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
 import { SerializedCategoryCode } from "~/services/category.server";
 import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
 import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
-import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { MoneyFormatter } from "~/commons/general.common";
+
+import { StyledBox } from "./StyledBox";
+import { FileUploadModal } from "./FileUploadModal";
+import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 
 type GridRowsPropSetter = (
     newRows: (oldRows: GridRowsProp) => GridRowsProp
