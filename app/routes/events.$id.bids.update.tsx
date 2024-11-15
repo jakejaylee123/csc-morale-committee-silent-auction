@@ -85,7 +85,16 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: false,
-            error: `The passed bid amount "${bidAmount || "$0.00"}" was not valid.`
+            error: `The passed bid amount "$${bidAmount || "0.00"}" was not valid.`
+        } satisfies BidUpdateResult);
+    }
+
+    if (item.minimumBid && item.minimumBid.greaterThan(parsedBidAmount)) {
+        return json({
+            success: false,
+            concluded: false,
+            error: `The passed bid amount "${bidAmount || "$0.00"}" was not `
+             + `greater than or equal to the item's minimum bid amount "$${item.minimumBid || "0.00"}"`
         } satisfies BidUpdateResult);
     }
     
