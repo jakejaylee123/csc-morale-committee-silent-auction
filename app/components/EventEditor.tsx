@@ -10,7 +10,8 @@ import {
     Checkbox,
     FormControlLabel,
     TextField,
-    Typography 
+    Typography, 
+    FormLabel
 } from "@mui/material";
 
 import { Create, Save } from "@mui/icons-material";
@@ -45,9 +46,9 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [enabled, setEnabled] = React.useState(isNew ? true : event.enabled);
     const [releaseWinners, setReleaseWinners] = React.useState(isNew ? false : event.releaseWinners)
     const [startDate, setStartDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt, { zone: "utc" }).toLocal());
+        .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt));
     const [endDate, setEndDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt, { zone: "utc" }).toLocal());
+        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt));
 
     console.log({
         startDate,
@@ -109,9 +110,15 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                     onChange={(newValue => setEndDate(newValue))}
                                 />
                                 <VisuallyHiddenInput
-                                    name="timeZone"
-                                    value={DateTime.local().zoneName}
+                                    suppressHydrationWarning
+                                    name="timezone"
+                                    defaultValue={DateTime.local().zoneName}
                                 />
+                                <FormLabel
+                                    suppressHydrationWarning
+                                >
+                                    {`Current timezone: ${DateTime.now().zoneName}`}
+                                </FormLabel>
                                 <ButtonGroup fullWidth>
                                     <Button
                                         startIcon={isNew ? <Create /> : <Save />}

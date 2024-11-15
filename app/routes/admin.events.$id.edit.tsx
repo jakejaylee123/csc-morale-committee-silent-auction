@@ -34,6 +34,8 @@ export type EventUpdateResult = {
 export type SerializedEventUpdateResult = SerializeFrom<EventUpdateResult>;
 export type SerializedNullableEventUpdateResult = SerializedEventUpdateResult | null | undefined;
 
+const REQUEST_DATE_FORMAT = "MM/dd/yyyy hh:mm a";
+
 export const loader = async function ({ request, params }) {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
@@ -91,6 +93,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     const enabled = "true" === formData.get("enabled");
     const startDate = formData.get("startDate") as string;
     const endDate = formData.get("endDate") as string;
+    const timezone = formData.get("timezone") as string;
     const releaseWinners = formData.get("releaseWinners") as string;
 
     let type: EventUpdateType = "none"; 
@@ -103,8 +106,8 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                 event: {
                     description,
                     enabled,
-                    startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
-                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a"),
+                    startDate: DateTime.fromFormat(startDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    endDate: DateTime.fromFormat(endDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
                 }
             });
         } else if (Identifiers.isIntegerId(id)) {
@@ -115,8 +118,8 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                     id: parseInt(id),
                     description,
                     enabled,
-                    startDate: DateTime.fromFormat(startDate, "MM/dd/yyyy hh:mm a"),
-                    endDate: DateTime.fromFormat(endDate, "MM/dd/yyyy hh:mm a"),
+                    startDate: DateTime.fromFormat(startDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    endDate: DateTime.fromFormat(endDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
                     releaseWinners: releaseWinners === "true"
                 }
             });

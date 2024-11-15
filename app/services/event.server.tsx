@@ -2,6 +2,7 @@ import { SerializeFrom } from "@remix-run/node";
 
 import { PrismaClient, Event, Item } from "@prisma/client";
 import { DateTime } from "luxon";
+import { DateTimeField } from "@mui/x-date-pickers";
 
 export interface EventGetOptions {
     withItems?: boolean,
@@ -54,7 +55,7 @@ export class EventService {
      * @returns All active auctions.
      */
     public static async getEnabledActiveAndPast(): Promise<EventWithConvenience[]> {
-        const currentDateTime = new Date().toISOString();
+        const currentDateTime = DateTime.utc().toJSDate();
         
         return EventService.injectConvenienceProperties(
             await EventService.client.event.findMany({
@@ -74,7 +75,7 @@ export class EventService {
      * @returns All active auctions.
      */
     public static async getActive(): Promise<EventWithConvenience[]> {
-        const currentDateTime = new Date().toISOString();
+        const currentDateTime = DateTime.utc().toJSDate();
         
         return EventService.injectConvenienceProperties(
             await EventService.client.event.findMany({
@@ -133,14 +134,14 @@ export class EventService {
      * @returns Event that corresponds to passed ID.
      */
     public static async create({ creatorId, event }: EventCreateOptions): Promise<EventWithConvenience> {
-        const currentDate = DateTime.now().toUTC().toJSDate();
+        const currentDate = DateTime.utc().toJSDate();
 
         return EventService.injectConvenienceProperties([
             await EventService.client.event.create({
                 data: {
                     description: event.description,
-                    startsAt: event.startDate.toUTC().toJSDate(),
-                    endsAt: event.endDate.toUTC().toJSDate(),
+                    startsAt: event.startDate.toJSDate(),
+                    endsAt: event.endDate.toJSDate(),
                     createdAt: currentDate,
                     createdBy: creatorId,
                     enabled: event.enabled,
@@ -160,19 +161,22 @@ export class EventService {
      * @returns Event that corresponds to passed ID.
      */
     public static async update({ updatorId, event }: EventUpdateOptions): Promise<EventWithConvenience> {
-        const currentDate = DateTime.now().toUTC().toJSDate();
+        console.log(event);
+        const currentDate = DateTime.utc().toJSDate();
 
         return EventService.injectConvenienceProperties([
             await EventService.client.event.update({
                 where: { id: event.id },
                 data: {
                     description: event.description,
-                    startsAt: event.startDate.toUTC().toJSDate(),
-                    endsAt: event.endDate.toUTC().toJSDate(),
+                    startsAt: event.startDate.toJSDate(),
+                    endsAt: event.endDate.toJSDate(),
                     createdAt: currentDate,
                     createdBy: updatorId,
                     enabled: event.enabled,
                     releaseWinners: event.releaseWinners,
+                    disabledAt: null,
+                    disabledBy: null,
                     ...(!event.enabled && {
                         disabledAt: currentDate,
                         disabledBy: updatorId
@@ -183,7 +187,11 @@ export class EventService {
     }
 
     private static injectConvenienceProperties(events: Event[]): EventWithConvenience[] {
-        const currentDate = DateTime.now().toUTC().toJSDate();
+        const currentDate = DateTime.utc().toJSDate();
+
+        console.log({
+            currentDate, events
+        })
 
         return events.map(event => ({
             ...event,
