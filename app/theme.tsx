@@ -290,18 +290,6 @@ export default createTheme({
                     }),
                 })
             }            
-        },
-        MuiPaper: {
-            styleOverrides: {
-                root: ({ theme }) => ({
-                    backgroundColor: "rgba(0, 0, 0, 0)",
-                    ...theme.applyStyles('dark', {
-                        backgroundColor: "rgba(0, 0, 0, 0)",
-                    }),
-                })
-            }            
-        },
+        }
     }
 });
-
-//export const theme = extendTheme() createTheme(getThemeOptions("dark"));
