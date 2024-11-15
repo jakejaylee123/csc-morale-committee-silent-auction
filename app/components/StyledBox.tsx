@@ -2,7 +2,7 @@ import { styled } from "@mui/material/styles";
 
 export const StyledBox = styled("div")(({ theme }) => ({
     alignSelf: "center",
-    width: "100%",
+    width: "90%",
     borderRadius: theme.shape.borderRadius,
     outline: "1px solid",
     boxShadow: "0 0 12px 8px hsla(220, 25%, 80%, 0.2)",

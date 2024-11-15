@@ -1,10 +1,12 @@
 import * as React from "react";
 import { useFetcher } from "@remix-run/react";
 
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import {
+    Alert,
+    Button,
+    Stack,
+    Typography 
+} from "@mui/material";
 
 import { 
     DataGrid, 
@@ -320,69 +322,71 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                 onOk={() => setAuctionConcludedModalOpen(false)}
                 onClose={() => setAuctionConcludedModalOpen(false)}
             />
-            <StyledBox>
-                <Stack
-                    spacing={2}
-                    sx={(theme) => ({
-                        "& .confirmed": {
-                            backgroundColor: (theme.palette.mode === "dark"
-                                ? theme.palette.success.dark
-                                : theme.palette.success.light) + "!important"
-                        }
-                    })}
-                >
+            <Stack alignContent="center">
+                <StyledBox>
                     <Stack
                         spacing={2}
-                        direction="row"
-                    >
-                        <Typography
-                            variant={"h4"}
-                            gutterBottom
-                        >{"Bids"}</Typography>
-                        <Typography
-                            align="right"
-                            flex={1}
-                            variant={"h4"}
-                            gutterBottom
-                        >{"Confirmed bid total: " + getConfirmedBidTotal({
-                            dataSource: rows,
-                            asFormattedString: true
-                        })}</Typography>
-                    </Stack>
-                    <Alert
-                        severity="warning"
-                        sx={{ fontWeight: "bold" }}
-                    >NOTE: Once confirmed, all bids are final.</Alert>
-                    <DataGrid
-                        filterModel={filterModel}
-                        onFilterModelChange={onFilterModelChange}
-                        disableColumnFilter
-                        disableColumnSelector
-                        disableDensitySelector
-                        columns={columns}
-                        columnVisibilityModel={columnVisibilityModel}
-                        rows={rows}
-                        getRowClassName={getRowClassName}
-                        onRowEditStop={onRowEditStop}
-                        isCellEditable={(params) => !params.row.confirmed}
-                        slots={{ toolbar: GridQuickSearchToolbar }}
-                        slotProps={{
-                            toolbar: {
-                                withFilterCheckboxes: Object.values(checkboxFilterStatesRef.current).map(state => ({
-                                    id: state.filter.id,
-                                    value: state.apply,
-                                    checked: state.apply,
-                                    label: state.filter.label,
-                                    onInput: () => {
-                                        state.apply = !state.apply
-                                        onFilterModelChange();
-                                    }
-                                } satisfies GridQuickSearchFilterCheckbox))
+                        sx={(theme) => ({
+                            "& .confirmed": {
+                                backgroundColor: (theme.palette.mode === "dark"
+                                    ? theme.palette.success.dark
+                                    : theme.palette.success.light) + "!important"
                             }
-                        }}
-                    />
-                </Stack>
-            </StyledBox>
+                        })}
+                    >
+                        <Stack
+                            spacing={2}
+                            direction="row"
+                        >
+                            <Typography
+                                variant={"h4"}
+                                gutterBottom
+                            >{"Bids"}</Typography>
+                            <Typography
+                                align="right"
+                                flex={1}
+                                variant={"h4"}
+                                gutterBottom
+                            >{"Confirmed bid total: " + getConfirmedBidTotal({
+                                dataSource: rows,
+                                asFormattedString: true
+                            })}</Typography>
+                        </Stack>
+                        <Alert
+                            severity="warning"
+                            sx={{ fontWeight: "bold" }}
+                        >NOTE: Once confirmed, all bids are final.</Alert>
+                        <DataGrid
+                            filterModel={filterModel}
+                            onFilterModelChange={onFilterModelChange}
+                            disableColumnFilter
+                            disableColumnSelector
+                            disableDensitySelector
+                            columns={columns}
+                            columnVisibilityModel={columnVisibilityModel}
+                            rows={rows}
+                            getRowClassName={getRowClassName}
+                            onRowEditStop={onRowEditStop}
+                            isCellEditable={(params) => !params.row.confirmed}
+                            slots={{ toolbar: GridQuickSearchToolbar }}
+                            slotProps={{
+                                toolbar: {
+                                    withFilterCheckboxes: Object.values(checkboxFilterStatesRef.current).map(state => ({
+                                        id: state.filter.id,
+                                        value: state.apply,
+                                        checked: state.apply,
+                                        label: state.filter.label,
+                                        onInput: () => {
+                                            state.apply = !state.apply
+                                            onFilterModelChange();
+                                        }
+                                    } satisfies GridQuickSearchFilterCheckbox))
+                                }
+                            }}
+                        />
+                    </Stack>
+                </StyledBox>
+            </Stack>
             {
                 !!snackbar &&
                 <StandardSnackbar

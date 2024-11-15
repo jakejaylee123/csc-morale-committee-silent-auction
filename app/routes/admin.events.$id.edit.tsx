@@ -86,6 +86,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
 
     const { id } = params;
     const formData = await request.formData();
+    console.log(formData);
     const description = formData.get("description") as string;
     const enabled = "true" === formData.get("enabled");
     const startDate = formData.get("startDate") as string;
@@ -151,7 +152,10 @@ export default function AdminEventEdit() {
     // If we successfully made an auction event, we can change the URL to
     // the proper URL of the newly created auction
     if (result?.success) {
-        window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);
+        try {
+            window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);
+        } catch (error) { }
+
         if (event) event.id = result.event.id;
     }
     

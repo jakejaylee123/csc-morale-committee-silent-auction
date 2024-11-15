@@ -16,19 +16,18 @@ export default defineConfig({
     },
     ssr: {
         noExternal: [
-            "@mui/icons-material",
-            "@mui/material"
+            "@mui/icons-material"
         ]
     },
     plugins: [
+        tsconfigPaths(),
         remix({
             future: {
                 v3_fetcherPersist: true,
                 v3_relativeSplatPath: true,
                 v3_throwAbortReason: true,
             },
-        }),
-        tsconfigPaths(),
+        })
     ],
     resolve: {
         alias: process.env.NODE_ENV === "development" ? staticResolutions : [{
@@ -56,5 +55,9 @@ export default defineConfig({
                 return null;
             }
         }]
+    },
+    optimizeDeps: {
+        noDiscovery: true,
+        include: []
     }
 });

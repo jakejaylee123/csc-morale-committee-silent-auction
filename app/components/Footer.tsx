@@ -1,10 +1,12 @@
 import * as React from "react";
 
-import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import {
+    Link,
+    Paper,
+    Typography
+ } from "@mui/material";
 
-function Copyright() {
+ function Copyright() {
     return (
         <Typography 
             variant="body2" 
@@ -23,16 +25,16 @@ function Copyright() {
 export function Footer() {
     return (
         <Paper
-            className="footer" 
-            sx={{ 
+            className="footer"
+            sx={{
                 displayPrint: "none",
                 borderRadius: "0px",
                 display: "flex",
-                position: 'fixed', 
-                bottom: 0, 
-                left: 0, 
-                right: 0 
-            }} 
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0
+            }}
             elevation={3}
         >
             <Copyright />

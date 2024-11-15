@@ -1,15 +1,17 @@
 import * as React from "react";
 import { Form } from "@remix-run/react";
 
-import Backdrop from "@mui/material/Backdrop";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Fade from "@mui/material/Fade";
-import Modal from "@mui/material/Modal";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import {
+    Backdrop,
+    Button,
+    ButtonGroup,
+    Fade,
+    Modal,
+    Stack,
+    Typography 
+} from "@mui/material";
 
-import UploadFile from "@mui/icons-material/UploadFile";
+import { UploadFile } from "@mui/icons-material";
 
 import { SerializedNullableEventWithItems } from "~/services/event.server";
 

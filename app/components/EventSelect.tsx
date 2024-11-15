@@ -1,13 +1,16 @@
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Stack from "@mui/material/Typography";
-import Typography from "@mui/material/Typography";
-import { SelectChangeEvent } from "@mui/material/Select";
-import { Variant } from "@mui/material/styles/createTypography";
+import {
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    Stack,
+    Typography
+ } from "@mui/material";
 
-import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
+ import { Variant } from "@mui/material/styles/createTypography";
+
+import { SentimentVeryDissatisfied } from "@mui/icons-material";
 
 import { SerializedEvent } from "~/services/event.server";
 

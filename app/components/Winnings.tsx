@@ -1,17 +1,19 @@
 import * as React from "react";
 import { useWindowSize } from "@react-hook/window-size";
 
-import Alert from "@mui/material/Alert";
-import Stack from "@mui/material/Stack";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
+import {
+    Alert,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from "@mui/material";
 
-import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
+import { SentimentVeryDissatisfied } from "@mui/icons-material";
 
 import { default as Confetti } from "react-confetti";
 

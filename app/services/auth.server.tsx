@@ -82,6 +82,7 @@ export const getAuthenticatedBidder = async function (request: Request): Promise
         
         return authentication;
     } catch (error) {
+        console.error(error);
         return undefined;
     }
 };
@@ -97,6 +98,6 @@ export const requireAuthenticatedBidder = async function (request: Request, opti
     if (options.mustBeAdmin && !authentication.bidder.adminAssignment) {
         throw redirect("/");
     }
-
+    
     return authentication;
 };

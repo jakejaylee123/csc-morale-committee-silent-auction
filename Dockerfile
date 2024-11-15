@@ -1,12 +1,17 @@
-FROM oven/bun:latest
+FROM oven/bun:debian
 
-COPY app ./app
-COPY prisma ./prisma
-COPY public ./public
+RUN apt-get update && apt-get install -y ca-certificates
 
-COPY package.json .
-COPY vite.config.ts .
-COPY tsconfig.json .
+ADD ./certs/DigiCertGlobalRootCA.crt.pem /usr/local/share/ca-certificates/DigiCertGlobalRootCA.crt.pem
+RUN chmod 644 /usr/local/share/ca-certificates/DigiCertGlobalRootCA.crt.pem && update-ca-certificates
+
+ADD app ./app
+ADD prisma ./prisma
+ADD public ./public
+
+ADD package.json .
+ADD vite.config.ts .
+ADD tsconfig.json .
 
 RUN bun install
 RUN bun run build

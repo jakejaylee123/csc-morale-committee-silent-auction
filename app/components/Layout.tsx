@@ -1,7 +1,6 @@
 import * as React from "react";
 
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
+import { Container, Box } from "@mui/material";
 
 export function Layout({ children }: { children: React.ReactNode }) {    
     return (

@@ -3,16 +3,17 @@ import { Form } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Stack from "@mui/material/Stack";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import {
+    Button,
+    ButtonGroup,
+    Stack,
+    Checkbox,
+    FormControlLabel,
+    TextField,
+    Typography 
+} from "@mui/material";
 
-import Create from "@mui/icons-material/Create";
-import Save from "@mui/icons-material/Save";
+import { Create, Save } from "@mui/icons-material";
 
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
@@ -22,6 +23,7 @@ import { SerializedCategoryCode } from "~/services/category.server";
 
 import { StyledBox } from "./StyledBox";
 import { EventItemsEditor } from "./EventItemsEditor";
+import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
 
 export interface EventEditorProps {
     event: SerializedNullableEventWithItems,
@@ -43,9 +45,14 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [enabled, setEnabled] = React.useState(isNew ? true : event.enabled);
     const [releaseWinners, setReleaseWinners] = React.useState(isNew ? false : event.releaseWinners)
     const [startDate, setStartDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt));
+        .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt, { zone: "utc" }).toLocal());
     const [endDate, setEndDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt));
+        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt, { zone: "utc" }).toLocal());
+
+    console.log({
+        startDate,
+        endDate
+    });
 
     return (
         <>
@@ -100,6 +107,10 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                     name="endDate"
                                     value={endDate}
                                     onChange={(newValue => setEndDate(newValue))}
+                                />
+                                <VisuallyHiddenInput
+                                    name="timeZone"
+                                    value={DateTime.local().zoneName}
                                 />
                                 <ButtonGroup fullWidth>
                                     <Button

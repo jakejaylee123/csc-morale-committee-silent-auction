@@ -3,15 +3,16 @@ import { useFetcher } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+import {
+    Button,
+    ButtonGroup,
+    Stack,
+    Typography,
+    MenuItem,
+    Select
+ } from "@mui/material";
 
-import Delete from "@mui/icons-material/Delete";
-import UploadFile from "@mui/icons-material/UploadFile";
+import { Delete, UploadFile } from "@mui/icons-material";
 
 import { 
     DataGrid, 

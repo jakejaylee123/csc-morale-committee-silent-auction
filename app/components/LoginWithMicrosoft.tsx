@@ -1,17 +1,20 @@
 import * as React from "react";
 import { Form } from "@remix-run/react";
 
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import {
+    Button,
+    ButtonGroup,
+    Stack
+} from "@mui/material";
 
-import LoginRounded from "@mui/icons-material/LoginRounded";
+import { LoginRounded } from "@mui/icons-material";
 
 import { StyledBox } from "./StyledBox";
 
 export function LoginWithMicrosoft() {
     return (
-        <>
-            <StyledBox>
+        <Stack alignContent="center">
+            <StyledBox sx={{ maxWidth: { sm: 400, xs: "100%" } }}>
                 <Form action="/auth/microsoft" method="post">
                     <ButtonGroup fullWidth>
                         <Button
@@ -22,6 +25,6 @@ export function LoginWithMicrosoft() {
                     </ButtonGroup>
                 </Form>
             </StyledBox>
-        </>
+        </Stack>
     );
 }

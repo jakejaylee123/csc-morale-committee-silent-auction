@@ -1,21 +1,25 @@
 import * as React from "react";
 
-import Avatar from "@mui/material/Avatar";
-import Link from "@mui/material/Link";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import Divider from "@mui/material/Divider";
-import Drawer from "@mui/material/Drawer";
-import MenuItem from "@mui/material/MenuItem";
-import IconButton from "@mui/material/IconButton";
-import Toolbar from "@mui/material/Toolbar";
+import {
+    Avatar,
+    Link,
+    AppBar,
+    Box,
+    Button,
+    Container,
+    Divider,
+    Drawer,
+    MenuItem,
+    IconButton,
+    Toolbar
+ } from "@mui/material";
 
 import { useColorScheme } from "@mui/material";
 
-import { CloseRounded } from "@mui/icons-material";
-import Menu from "@mui/icons-material/Menu";
+import { 
+    CloseRounded,
+    Menu 
+} from "@mui/icons-material";
 
 import { SerializedBidderWithAdmin } from "~/services/users.server";
 import { CscIcon } from "./CscIcon";
@@ -37,7 +41,7 @@ export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) 
     return (
         <AppBar
             position="fixed"
-            sx={{ displayPrint: "none", boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", mt: 2 }}
+            sx={{ displayPrint: "none", boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", pt: 2 }}
         >
             <Container
                 sx={{
@@ -57,17 +61,14 @@ export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) 
                         maxHeight: 40,
                         border: "1px solid",
                         borderColor: "divider",
-                        backgroundColor: "hsla(220, 60%, 99%, 0.6)",
                         boxShadow:
                             "0 1px 2px hsla(210, 0%, 0%, 0.05), 0 2px 12px hsla(210, 100%, 80%, 0.5)",
                         ...theme.applyStyles("dark", {
-                            bgcolor: "hsla(220, 0%, 0%, 0.7)",
                             boxShadow:
                                 "0 1px 2px hsla(210, 0%, 0%, 0.5), 0 2px 12px hsla(210, 100%, 25%, 0.3)",
                         }),
                     })}
                 >
-                    
                     <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", px: 0 }}>
                         <CscIcon />
                         <Box sx={{ display: { xs: "none", md: "flex" } }}>
@@ -107,7 +108,7 @@ export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) 
                             `${bidder.firstName.toUpperCase()[0]}${bidder.lastName.toUpperCase()[0]}`
                         }</Avatar>
                     }
-                    <Box
+                    {/* <Box
                         sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -122,7 +123,7 @@ export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) 
                                 setMode(mode === "light" ? "dark" : "light");
                             }} 
                         />
-                    </Box>
+                    </Box> */}
                     <Box sx={{ display: { sm: "flex", md: "none" } }}>
                         <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
                             <Menu />

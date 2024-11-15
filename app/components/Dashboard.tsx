@@ -1,12 +1,16 @@
 import * as React from "react";
 
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Stack from "@mui/material/Stack";
+import {
+    Button,
+    ButtonGroup,
+    Stack
+ } from "@mui/material";
 
-import PlayArrow from "@mui/icons-material/PlayArrow";
-import Article from "@mui/icons-material/Article";
-import AutoAwesome from "@mui/icons-material/AutoAwesome";
+import {
+    PlayArrow,
+    Article,
+    AutoAwesome
+ } from "@mui/icons-material";
 
 import { EventCommon } from "~/commons/event.common";
 import { SerializedEvent } from "~/services/event.server";

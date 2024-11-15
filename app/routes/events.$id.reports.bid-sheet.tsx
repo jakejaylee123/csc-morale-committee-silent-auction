@@ -1,6 +1,9 @@
 import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
+import { Print } from "@mui/icons-material";
+import { Fab, Stack } from "@mui/material";
+
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
 import { APP_NAME, Identifiers } from "~/commons/general.common";
@@ -84,6 +87,21 @@ export default function EventReportBidSheet() {
                 event={event}
                 categories={categories}
             />
+            <Fab 
+                variant="extended"
+                size="large"
+                color="primary"
+                onClick={() => window.print()}
+                sx={{ 
+                    position: "fixed", 
+                    bottom: 76, 
+                    right: 24,
+                    displayPrint: "none"
+                }}
+            >
+                <Print sx={{ mr: 1 }} />
+                Print
+            </Fab>
         </>
     );
 }

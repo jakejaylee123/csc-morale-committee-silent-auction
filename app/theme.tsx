@@ -1,8 +1,4 @@
-import {
-    extendTheme,
-    createTheme,
-    alpha
-} from "@mui/material/styles";
+import { createTheme, alpha } from '@mui/material/styles';
 
 declare module "@mui/material/styles/createPalette" {
     interface ColorRange {
@@ -87,7 +83,8 @@ export const red = {
 };
 
 const placeholderTheme = createTheme();
-export default extendTheme({
+export default createTheme({
+    cssVariables: true,
     colorSchemes: {
         light: {
             palette: {
@@ -244,6 +241,13 @@ export default extendTheme({
         }
     },
     components: {
+        MuiCssBaseline: {
+            styleOverrides: `
+                body {
+                    margin: 0;
+                }
+            `
+        },
         MuiContainer: {
             styleOverrides: {
                 root: {
@@ -276,6 +280,26 @@ export default extendTheme({
                     }),
                 })
             }
+        },
+        MuiAppBar: {
+            styleOverrides: {
+                root: ({ theme }) => ({
+                    backgroundColor: "rgba(0, 0, 0, 0)",
+                    ...theme.applyStyles('dark', {
+                        backgroundColor: "rgba(0, 0, 0, 0)",
+                    }),
+                })
+            }            
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: ({ theme }) => ({
+                    backgroundColor: "rgba(0, 0, 0, 0)",
+                    ...theme.applyStyles('dark', {
+                        backgroundColor: "rgba(0, 0, 0, 0)",
+                    }),
+                })
+            }            
         },
     }
 });

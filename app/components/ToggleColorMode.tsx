@@ -1,10 +1,8 @@
 import * as React from "react";
 
-import IconButton from "@mui/material/IconButton";
-import { IconButtonProps } from "@mui/material";
+import { IconButton, IconButtonProps } from "@mui/material";
 
-import WbSunnyRounded from "@mui/icons-material/WbSunnyRounded";
-import ModeNightRounded from "@mui/icons-material/ModeNightRounded";
+import { WbSunnyRounded, ModeNightRounded } from "@mui/icons-material";
 
 export type Mode = "light" | "dark" | "system";
 interface ToggleColorModeProps extends IconButtonProps {

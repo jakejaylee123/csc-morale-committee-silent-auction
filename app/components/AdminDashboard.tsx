@@ -1,12 +1,16 @@
 import * as React from "react";
 
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Stack from "@mui/material/Stack";
+import {
+    Button,
+    ButtonGroup,
+    Stack 
+} from "@mui/material";
 
-import Add from "@mui/icons-material/Add";
-import AutoAwesome from "@mui/icons-material/AutoAwesome";
-import Edit from "@mui/icons-material/Edit";
+import {
+    Add,
+    AutoAwesome,
+    Edit
+ } from "@mui/icons-material";
 
 import { SerializedEvent } from "~/services/event.server";
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";

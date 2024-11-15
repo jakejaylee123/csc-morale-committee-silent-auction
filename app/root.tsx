@@ -1,6 +1,6 @@
-import { 
+import {
     LoaderFunction,
-    LinksFunction 
+    LinksFunction
 } from "@remix-run/node";
 import {
     Links,
@@ -12,9 +12,9 @@ import {
     useLoaderData
 } from "@remix-run/react";
 
-import { 
+import {
     ThemeProvider,
-    useColorScheme 
+    useColorScheme
 } from "@mui/material/styles";
 
 import theme from "./theme";
@@ -23,7 +23,7 @@ import { getMuiLinks } from "./components/getMuiLinks";
 import { MuiDocument } from "./components/MuiDocument";
 
 import { DefaultTransition } from "./components/DefaultTransition";
-import { InitColorSchemeScript } from "./components/danger/InitColorSchemeScript";
+import InitColorSchemeScript from "./components/danger/InitColorSchemeScript";
 import { NavigationBar } from "./components/NavigationBar";
 import { Footer } from "./components/Footer";
 
@@ -58,7 +58,7 @@ function LayoutInner({ title, children }: { title: string, children: React.React
     const authentication = loaderData?.authentication;
 
     return (
-        <html lang="en" data-mui-color-scheme={colorSchemeState.mode}>
+        <html lang="en" data-mui-color-scheme={colorSchemeState.mode} suppressHydrationWarning>
             <head suppressHydrationWarning>
                 <meta charSet="utf-8" suppressHydrationWarning />
                 <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />
@@ -68,10 +68,7 @@ function LayoutInner({ title, children }: { title: string, children: React.React
                 <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
-                <InitColorSchemeScript
-                    modeStorageKey="mui-mode"
-                    attribute="data-mui-color-scheme"
-                />
+                <InitColorSchemeScript />
                 <NavigationBar
                     bidder={authentication?.bidder}
                     colorSchemeState={colorSchemeState}
