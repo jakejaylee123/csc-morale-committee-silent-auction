@@ -183,7 +183,8 @@ export default function AdminEventEdit() {
             />
             <EventEditor
                 event={event}
-                categories={categories} />
+                categories={categories} 
+            />
         </>
     );
 }

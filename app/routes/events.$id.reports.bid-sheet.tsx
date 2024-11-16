@@ -94,8 +94,8 @@ export default function EventReportBidSheet() {
                 onClick={() => window.print()}
                 sx={{ 
                     position: "fixed", 
-                    bottom: 76, 
-                    right: 24,
+                    bottom: 75, 
+                    right: 25,
                     displayPrint: "none"
                 }}
             >

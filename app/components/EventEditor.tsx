@@ -58,7 +58,12 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     return (
         <>
             <LocalizationProvider dateAdapter={AdapterLuxon}>
-                <Stack spacing={2}>
+                <Stack 
+                    spacing={2}
+                    sx={{
+                        marginBottom: 75
+                    }}
+                >
                     <StyledBox>
                         <Typography variant={"h4"} gutterBottom>{"Main properties"}</Typography>
                         <Form
