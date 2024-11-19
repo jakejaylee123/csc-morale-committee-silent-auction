@@ -155,7 +155,13 @@ function WinnerSubReport({ source, categoryHash }: WinnerSubReportProps) {
 
     const generator = new ItemTagNumberGenerator(categoryHash);
     return (
-        <>
+        <Stack
+            sx={{
+                padding: 0,
+                margin: 0,
+                marginBottom: 100
+            }}
+        >
             <Typography
                 align="center"
                 sx={{
@@ -219,7 +225,7 @@ function WinnerSubReport({ source, categoryHash }: WinnerSubReportProps) {
                     )
                 })
             }
-        </>
+        </Stack>
     );
 }
 

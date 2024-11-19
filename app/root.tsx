@@ -68,6 +68,7 @@ function LayoutInner({ title, children }: { title: string, children: React.React
                 <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
+                <Scripts />
                 <InitColorSchemeScript />
                 <NavigationBar
                     bidder={authentication?.bidder}
@@ -78,7 +79,6 @@ function LayoutInner({ title, children }: { title: string, children: React.React
                 </DefaultTransition>
                 <Footer />
                 <ScrollRestoration />
-                <Scripts />
             </body>
         </html>
     );

@@ -1,6 +1,5 @@
 import * as React from "react";
-import { useWindowSize } from "@react-hook/window-size";
-
+import * as confetti from "canvas-confetti";
 import {
     Alert,
     Stack,
@@ -14,8 +13,6 @@ import {
 } from "@mui/material";
 
 import { SentimentVeryDissatisfied } from "@mui/icons-material";
-
-import { default as Confetti } from "react-confetti";
 
 import { SerializedBidWithItem } from "~/services/bid.server";
 import { SerializedCategoryCode } from "~/services/category.server";
@@ -45,18 +42,6 @@ const getWinningBidTotal = function (bids: SerializedBidWithItem[]): string {
     });
 };
 
-function WrappedConfetti({ width, height }: WrappedConfettiProps) {
-    return (
-        <div>
-            <Confetti
-                width={width}
-                height={height}
-                initialVelocityY={50}
-            />
-        </div>
-    )
-};
-
 export function Winnings({ categories, winningBids }: WinningsProps) {
     const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     const generator = new ItemTagNumberGenerator(categoryHash.current);
@@ -73,25 +58,55 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
 
     if (!winningBids.length) {
         return (
-            <StyledBox>
-                <Stack spacing={2} alignItems="center">
-                    <Typography variant={"h4"} gutterBottom>You have no winnings for this auction event.</Typography>
-                    <SentimentVeryDissatisfied
-                        sx={{ width: 100, height: 100 }}
-                        fontSize="large"
-                    />
-                </Stack>
-            </StyledBox>
+            <Stack alignItems="center">
+                <StyledBox>
+                    <Stack spacing={2} alignItems="center">
+                        <Typography variant={"h4"} gutterBottom>You have no winnings for this auction event.</Typography>
+                        <SentimentVeryDissatisfied
+                            sx={{ width: 100, height: 100 }}
+                            fontSize="large"
+                        />
+                    </Stack>
+                </StyledBox>
+            </Stack>
         );
     }
 
-    const [width, height] = useWindowSize();
+    // This is a function that shoots out confetti... Ya know, since
+    // the user won something...
+    React.useEffect(() => {
+        const runConfettiStarter = (starter: confetti.CreateTypes) => {
+            if (document.visibilityState !== "hidden") {
+                starter({
+                    shapes: ["square", "circle"],
+                    startVelocity: 25,
+                    particleCount: 100,
+                    spread: 90,
+                    origin: {
+                        y: (1),
+                        x: (0.5)
+                    }
+                });
+            }
+        };
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 500;
+        canvas.height = 250;
+        canvas.style.position = "absolute";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        document.body.prepend(canvas);
+
+        const confettiStarter = confetti.create(canvas);
+        runConfettiStarter(confettiStarter);
+        setInterval(() => {
+            runConfettiStarter(confettiStarter);
+        }, 2000);
+    }, []);
+
     return (
-        <>
-            <WrappedConfetti
-                width={width}
-                height={height}
-            />
+        <Stack alignItems="center">
             <StyledBox>
                 <Stack
                     spacing={2}
@@ -129,7 +144,7 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
                             <TableBody>
                                 {
                                     winningBidsWithTagNumbers.map(bid => (
-                                        <TableRow 
+                                        <TableRow
                                             key={`table-row-bid-${bid.id}`}
                                         >
                                             <TableCell>{bid.tagNumber}</TableCell>
@@ -145,6 +160,6 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
                     </TableContainer>
                 </Stack>
             </StyledBox>
-        </>
+        </Stack>
     );
 };

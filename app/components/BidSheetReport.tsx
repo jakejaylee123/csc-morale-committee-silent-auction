@@ -149,6 +149,11 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
         <>
             <Stack
                 spacing={2}
+                sx={{
+                    padding: 0,
+                    margin: 0,
+                    marginBottom: 100
+                }}
             >
                 <Typography
                     variant="h5"
