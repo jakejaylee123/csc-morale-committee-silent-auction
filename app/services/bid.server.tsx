@@ -58,7 +58,11 @@ export class BidService {
             include: {
                 ...(withItem && { item: true }),
                 ...(withBidder && { bidder: true })
-            }
+            },
+            orderBy: [
+                { bidAmount: "desc" },
+                { createdAt: "asc" }
+            ]
         });
     }
 
@@ -75,23 +79,15 @@ export class BidService {
             withBidder
         });
 
-        const eventBidsWithItems = eventBids.filter(bid => BidService.isBidWithItem(bid));
+        const eventBidsWithItems = eventBids
+            .filter(bid => BidService.isBidWithItem(bid));
+        const biddedItems = eventBidsWithItems.map(bid => bid.item);
+        const winningBids = biddedItems.map(item => eventBidsWithItems.find(bid => bid.itemId === item.id));
+        
         const winningBidsHash: { [itemIdString: string]: BidWithItem } = {};
-        eventBidsWithItems.forEach(bid => {
-            if (bid.disqualified || bid.item.disqualified) {
-                return;
-            }
-
-            const bidItemKey = `${bid.itemId}`;
-            if (!winningBidsHash[bidItemKey]) {
-                winningBidsHash[bidItemKey] = bid;
-            } else {
-                const currentWinningBid = winningBidsHash[bidItemKey];
-                const comparison = BidService.compareBids(currentWinningBid, bid);
-                winningBidsHash[bidItemKey] = comparison > 0
-                    ? bid : currentWinningBid;
-            }
-        });
+        for (const bid of winningBids) {
+            winningBidsHash[`${bid?.itemId}`] = bid as BidWithItem;
+        }
 
         return Object.values(winningBidsHash)
             .filter(bid => undefined === bidderId || bidderId === bid.bidderId)

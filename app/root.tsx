@@ -32,6 +32,7 @@ import {
     getAuthenticatedBidder,
     SerializedBidderAuthentication
 } from "./services/auth.server";
+import { Stack } from "@mui/material";
 
 export interface RootLoaderFunctionData {
     authentication?: BidderAuthentication
@@ -77,6 +78,7 @@ function LayoutInner({ title, children }: { title: string, children: React.React
                 <DefaultTransition>
                     {children}
                 </DefaultTransition>
+                <Stack sx={{ marginBottom: 100 }} />
                 <Footer />
                 <ScrollRestoration />
             </body>
