@@ -17,7 +17,8 @@ import {
     GridFilterModel, 
     GridRowClassNameParams, 
     GridRowEditStopReasons, 
-    GridRowParams 
+    GridRowParams, 
+    ToolbarPropsOverrides
 } from "@mui/x-data-grid";
 
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
@@ -31,9 +32,10 @@ import { CategoryCommon } from "~/commons/category.common";
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 
 import { StyledBox } from "./StyledBox";
-import { GridQuickSearchFilterCheckbox, GridQuickSearchToolbar, GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
+import { GridQuickSearchFilterCheckbox, GridQuickSearchToolbar, GridQuickSearchFilterCheckboxStates, GridQuickSearchToolbarProps } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
+import { GridToolbarProps } from "@mui/x-data-grid/internals";
 
 const FILTER_ID_CONFIRMED_BIDS = "confirmed-bids-filter";
 
@@ -59,6 +61,7 @@ interface BidEditorDataSourceItem {
     itemDescription: string,
     minimumBid?: number,
     confirmed: boolean,
+    confirming: boolean,
     bidAmount?: number
 };
 type BidEditorDataSource = BidEditorDataSourceItem[];
@@ -99,6 +102,7 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
             itemDescription: item.itemDescription,
             minimumBid,
             confirmed: !!currentBid,
+            confirming: false,
             bidAmount
         };
     });
@@ -111,13 +115,18 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
 }
 
 const createBidConfirmButton: BidConfirmButtonCreator = function ({ params, onClick }) {
+    const variant = params.row.confirmed ? undefined : "contained";
+    const disabled = params.row.confirmed || params.row.confirming;
+    const text = params.row.confirmed ? "Confirmed" 
+        : params.row.confirming ? "Confirming..." : "Confirm";
+
     return [(
         <Button
             color="primary"
-            variant={(params.row.confirmed) ? undefined : "contained"}
-            disabled={params.row.confirmed}
+            variant={variant}
+            disabled={disabled}
             onClick={onClick}
-        >{params.row.confirmed ? "Confirmed" : "Confirm"}</Button>
+        >{text}</Button>
     )];
 };
 
@@ -133,15 +142,6 @@ const getConfirmedBidTotal = function ({ dataSource, asFormattedString }: GetCon
         amount: sum,
         emptyPlaceholder: "$0.00"
     }) : sum;
-};
-
-const getConfirmedBidFilter = function () {
-    return { 
-        id: FILTER_ID_CONFIRMED_BIDS,
-        field: "confirmed", 
-        operator: "is", 
-        value: "true" 
-    };
 };
 
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
@@ -206,15 +206,18 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
     // we use an effect to listen for the response we get back
     const bidFetcher = useFetcher<SerializedBidUpdateResult>();
     React.useEffect(() => {
-        if (bidFetcher.state === "idle" && bidFetcher.data) {
+        if (bidFetcher.state !== "idle" && bidFetcher.data) {
             console.log("Bid fetcher data: ", bidFetcher.data);
             if (true === bidFetcher.data.success) {
                 const newBid = bidFetcher.data.bid;
-                setCurrentBids((oldBids) => oldBids.concat(newBid));
+                setCurrentBids(oldBids => oldBids.concat(newBid));
+
                 setSnackbar({ alerts: [{ message: "Bid confirmed", severity: "success" }] });
             } else if (bidFetcher.data.concluded) {
                 setAuctionConcludedModalOpen(true);
             } else {
+                setCurrentBids(oldBids => oldBids);
+
                 setSnackbar({ alerts: [{ message: bidFetcher.data.error, severity: "error" }] });
             }
         }
@@ -371,17 +374,18 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                             slots={{ toolbar: GridQuickSearchToolbar }}
                             slotProps={{
                                 toolbar: {
-                                    withFilterCheckboxes: Object.values(checkboxFilterStatesRef.current).map(state => ({
-                                        id: state.filter.id,
-                                        value: state.apply,
-                                        checked: state.apply,
-                                        label: state.filter.label,
-                                        onInput: () => {
-                                            state.apply = !state.apply
-                                            onFilterModelChange();
-                                        }
-                                    } satisfies GridQuickSearchFilterCheckbox))
-                                }
+                                    withFilterCheckboxes: Object.values(checkboxFilterStatesRef.current)
+                                        .map(state => ({
+                                            id: state.filter.id,
+                                            value: state.apply,
+                                            checked: state.apply,
+                                            label: state.filter.label,
+                                            onInput: () => {
+                                                state.apply = !state.apply
+                                                onFilterModelChange();
+                                            }
+                                        } satisfies GridQuickSearchFilterCheckbox))
+                                } as GridQuickSearchToolbarProps
                             }}
                         />
                     </Stack>

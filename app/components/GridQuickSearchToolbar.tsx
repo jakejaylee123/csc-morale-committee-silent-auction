@@ -8,7 +8,8 @@ import {
 import { 
     GridFilterItem, 
     GridToolbarProps, 
-    GridToolbarQuickFilter 
+    QuickFilter, 
+    ToolbarPropsOverrides
 } from "@mui/x-data-grid";
 
 export type GridQuickSearchFilterCheckboxState = {
@@ -28,7 +29,7 @@ export interface GridQuickSearchFilterCheckbox {
     onInput: React.FormEventHandler<HTMLButtonElement>
 };
 
-export interface GridQuickSearchToolbarProps extends GridToolbarProps {
+export interface GridQuickSearchToolbarProps extends Partial<GridToolbarProps & ToolbarPropsOverrides> {
     withFilterCheckboxes?: GridQuickSearchFilterCheckbox[]
 };
 
@@ -44,7 +45,7 @@ export function GridQuickSearchToolbar({ withFilterCheckboxes }: GridQuickSearch
                 spacing={2} 
                 direction="row"
             >
-                <GridToolbarQuickFilter />
+                <QuickFilter />
                 {
                     withFilterCheckboxes?.map((checkbox, index) => (
                         <FormControlLabel
