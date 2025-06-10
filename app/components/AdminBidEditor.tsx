@@ -257,47 +257,53 @@ export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps)
 
     return (
         <>
-            <StyledBox>
-                <Stack
-                    spacing={2}
-                    sx={(theme) => ({
-                        "& .disqualified": {
-                            backgroundColor: (theme.palette.mode === "dark"
-                                ? theme.palette.error.dark
-                                : theme.palette.error.light) + "!important"
-                        }
-                    })}
-                >
+            <Stack 
+                spacing={2}
+                sx={{
+                    marginBottom: 75
+                }}>
+                <StyledBox>
                     <Stack
                         spacing={2}
-                        direction="row"
+                        sx={(theme) => ({
+                            "& .disqualified": {
+                                backgroundColor: (theme.palette.mode === "dark"
+                                    ? theme.palette.error.dark
+                                    : theme.palette.error.light) + "!important"
+                            }
+                        })}
                     >
-                        <Typography
-                            variant={"h4"}
-                            gutterBottom
-                        >{"Bids"}</Typography>
+                        <Stack
+                            spacing={2}
+                            direction="row"
+                        >
+                            <Typography
+                                variant={"h4"}
+                                gutterBottom
+                            >{"Bids"}</Typography>
+                        </Stack>
+                        <DataGrid
+                            disableColumnFilter
+                            disableColumnSelector
+                            disableDensitySelector
+                            columns={columns}
+                            columnVisibilityModel={columnVisibilityModel}
+                            rows={rows}
+                            getRowClassName={getRowClassName}
+                            onRowEditStop={onRowEditStop}
+                            isCellEditable={(params) => !params.row.disqualified}
+                            slots={{ toolbar: GridQuickSearchToolbar }}
+                        />
                     </Stack>
-                    <DataGrid
-                        disableColumnFilter
-                        disableColumnSelector
-                        disableDensitySelector
-                        columns={columns}
-                        columnVisibilityModel={columnVisibilityModel}
-                        rows={rows}
-                        getRowClassName={getRowClassName}
-                        onRowEditStop={onRowEditStop}
-                        isCellEditable={(params) => !params.row.disqualified}
-                        slots={{ toolbar: GridQuickSearchToolbar }}
+                </StyledBox>
+                {
+                    !!snackbar &&
+                    <StandardSnackbar
+                        {...snackbar}
+                        onClose={onCloseSnackbar}
                     />
-                </Stack>
-            </StyledBox>
-            {
-                !!snackbar &&
-                <StandardSnackbar
-                    {...snackbar}
-                    onClose={onCloseSnackbar}
-                />
-            }
+                }
+            </Stack>
         </>
     );
 }
