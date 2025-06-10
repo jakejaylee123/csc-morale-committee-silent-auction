@@ -45,15 +45,13 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [description, setDescription] = React.useState(isNew ? "" : event.description);
     const [enabled, setEnabled] = React.useState(isNew ? true : event.enabled);
     const [releaseWinners, setReleaseWinners] = React.useState(isNew ? false : event.releaseWinners)
-    const [startDate, setStartDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt));
-    const [endDate, setEndDate] = React
-        .useState<NullableDateTime>(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt));
+    const [startDate, setStartDate] = React.useState<NullableDateTime>(null);
+    const [endDate, setEndDate] = React.useState<NullableDateTime>(null);
 
-    console.log({
-        startDate,
-        endDate
-    });
+    React.useEffect(() => {
+        setStartDate(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt))
+        setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt))
+    }, []);
 
     return (
         <>
