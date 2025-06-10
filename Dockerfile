@@ -1,4 +1,4 @@
-FROM oven/bun:1.1.34-debian
+FROM oven/bun:debian
 
 RUN apt-get update && apt-get install -y ca-certificates
 

@@ -26,7 +26,7 @@ import { CscIcon } from "./CscIcon";
 import { ToggleColorMode } from "./ToggleColorMode";
 
 interface NavigationBarProps {
-    bidder?: SerializedBidderWithAdmin
+    bidder?: SerializedBidderWithAdmin,
     colorSchemeState: ReturnType<typeof useColorScheme>
 }
 

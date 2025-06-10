@@ -5,7 +5,7 @@ import { Dashboard } from "~/components/Dashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithConvenience, SerializedEvent } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { BidderWithAdmin, SerializedBidderWithAdmin } from "~/services/users.server";
+import { BidderService, BidderWithAdmin, SerializedBidderWithAdmin } from "~/services/users.server";
 import { APP_NAME } from "~/commons/general.common";
 
 interface IndexLoaderFunctionData {
@@ -18,9 +18,12 @@ interface SerializedIndexLoaderFunctionData {
 };
 
 export const loader = async function ({ request }) {
-    const { bidder } = await requireAuthenticatedBidder(request);
+    const { fullBidder } = await requireAuthenticatedBidder(request, {
+        withFullBidder: true
+    });
+
     const data = {
-        bidder,
+        bidder: fullBidder,
         events: await EventService.getEnabledActiveAndPast()
     } satisfies IndexLoaderFunctionData;
 

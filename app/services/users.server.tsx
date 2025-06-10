@@ -16,7 +16,30 @@ export type BidderWithAdmin = Bidder & {
 };
 export type SerializedBidderWithAdmin = SerializeFrom<BidderWithAdmin>;
 
+// This is a typical bidder object, but only with minimal (and uniquely identifiable) information
+// that can be stored in a cookie session without hitting the size limit. If you need more information
+// than just the IDs, you should use the `BidderWithAdmin` type (and its serialized version).
+export type AuthenticatedBidder = Pick<BidderWithAdmin, 
+    "windowsId" | "id" | "adminAssignment">;
+export type SerializedAuthenticatedBidder = SerializeFrom<AuthenticatedBidder>;
+
 export class BidderService {
+    /**
+     * Finds a bidder based on the provided ID
+     * @param id The ID of the user/bidder to retrieve.
+     * @returns Found bidder.
+     */
+    public static async getById(id: number): Promise<BidderWithAdmin | undefined> {
+        const prisma = new PrismaClient();
+        
+        return await prisma.bidder.findFirst({
+            where: { id },
+            include: {
+                adminAssignment: true
+            }
+        }) || undefined;
+    }
+
     /**
      * Finds a bidder based on the provided profiledId (windowsId). If the
      * bidder is not found, they are created with the passed parameters.
@@ -53,7 +76,6 @@ export class BidderService {
             }
         });
 
-        
         return {
             ...newBidder,
             adminAssignment: null 

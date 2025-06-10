@@ -28,23 +28,25 @@ import { NavigationBar } from "./components/NavigationBar";
 import { Footer } from "./components/Footer";
 
 import {
-    BidderAuthentication,
+    FullBidderAuthentication,
     getAuthenticatedBidder,
-    SerializedBidderAuthentication
+    SerializedFullBidderAuthentication
 } from "./services/auth.server";
 import { Stack } from "@mui/material";
 
 export interface RootLoaderFunctionData {
-    authentication?: BidderAuthentication
+    authentication?: FullBidderAuthentication
 };
 export interface SerializedRootLoaderFunctionData {
-    authentication?: SerializedBidderAuthentication
+    authentication?: SerializedFullBidderAuthentication
 };
 
 export const links: LinksFunction = () => [...getMuiLinks()];
 
 export const loader = async function ({ request }) {
-    const authentication = await getAuthenticatedBidder(request);
+    const authentication = await getAuthenticatedBidder(request, {
+        withFullBidder: true
+    });
     const data = {
         authentication
     } satisfies RootLoaderFunctionData;
@@ -72,7 +74,7 @@ function LayoutInner({ title, children }: { title: string, children: React.React
                 <Scripts />
                 <InitColorSchemeScript />
                 <NavigationBar
-                    bidder={authentication?.bidder}
+                    bidder={authentication?.fullBidder}
                     colorSchemeState={colorSchemeState}
                 />
                 <DefaultTransition>

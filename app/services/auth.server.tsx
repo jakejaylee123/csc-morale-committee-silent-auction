@@ -3,7 +3,7 @@ import { MicrosoftStrategy } from "remix-auth-microsoft";
 import { redirect, SerializeFrom } from "@remix-run/node";
 
 import { sessionStorage } from "./session.server";
-import { BidderService, BidderWithAdmin } from "./users.server";
+import { BidderService, AuthenticatedBidder, BidderWithAdmin } from "./users.server";
 
 declare global {
     namespace NodeJS {
@@ -18,9 +18,21 @@ declare global {
 
 export interface BidderAuthentication {
     accessToken: string,
-    bidder: BidderWithAdmin
+    bidder: AuthenticatedBidder
 };
 export type SerializedBidderAuthentication = SerializeFrom<BidderAuthentication>;
+
+export interface FullBidderAuthentication {
+    accessToken: string,
+    bidder: AuthenticatedBidder
+    fullBidder: BidderWithAdmin
+};
+export type SerializedFullBidderAuthentication = SerializeFrom<FullBidderAuthentication>;
+
+export interface AuthenticatedBidderOptions {
+    mustBeAdmin?: boolean,
+    withFullBidder?: boolean
+};
 
 export const authenticator = new Authenticator<BidderAuthentication>(sessionStorage); //User is a custom user types you can define as you want
 const microsoftStrategy = new MicrosoftStrategy(
@@ -32,7 +44,7 @@ const microsoftStrategy = new MicrosoftStrategy(
         scope: "openid profile email", // optional
         prompt: "login", // optional
     },
-    async ({ accessToken, extraParams, profile }) => {
+    async ({ accessToken, profile }) => {
         // Here you can fetch the user from database or return a user object based on profile
         // return {profile}
         // The returned object is stored in the session storage you are using by the authenticator
@@ -48,36 +60,51 @@ const microsoftStrategy = new MicrosoftStrategy(
         // The email address received from Microsoft Entra ID is not validated and can be changed to anything from Azure Portal.
         // If you use the email address to identify users and allow signing in from any tenant (`tenantId` is not set)
         // it opens up a possibility of spoofing users!
+
+        // Trying to store the least amount of data in the session to placate cookie size limits
+        const {
+            id,
+            windowsId,
+            adminAssignment
+        } = await BidderService.findOrCreate({ 
+            profileId: profile.id, 
+            displayName: profile.displayName,
+            emailAddress: profile.emails[0]?.value,
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName
+        });
+
         return {
             accessToken,
-            bidder: await BidderService.findOrCreate({ 
-                profileId: profile.id, 
-                displayName: profile.displayName,
-                emailAddress: profile.emails[0]?.value,
-                firstName: profile.name.givenName,
-                lastName: profile.name.familyName
-            })
+            bidder: { id, windowsId, adminAssignment }
         } satisfies BidderAuthentication;
     }
 );
 authenticator.use(microsoftStrategy);
 
-
-export interface AuthenticatedBidderOptions {
-    mustBeAdmin?: boolean
-};
-
-const defaultifyAuthenticationBidderOptions = function (options?: AuthenticatedBidderOptions): AuthenticatedBidderOptions {
-    return {
-        mustBeAdmin: options?.mustBeAdmin || false
-    };
-};
-
-export const getAuthenticatedBidder = async function (request: Request): Promise<BidderAuthentication | undefined> {
+export function getAuthenticatedBidder(request: Request, options: { withFullBidder: true } & AuthenticatedBidderOptions): Promise<FullBidderAuthentication | undefined>;
+export function getAuthenticatedBidder(request: Request, options?: AuthenticatedBidderOptions): Promise<BidderAuthentication | undefined>;
+export async function getAuthenticatedBidder(request: Request, options?: AuthenticatedBidderOptions): Promise<BidderAuthentication | FullBidderAuthentication | undefined> {
     try {
         const authentication = await authenticator.isAuthenticated(request);
         if (!authentication) {
             return undefined;
+        }
+
+        if (options?.mustBeAdmin && !authentication.bidder.adminAssignment) {
+            return undefined;
+        }
+
+        if (options?.withFullBidder) {
+            const fullBidder = await BidderService.getById(authentication.bidder.id);
+            if (!fullBidder) {
+                return undefined;
+            }
+            
+            return {
+                ...authentication,
+                fullBidder
+            };
         }
         
         return authentication;
@@ -87,16 +114,28 @@ export const getAuthenticatedBidder = async function (request: Request): Promise
     }
 };
 
-export const requireAuthenticatedBidder = async function (request: Request, options?: AuthenticatedBidderOptions): Promise<BidderAuthentication> {
-    options = defaultifyAuthenticationBidderOptions(options);
-
+export function requireAuthenticatedBidder(request: Request, options: { withFullBidder: true } & AuthenticatedBidderOptions): Promise<FullBidderAuthentication>;
+export function requireAuthenticatedBidder(request: Request, options?: AuthenticatedBidderOptions): Promise<BidderAuthentication>;
+export async function requireAuthenticatedBidder(request: Request, options?: AuthenticatedBidderOptions): Promise<BidderAuthentication | FullBidderAuthentication> {
     const authentication = await authenticator.isAuthenticated(request);
     if (!authentication) {
         throw redirect("/login");
     }
 
-    if (options.mustBeAdmin && !authentication.bidder.adminAssignment) {
+    if (options?.mustBeAdmin && !authentication.bidder.adminAssignment) {
         throw redirect("/");
+    }
+
+    if (options?.withFullBidder) {
+        const fullBidder = await BidderService.getById(authentication.bidder.id);
+        if (!fullBidder) {
+            throw redirect("/");
+        }
+        
+        return {
+            ...authentication,
+            fullBidder
+        };
     }
     
     return authentication;
