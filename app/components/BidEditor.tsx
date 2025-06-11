@@ -4,6 +4,8 @@ import { useFetcher } from "@remix-run/react";
 import {
     Alert,
     Button,
+    Checkbox,
+    FormControlLabel,
     Stack,
     Typography 
 } from "@mui/material";
@@ -17,8 +19,7 @@ import {
     GridFilterModel, 
     GridRowClassNameParams, 
     GridRowEditStopReasons, 
-    GridRowParams, 
-    ToolbarPropsOverrides
+    GridRowParams
 } from "@mui/x-data-grid";
 
 import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
@@ -32,10 +33,9 @@ import { CategoryCommon } from "~/commons/category.common";
 import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
 
 import { StyledBox } from "./StyledBox";
-import { GridQuickSearchFilterCheckbox, GridQuickSearchToolbar, GridQuickSearchFilterCheckboxStates, GridQuickSearchToolbarProps } from "./GridQuickSearchToolbar";
+import { GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
-import { GridToolbarProps } from "@mui/x-data-grid/internals";
 
 const FILTER_ID_CONFIRMED_BIDS = "confirmed-bids-filter";
 
@@ -66,6 +66,13 @@ interface BidEditorDataSourceItem {
 };
 type BidEditorDataSource = BidEditorDataSourceItem[];
 
+type BidEditorHeaderProps = {
+    source: BidEditorDataSource
+};
+type ConfirmedBidsOnlyCheckboxProps = {
+    statesRef: React.MutableRefObject<GridQuickSearchFilterCheckboxStates>,
+    onFilterModelChange: () => void
+};
 type BidConfirmButtonCreatorArgs = {
     params: GridRowParams<BidEditorDataSourceItem>,
     onClick?: React.MouseEventHandler<HTMLButtonElement>
@@ -144,10 +151,61 @@ const getConfirmedBidTotal = function ({ dataSource, asFormattedString }: GetCon
     }) : sum;
 };
 
+function BidEditorHeader({ source }: BidEditorHeaderProps) {
+    return (
+        <Stack
+            spacing={2}
+            direction="row"
+        >
+            <Typography
+                variant={"h4"}
+                gutterBottom
+            >{"Bids"}</Typography>
+            <Typography
+                align="right"
+                flex={1}
+                variant={"h4"}
+                gutterBottom
+            >{"Confirmed bid total: " + getConfirmedBidTotal({
+                dataSource: source,
+                asFormattedString: true
+            })}</Typography>
+        </Stack>
+    );
+}
+
+function BidConfirmationAlert() {
+    return (
+        <Alert
+            severity="warning"
+            sx={{ fontWeight: "bold" }}
+        >NOTE: Once confirmed, all bids are final.</Alert>
+    );
+}
+
+function ConfirmedBidsOnlyCheckbox({ statesRef, onFilterModelChange }: ConfirmedBidsOnlyCheckboxProps) {
+    return (
+        <FormControlLabel 
+            label="Show confirmed bids only" 
+            control={
+                <Checkbox
+                    color="primary"
+                    checked={statesRef.current[FILTER_ID_CONFIRMED_BIDS].apply}
+                    onChange={() => {
+                        statesRef.current[FILTER_ID_CONFIRMED_BIDS].apply = !statesRef.current[FILTER_ID_CONFIRMED_BIDS].apply;
+                        onFilterModelChange();
+                    }} />}
+        />
+    );
+}
+
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     
     const [currentBids, setCurrentBids] = React.useState(bids || []);
+    const refreshCurrentBids = function () {
+        setCurrentBids(oldBids => oldBids);
+    };
     const [auctionConcludedModalOpen, setAuctionConcludedModalOpen] = React.useState(false);
     
     const [rows, setRows] = React.useState<BidEditorDataSource>(createBidEditorDataSource({
@@ -216,7 +274,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             } else if (bidFetcher.data.concluded) {
                 setAuctionConcludedModalOpen(true);
             } else {
-                setCurrentBids(oldBids => oldBids);
+                refreshCurrentBids();
 
                 setSnackbar({ alerts: [{ message: bidFetcher.data.error, severity: "error" }] });
             }
@@ -236,6 +294,9 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             } else if ((bid.bidAmount || 0) <= 0) {
                 setSnackbar({ alerts: [{ message: "Bid must be greater than $0.00", severity: "error" }] });
             } else {
+                bid.confirming = true;
+                refreshCurrentBids();
+                
                 // We will process the result of this submission
                 // in the "useEffect" that listens to this "bidFetcher"
                 bidFetcher.submit(bid as any, {
@@ -259,21 +320,24 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             headerName: "",
             type: "string",
             editable: false,
-            sortable: true
+            sortable: true,
+            flex: 1
         },
         {
             field: "itemTagNumber",
             headerName: "Tag number",
             type: "string",
             editable: false,
-            sortable: false
+            sortable: false,
+            flex: 1
+
         },
         {
             field: "itemDescription",
             headerName: "Item description",
             type: "string",
             editable: false,
-            flex: 1
+            flex: 3
         },
         {
             field: "minimumBid",
@@ -281,6 +345,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             type: "number",
             editable: false,
             align: "left",
+            flex: 1,
             valueFormatter: (_, row) => MoneyFormatter.getFormattedMoney({
                 amount: row.minimumBid,
                 emptyPlaceholder: ""
@@ -289,12 +354,13 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
         {
             field: "confirmed",
             headerName: "Confirmed",
-            type: "boolean"
+            type: "boolean",
         },
         {
             field: "actions",
             headerName: "",
             type: "actions",
+            flex: 1,
             getActions: (params: GridRowParams<BidEditorDataSourceItem>) => createBidConfirmButton({
                 params,
                 onClick: async () => await onBidConfirm(params.row)
@@ -307,9 +373,10 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             editable: true,
             type: "number",
             align: "left",
+            flex: 2,
             valueFormatter: (_, row) => MoneyFormatter.getFormattedMoney({
                 amount: row.bidAmount,
-                emptyPlaceholder: ""
+                emptyPlaceholder: "(Double-click here to bid)"
             })
         },
     ]
@@ -331,34 +398,16 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                         spacing={2}
                         sx={(theme) => ({
                             "& .confirmed": {
-                                backgroundColor: (theme.palette.mode === "dark"
-                                    ? theme.palette.success.dark
-                                    : theme.palette.success.light) + "!important"
+                                backgroundColor: theme.palette.success.dark
                             }
                         })}
                     >
-                        <Stack
-                            spacing={2}
-                            direction="row"
-                        >
-                            <Typography
-                                variant={"h4"}
-                                gutterBottom
-                            >{"Bids"}</Typography>
-                            <Typography
-                                align="right"
-                                flex={1}
-                                variant={"h4"}
-                                gutterBottom
-                            >{"Confirmed bid total: " + getConfirmedBidTotal({
-                                dataSource: rows,
-                                asFormattedString: true
-                            })}</Typography>
-                        </Stack>
-                        <Alert
-                            severity="warning"
-                            sx={{ fontWeight: "bold" }}
-                        >NOTE: Once confirmed, all bids are final.</Alert>
+                        <BidEditorHeader source={rows} />
+                        <BidConfirmationAlert />
+                        <ConfirmedBidsOnlyCheckbox
+                            statesRef={checkboxFilterStatesRef}
+                            onFilterModelChange={onFilterModelChange}
+                        />
                         <DataGrid
                             filterModel={filterModel}
                             onFilterModelChange={onFilterModelChange}
@@ -370,23 +419,8 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                             rows={rows}
                             getRowClassName={getRowClassName}
                             onRowEditStop={onRowEditStop}
-                            isCellEditable={(params) => !params.row.confirmed}
-                            slots={{ toolbar: GridQuickSearchToolbar }}
-                            slotProps={{
-                                toolbar: {
-                                    withFilterCheckboxes: Object.values(checkboxFilterStatesRef.current)
-                                        .map(state => ({
-                                            id: state.filter.id,
-                                            value: state.apply,
-                                            checked: state.apply,
-                                            label: state.filter.label,
-                                            onInput: () => {
-                                                state.apply = !state.apply
-                                                onFilterModelChange();
-                                            }
-                                        } satisfies GridQuickSearchFilterCheckbox))
-                                } as GridQuickSearchToolbarProps
-                            }}
+                            isCellEditable={(params) => !(params.row.confirmed || params.row.confirming)}
+                            showToolbar
                         />
                     </Stack>
                 </StyledBox>
