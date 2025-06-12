@@ -1,8 +1,9 @@
 import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
-import { Print } from "@mui/icons-material";
-import { Fab, Stack } from "@mui/material";
+import Fab from "@mui/material/Fab"; 
+
+import Print from "@mui/icons-material/Print";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";

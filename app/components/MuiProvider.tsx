@@ -2,7 +2,7 @@ import createCache from "@emotion/cache";
 
 import { CacheProvider } from "@emotion/react";
 
-import { ThemeProvider } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 
 import theme from "~/theme";
 

@@ -1,19 +1,17 @@
-import * as React from "react";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Stack from "@mui/material/Stack";
+import Typography, { TypographyOwnProps } from "@mui/material/Typography";
 
-import {
-    Box,
-    Container,
-    Stack,
-    Typography
- } from "@mui/material";
+import { GetPropertyType } from "~/commons/general.common";
 
-import { Variant } from "@mui/material/styles/createTypography";
+type TypographyVariant = GetPropertyType<TypographyOwnProps, "variant">;
 
 export interface GleamingHeaderProps {
     title?: string,
-    titleVariant?: Variant,
+    titleVariant?: TypographyVariant,
     description?: string,
-    descriptionVariant?: Variant
+    descriptionVariant?: TypographyVariant
 };
 
 export function GleamingHeader({ 

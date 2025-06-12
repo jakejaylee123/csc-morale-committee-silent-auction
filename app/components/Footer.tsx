@@ -1,10 +1,6 @@
-import * as React from "react";
-
-import {
-    Link,
-    Paper,
-    Typography
- } from "@mui/material";
+import Link from "@mui/material/Link";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 
  function Copyright() {
     return (

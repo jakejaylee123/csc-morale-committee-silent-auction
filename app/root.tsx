@@ -32,7 +32,8 @@ import {
     getAuthenticatedBidder,
     SerializedFullBidderAuthentication
 } from "./services/auth.server";
-import { Stack } from "@mui/material";
+
+import Stack from "@mui/material/Stack";
 
 export interface RootLoaderFunctionData {
     authentication?: FullBidderAuthentication

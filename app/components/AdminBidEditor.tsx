@@ -1,11 +1,9 @@
 import * as React from "react";
 import { useFetcher } from "@remix-run/react";
 
-import {
-    Button,
-    Stack,
-    Typography
-} from "@mui/material";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 import {
     DataGrid,

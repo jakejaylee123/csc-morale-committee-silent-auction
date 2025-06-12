@@ -1,18 +1,17 @@
 import * as React from "react";
 import * as confetti from "canvas-confetti";
-import {
-    Alert,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography
-} from "@mui/material";
 
-import { SentimentVeryDissatisfied } from "@mui/icons-material";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+
+import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
 
 import { SerializedBidWithItem } from "~/services/bid.server";
 import { SerializedCategoryCode } from "~/services/category.server";

@@ -1,29 +1,24 @@
 import * as React from "react";
 
-import {
-    Avatar,
-    Link,
-    AppBar,
-    Box,
-    Button,
-    Container,
-    Divider,
-    Drawer,
-    MenuItem,
-    IconButton,
-    Toolbar
- } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Link from "@mui/material/Link";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
 
-import { useColorScheme } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 
-import { 
-    CloseRounded,
-    Menu 
-} from "@mui/icons-material";
+import CloseRounded from "@mui/icons-material/CloseRounded";
+import Menu from "@mui/icons-material/Menu";
 
 import { SerializedBidderWithAdmin } from "~/services/users.server";
 import { CscIcon } from "./CscIcon";
-import { ToggleColorMode } from "./ToggleColorMode";
 
 interface NavigationBarProps {
     bidder?: SerializedBidderWithAdmin,
@@ -108,22 +103,6 @@ export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) 
                             `${bidder.firstName.toUpperCase()[0]}${bidder.lastName.toUpperCase()[0]}`
                         }</Avatar>
                     }
-                    {/* <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'end',
-                            mx: 1,
-
-                        }}
-                    >
-                        <ToggleColorMode 
-                            mode={mode || "light"} 
-                            toggleColorMode={() => {
-                                setMode(mode === "light" ? "dark" : "light");
-                            }} 
-                        />
-                    </Box> */}
                     <Box sx={{ display: { sm: "flex", md: "none" } }}>
                         <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
                             <Menu />

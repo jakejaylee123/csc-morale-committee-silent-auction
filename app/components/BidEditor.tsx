@@ -1,14 +1,12 @@
 import * as React from "react";
 import { useFetcher } from "@remix-run/react";
 
-import {
-    Alert,
-    Button,
-    Checkbox,
-    FormControlLabel,
-    Stack,
-    Typography 
-} from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 import { 
     DataGrid, 

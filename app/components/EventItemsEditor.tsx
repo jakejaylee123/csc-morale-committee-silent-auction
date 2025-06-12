@@ -3,16 +3,15 @@ import { useFetcher } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import {
-    Button,
-    ButtonGroup,
-    Stack,
-    Typography,
-    MenuItem,
-    Select
- } from "@mui/material";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 
-import { Delete, UploadFile } from "@mui/icons-material";
+import UploadFile from "@mui/icons-material/UploadFile";
+import Delete from "@mui/icons-material/Delete";
 
 import { 
     DataGrid, 
@@ -24,9 +23,7 @@ import {
     GridRowModes, 
     GridRowModesModel, 
     GridRowParams, 
-    GridRowsProp, 
-    GridSlots,
-    GridToolbarContainer,  
+    Toolbar,  
 } from "@mui/x-data-grid";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
@@ -39,12 +36,8 @@ import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 
-type GridRowsPropSetter = (
-    newRows: (oldRows: GridRowsProp) => GridRowsProp
-) => void;
-type GridRowModesModelSetter = (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
-) => void;
+type GridRowsPropSetter = React.Dispatch<React.SetStateAction<SerializedItem[]>>;
+type GridRowModesModelSetter = React.Dispatch<React.SetStateAction<GridRowModesModel>>;
 
 export interface EventItemsEditorToolbarProps {
     event: SerializedNullableEventWithItems,
@@ -115,7 +108,7 @@ function EventItemsEditorToolbar({
     };
 
     return (
-        <GridToolbarContainer>
+        <Toolbar>
             <Button
                 onClick={state === "view" ? onAdd : onSave}
                 variant="outlined"
@@ -128,7 +121,7 @@ function EventItemsEditorToolbar({
                     sx={{ ml: 1 }}
                 >Cancel</Button>
             }
-        </GridToolbarContainer>
+        </Toolbar>
     );
 }
 
@@ -376,15 +369,15 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                         processRowUpdate={onRowUpdate}
                         onProcessRowUpdateError={onProcessRowUpdateError}
                         slots={{
-                            toolbar: EventItemsEditorToolbar as GridSlots["toolbar"]
-                        }}
-                        slotProps={{
-                            toolbar: {
-                                event,
-                                categories,
-                                setRows,
-                                setRowModesModel
-                            }
+                            toolbar: (props) => (
+                                <EventItemsEditorToolbar
+                                    event={event}
+                                    categories={categories}
+                                    setRows={setRows}
+                                    setRowModesModel={setRowModesModel}
+                                    {...props}
+                                />
+                            )
                         }}
                     />
                 </Stack>

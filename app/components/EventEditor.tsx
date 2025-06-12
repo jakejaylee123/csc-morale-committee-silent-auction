@@ -3,18 +3,17 @@ import { Form } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
-import {
-    Button,
-    ButtonGroup,
-    Stack,
-    Checkbox,
-    FormControlLabel,
-    TextField,
-    Typography, 
-    FormLabel
-} from "@mui/material";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import FormLabel from "@mui/material/FormLabel";
 
-import { Create, Save } from "@mui/icons-material";
+import Create from "@mui/icons-material/Create";
+import Save from "@mui/icons-material/Save";
 
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";

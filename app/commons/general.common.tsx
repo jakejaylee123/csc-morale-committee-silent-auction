@@ -38,3 +38,5 @@ export type Result<TSuccessValue, TErrorValue> = {
     success: false
     error: TErrorValue
 };
+
+export type GetPropertyType<T, K extends keyof T> = T[K];

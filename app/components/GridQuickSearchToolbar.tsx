@@ -1,12 +1,10 @@
-import {
-    Checkbox,
-    FormControlLabel,
-    Stack,
-    Box
-} from "@mui/material";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
 
 import { 
-    GridFilterItem, 
+    GridFilterItem,
     GridToolbarProps, 
     QuickFilter, 
     ToolbarPropsOverrides

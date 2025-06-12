@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Grow } from "@mui/material";
+import Grow from "@mui/material/Grow";
 
 import theme from "~/theme";
 

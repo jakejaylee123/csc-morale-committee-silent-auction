@@ -1,24 +1,22 @@
-import {
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
-    Stack,
-    Typography
- } from "@mui/material";
 
- import { Variant } from "@mui/material/styles/createTypography";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Typography, { TypographyOwnProps } from "@mui/material/Typography";
 
-import { SentimentVeryDissatisfied } from "@mui/icons-material";
+import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
 
 import { SerializedEvent } from "~/services/event.server";
+import { GetPropertyType } from "~/commons/general.common";
 
+type TypographyVariant = GetPropertyType<TypographyOwnProps, "variant">;
 export type EventSelectChangeEvent = SelectChangeEvent<string>;
 export interface EventSelectProps {
     title: string,
     emptyMessage?: string,
-    emptyMessageStyle?: Variant,
+    emptyMessageStyle?: TypographyVariant,
     events: SerializedEvent[]
     value: string | undefined,
     onBlur?: React.FocusEventHandler<any>;

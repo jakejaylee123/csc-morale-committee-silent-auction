@@ -1,11 +1,7 @@
 import React from "react";
 
-import {
-    Alert,
-    AlertColor,
-    Snackbar,
-    SnackbarProps
-} from "@mui/material";
+import Alert, { AlertColor } from "@mui/material/Alert";
+import Snackbar, { SnackbarProps } from "@mui/material/Snackbar";
 
 export type StandardAlertProps = { message: string, severity: AlertColor }
 export type StandardSnackbarProps = Omit<SnackbarProps, "autoHideDuration" | "anchorOrigin" | "children"> & {
