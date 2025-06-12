@@ -168,63 +168,73 @@ function WinnerSubReport({ source, categoryHash }: WinnerSubReportProps) {
                     fontWeight: "bold"
                 }}
             >Winners:</Typography>
-            {
-                source.map(({ bidderId, bidderString, winningBids, total }) => {
-                    return (
-                        <TableContainer key={`winner-table-${bidderId}`}>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Item</TableCell>
-                                        <TableCell
-                                            sx={{ textAlign: "center" }}
-                                        >Description</TableCell>
-                                        <TableCell
-                                            sx={{ textAlign: "right" }}
-                                        >Bid</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell></TableCell>
-                                        <TableCell sx={{ fontWeight: "bold" }}>
-                                            {bidderString}
-                                        </TableCell>
-                                        <TableCell></TableCell>
-                                    </TableRow>
-                                    {
-                                        winningBids.map((bid) => (
-                                            <TableRow key={`table-row-bid-${bid.id}`}>
-                                                <TableCell>{generator.getItemTagNumber({
-                                                    categoryId: bid.item.categoryId,
-                                                    itemNumber: bid.item.itemNumber
-                                                })}</TableCell>
-                                                <TableCell>
-                                                    {bid.item.itemDescription}
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{ textAlign: "right" }}
-                                                >{MoneyFormatter.getFormattedMoney({
-                                                    amount: bid.bidAmount
-                                                })}</TableCell>
-                                            </TableRow>
-                                        ))
-                                    }
-                                    <TableRow>
-                                        <TableCell></TableCell>
-                                        <TableCell></TableCell>
-                                        <TableCell
-                                            sx={{ textAlign: "right" }}
-                                        >{MoneyFormatter.getFormattedMoney({
-                                            amount: total
-                                        })}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )
-                })
-            }
+            <TableContainer key={`winner-table`}>
+                <Table size="small">
+                    {
+                        source.map(({ bidderString, winningBids, total }) => {
+                            return (
+                                <>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Item</TableCell>
+                                            <TableCell
+                                                sx={{ textAlign: "center" }}
+                                            >Description</TableCell>
+                                            <TableCell
+                                                sx={{ textAlign: "right" }}
+                                            >Bid</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell></TableCell>
+                                            <TableCell sx={{ fontWeight: "bold" }}>
+                                                {bidderString}
+                                            </TableCell>
+                                            <TableCell></TableCell>
+                                        </TableRow>
+                                        {
+                                            winningBids.map((bid) => (
+                                                <TableRow key={`table-row-bid-${bid.id}`}>
+                                                    <TableCell>{generator.getItemTagNumber({
+                                                        categoryId: bid.item.categoryId,
+                                                        itemNumber: bid.item.itemNumber
+                                                    })}</TableCell>
+                                                    <TableCell>
+                                                        {bid.item.itemDescription}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        sx={{ textAlign: "right" }}
+                                                    >{MoneyFormatter.getFormattedMoney({
+                                                        amount: bid.bidAmount
+                                                    })}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        }
+                                        <TableRow>
+                                            <TableCell
+                                                colSpan={3}
+                                                sx={{ 
+                                                    textAlign: "right" 
+                                                }}
+                                            >{MoneyFormatter.getFormattedMoney({ amount: total})}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell 
+                                                colSpan={3} 
+                                                sx={{ 
+                                                    border: "none !important" ,
+                                                    height: 35
+                                                }}
+                                            />
+                                        </TableRow>
+                                    </TableBody>
+                                </>
+                            )
+                        })
+                    }
+                </Table>
+            </TableContainer>
         </Stack>
     );
 }
