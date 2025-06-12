@@ -368,6 +368,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                         onRowEditStop={onRowEditStop}
                         processRowUpdate={onRowUpdate}
                         onProcessRowUpdateError={onProcessRowUpdateError}
+                        showToolbar
                         slots={{
                             toolbar: (props) => (
                                 <EventItemsEditorToolbar
