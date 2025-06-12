@@ -161,7 +161,8 @@ export class ItemService {
 
             const bidInteger = parseInt(minimumBid);
             const bidFloat = parseFloat(minimumBid);
-            if (minimumBid && isNaN(bidInteger) && isNaN(bidFloat)) {
+            const minimumBidEntered = minimumBid && ("null" !== minimumBid);
+            if (minimumBidEntered  && isNaN(bidInteger) && isNaN(bidFloat)) {
                 errorMessages.push(`Minimum bid must be a valid number.`);
             }
 
