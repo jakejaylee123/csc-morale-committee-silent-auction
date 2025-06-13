@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useFetcher } from "@remix-run/react";
+import { FetcherWithComponents, useFetcher } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
@@ -9,21 +9,28 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import Tooltip from "@mui/material/Tooltip";
+import Popper from "@mui/material/Popper";
+import TextField from "@mui/material/TextField";
+import Paper from "@mui/material/Paper";
+import InputLabel from "@mui/material/InputLabel";
 
 import UploadFile from "@mui/icons-material/UploadFile";
 import Delete from "@mui/icons-material/Delete";
+import Add from "@mui/icons-material/Add";
 
-import { 
-    DataGrid, 
-    GridActionsCellItem, 
-    GridColDef, 
-    GridEventListener, 
-    GridRowEditStopReasons, 
-    GridRowId, 
-    GridRowModes, 
-    GridRowModesModel, 
-    GridRowParams, 
-    Toolbar,  
+import {
+    DataGrid,
+    GridActionsCellItem,
+    GridColDef,
+    GridEventListener,
+    GridRowEditStopReasons,
+    GridRowId,
+    GridRowModes,
+    GridRowModesModel,
+    GridRowParams,
+    Toolbar,
+    ToolbarButton
 } from "@mui/x-data-grid";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
@@ -36,14 +43,10 @@ import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 
-type GridRowsPropSetter = React.Dispatch<React.SetStateAction<SerializedItem[]>>;
-type GridRowModesModelSetter = React.Dispatch<React.SetStateAction<GridRowModesModel>>;
-
 export interface EventItemsEditorToolbarProps {
     event: SerializedNullableEventWithItems,
     categories: SerializedCategoryCode[],
-    setRows: GridRowsPropSetter,
-    setRowModesModel: GridRowModesModelSetter
+    itemFetcher: FetcherWithComponents<SerializedEventItemUpdateResult>
 }
 export interface EventItemsEditorProps {
     event: SerializedNullableEventWithItems,
@@ -53,74 +56,146 @@ export interface EventItemsEditorProps {
 function EventItemsEditorToolbar({
     event,
     categories,
-    setRows,
-    setRowModesModel
+    itemFetcher
 }: EventItemsEditorToolbarProps) {
-    const [state, setState] = React.useState<"add" | "view">("view");
+    const [newPanelOpen, setNewPanelOpen] = React.useState(false);
+    const newPanelTriggerRef = React.useRef<HTMLButtonElement>(null);
 
-    const onAdd = () => {
-        const newItem = {
-            id: 0,
-            eventId: event?.id || 0,
-            itemNumber: 1,
-            itemDescription: "",
-            minimumBid: "",
-            categoryId: categories[0].id,
-            disqualified: false,
-            disqualificationReason: "",
-            createdAt: DateTime.now().toISO(),
-            createdBy: 0,
-            updatedAt: null,
-            updatedBy: null,
-            disqualifiedBy: null
-        };
-
-        setRows((oldRows) => [
-            newItem,
-            ...oldRows
-        ]);
-
-        setRowModesModel((oldModel) => ({
-            ...oldModel,
-            [newItem.id]: {
-                mode: GridRowModes.Edit,
-                fieldToFocus: 'itemDescription'
-            },
-        }));
-
-        setState("add");
+    const handleClose = () => {
+        setNewPanelOpen(false);
     };
 
-    const onSave = () => {
-        setRowModesModel((model) => ({ ...model, [0]: { mode: GridRowModes.View } }));
-        setState("view");
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (event) {
+            const formData = new FormData(e.target as HTMLFormElement);
+            const newItem = {
+                id: "new",
+                eventId: event.id,
+                itemNumber: Number(formData.get("itemNumber")),
+                itemDescription: formData.get("itemDescription") as string,
+                minimumBid: formData.get("minimumBid") as string,
+                categoryId: Number(formData.get("category")),
+                disqualified: false,
+                disqualificationReason: "",
+                createdAt: DateTime.now().toISO(),
+                createdBy: 0,
+                updatedAt: null,
+                updatedBy: null,
+                disqualifiedBy: null
+            };
+
+            itemFetcher.submit(newItem, {
+                method: "POST",
+                action: `/admin/events/${event.id}/items/update`
+            });
+        } else {
+            console.error("There was no event to save this item to...");
+        }
+
+        handleClose();
     };
 
-    const onCancel = () => {
-        setRows((oldRows) => oldRows.filter(row => row.id !== 0));
-
-        setRowModesModel((oldModel) => {
-            delete oldModel[0];
-            return oldModel;
-        });
-
-        setState("view");
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            handleClose();
+        }
     };
 
     return (
         <Toolbar>
-            <Button
-                onClick={state === "view" ? onAdd : onSave}
-                variant="outlined"
-            >{state === 'add' ? 'Save' : 'Add'}</Button>
-            {
-                state === "add" &&
-                <Button
-                    onClick={onCancel}
-                    variant="outlined"
-                    sx={{ ml: 1 }}
-                >Cancel</Button>
-            }
+            <Tooltip title="Add new item">
+                <ToolbarButton
+                    ref={newPanelTriggerRef}
+                    aria-describedby="new-panel"
+                    label="Add item"
+                    onClick={() => setNewPanelOpen((prev) => !prev)}
+                >
+                    <Add fontSize="small" />
+                </ToolbarButton>
+            </Tooltip>
+
+            <Popper
+                open={newPanelOpen}
+                anchorEl={newPanelTriggerRef.current}
+                placement="bottom-end"
+                id="new-panel"
+                onKeyDown={handleKeyDown}
+            >
+                <Paper
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        width: 300,
+                        p: 2,
+                    }}
+                    elevation={8}
+                >
+                    <Typography fontWeight="bold">Add new item</Typography>
+                    <form onSubmit={handleSubmit}>
+                        <Stack spacing={2}>
+                            <InputLabel id="category-label">Category</InputLabel>
+                            <Select 
+                                fullWidth
+                                native
+                                label={"Category"}
+                                labelId="category-label"
+                                name="category"
+                                size="small"
+                                MenuProps={{ disablePortal: true }}
+                                required
+                            >
+                                {
+                                    categories.map(category => (
+                                        <option
+                                            key={`menu-item-category-${category.id}`}
+                                            id={`${category.id}`}
+                                            value={category.id}
+                                        >{category.description}</option>
+                                    ))
+                                }
+                            </Select>
+                            <TextField
+                                label="Item number"
+                                name="itemNumber"
+                                size="small"
+                                fullWidth
+                                autoFocus
+                                required
+                            />
+                            <TextField
+                                label="Description"
+                                type="text"
+                                name="itemDescription"
+                                size="small"
+                                fullWidth
+                                required
+                            />
+                            <TextField
+                                label="Minimum bid"
+                                type="number"
+                                name="minimumBid"
+                                size="small"
+                                fullWidth
+                                required
+                            />
+                            <Button 
+                                type="submit" 
+                                variant="contained" 
+                                fullWidth
+                            >Add item</Button>
+                            <Button 
+                                type="reset" 
+                                variant="outlined" 
+                                fullWidth 
+                                onClick={handleClose}
+                            >Cancel</Button>
+                        </Stack>
+                    </form>
+                </Paper>
+            </Popper>
         </Toolbar>
     );
 }
@@ -151,20 +226,22 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                 // If there was a change in the amount of items we have,
                 // then an item creation occurred rather than an update...    
                 if (newRows.length < rows.length) {
-                    setRows(newRows.concat(itemFetcher.data.items[0]));
+                    setRows(newRows.concat(itemFetcher.data.items));
                 }
 
-                setSnackbar({ alerts: [{ message: 'User successfully saved', severity: 'success' }] });
+                setSnackbar({ alerts: [{ message: 'Item successfully saved', severity: 'success' }] });
             } else {
                 setRows(newRows);
 
-                setSnackbar({ alerts: [{
-                    message: itemFetcher.data.errors
-                        .flatMap(error => error.messages)
-                        .map(message => `- ${message}`)
-                        .join("\r\n"),
-                    severity: "error"
-                }]});
+                setSnackbar({
+                    alerts: [{
+                        message: itemFetcher.data.errors
+                            .flatMap(error => error.messages)
+                            .map(message => `- ${message}`)
+                            .join("\r\n"),
+                        severity: "error"
+                    }]
+                });
             }
         }
     }, [itemFetcher]);
@@ -180,12 +257,14 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
 
                 setSnackbar({ alerts: [{ message: "Item successfully removed", severity: "success" }] });
             } else {
-                setSnackbar({ alerts: [{
-                    message: deleteData.errors
-                        .map(message => `- ${message}`)
-                        .join("\r\n"),
-                    severity: "error"
-                }]});
+                setSnackbar({
+                    alerts: [{
+                        message: deleteData.errors
+                            .map(message => `- ${message}`)
+                            .join("\r\n"),
+                        severity: "error"
+                    }]
+                });
             }
         }
     }, [itemDeleteFetcher]);
@@ -280,8 +359,8 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                 >
                     {
                         categories.map(category => (
-                            <MenuItem 
-                                key={`menu-item-category-${category.id}`} 
+                            <MenuItem
+                                key={`menu-item-category-${category.id}`}
                                 value={category.id}
                             >{category.description}</MenuItem>
                         ))
@@ -374,8 +453,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                                 <EventItemsEditorToolbar
                                     event={event}
                                     categories={categories}
-                                    setRows={setRows}
-                                    setRowModesModel={setRowModesModel}
+                                    itemFetcher={itemFetcher}
                                     {...props}
                                 />
                             )
