@@ -29,14 +29,15 @@ import {
     GridRowModes,
     GridRowModesModel,
     GridRowParams,
+    GridSortModel,
     Toolbar,
     ToolbarButton
 } from "@mui/x-data-grid";
 
 import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
 import { SerializedCategoryCode } from "~/services/category.server";
-import { SerializedEventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
-import { SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
+import { EventItemUpdateResult, SerializedEventItemUpdateResult} from "~/routes/admin.events.$id.items.update";
+import { EventItemDeleteResult, SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
 import { MoneyFormatter } from "~/commons/general.common";
 
 import { StyledBox } from "./StyledBox";
@@ -123,7 +124,7 @@ function EventItemsEditorToolbar({
                 id="new-panel"
                 onKeyDown={handleKeyDown}
             >
-                <Paper
+                <Paper 
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -136,11 +137,10 @@ function EventItemsEditorToolbar({
                     <Typography fontWeight="bold">Add new item</Typography>
                     <form onSubmit={handleSubmit}>
                         <Stack spacing={2}>
-                            <InputLabel id="category-label">Category</InputLabel>
+                            <InputLabel id="category-label">Category:</InputLabel>
                             <Select 
                                 fullWidth
                                 native
-                                label={"Category"}
                                 labelId="category-label"
                                 name="category"
                                 size="small"
@@ -157,24 +157,24 @@ function EventItemsEditorToolbar({
                                     ))
                                 }
                             </Select>
+                            <InputLabel id="item-number-label">Item number:</InputLabel>
                             <TextField
-                                label="Item number"
                                 name="itemNumber"
                                 size="small"
                                 fullWidth
                                 autoFocus
                                 required
                             />
+                            <InputLabel id="description-label">Description:</InputLabel>
                             <TextField
-                                label="Description"
                                 type="text"
                                 name="itemDescription"
                                 size="small"
                                 fullWidth
                                 required
                             />
+                            <InputLabel id="minimum-bid-label">Minimum bid:</InputLabel>
                             <TextField
-                                label="Minimum bid"
                                 type="number"
                                 name="minimumBid"
                                 size="small"
@@ -213,25 +213,24 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     const [rows, setRows] = React.useState<SerializedItem[]>(event?.items || []);
     const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
     const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
+    const [sortModel, _] = React.useState<GridSortModel>([{ field: "id", sort: "desc" }]);
 
     // We use this fetcher to send requests to update/create items, and then
     // we use an effect to listen for the response we get back
-    const itemFetcher = useFetcher<SerializedEventItemUpdateResult>();
+    const itemFetcher = useFetcher<EventItemUpdateResult>();
     React.useEffect(() => {
         if (itemFetcher.state === "idle" && itemFetcher.data) {
-            const newRows = rows
-                .filter((row) => row.id !== 0);
+            console.log(itemFetcher.data);
+            setRows(oldRows => oldRows.filter((row) => row.id !== 0));
 
             if (itemFetcher.data.success) {
-                // If there was a change in the amount of items we have,
-                // then an item creation occurred rather than an update...    
-                if (newRows.length < rows.length) {
-                    setRows(newRows.concat(itemFetcher.data.items));
-                }
+                const createdRows = itemFetcher.data.results
+                    .filter(result => result.operation === "create")
+                    .map(result => result.item);
+                setRows(oldRows => [...oldRows, ...createdRows]);
 
                 setSnackbar({ alerts: [{ message: 'Item successfully saved', severity: 'success' }] });
             } else {
-                setRows(newRows);
 
                 setSnackbar({
                     alerts: [{
@@ -248,7 +247,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
 
     // We use this fetcher to send requests to delete items, and then
     // we use an effect to listen for the response we get back
-    const itemDeleteFetcher = useFetcher<SerializedEventItemDeleteResult>();
+    const itemDeleteFetcher = useFetcher<EventItemDeleteResult>();
     React.useEffect(() => {
         if (itemDeleteFetcher.state === "idle" && itemDeleteFetcher.data) {
             const deleteData = itemDeleteFetcher.data as SerializedEventItemDeleteResult;
@@ -439,6 +438,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                         >Upload from CSV</Button>
                     </ButtonGroup>
                     <DataGrid
+                        sortModel={sortModel}
                         columns={columns}
                         rows={rows}
                         density="compact"

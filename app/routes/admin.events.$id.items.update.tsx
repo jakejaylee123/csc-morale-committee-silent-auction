@@ -8,9 +8,14 @@ import { ItemCreate, ItemService, ItemUpdate } from "~/services/item.server";
 import { Identifiers } from "~/commons/general.common";
 import { Item } from "@prisma/client";
 
+export type ItemUpdateResult = {
+    operation: "create" | "update"
+    item: Item
+};
+
 export type EventItemUpdateResult = {
     success: true
-    items: Item[]
+    results: ItemUpdateResult[]
 } | {
     success: false,
     errors: { index: number | string, messages: string[] }[];
@@ -82,16 +87,20 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         const updatedItems = updateRequests.length
             ? await ItemService.updateBulk(updateRequests as ItemUpdate[])
             : [];
+        const updateResults = updatedItems
+            .map(item => ({ operation: "update", item } satisfies ItemUpdateResult));
 
         const createRequests = requestResult.requests
             .filter(request => !Object.hasOwn(request, "id"));
         const createdItems = createRequests.length 
             ? await ItemService.createBulk(createRequests as ItemCreate[])
             : [];
+        const createResults = createdItems
+            .map(item => ({ operation: "create", item } satisfies ItemUpdateResult));
 
         return json({ 
             success: true,
-            items: updatedItems.concat(createdItems)
+            results: [...updateResults, ...createResults]
         } satisfies EventItemUpdateResult);
     } catch (error) {
         console.log({ error });

@@ -266,7 +266,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             console.log("Bid fetcher data: ", bidFetcher.data);
             if (true === bidFetcher.data.success) {
                 const newBid = bidFetcher.data.bid;
-                setCurrentBids(oldBids => oldBids.concat(newBid));
+                setCurrentBids(oldBids => [...oldBids, newBid]);
 
                 setSnackbar({ alerts: [{ message: "Bid confirmed", severity: "success" }] });
             } else if (bidFetcher.data.concluded) {
