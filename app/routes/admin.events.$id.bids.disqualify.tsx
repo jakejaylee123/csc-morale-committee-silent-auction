@@ -56,10 +56,10 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             })
         } satisfies AdminEventBidDisqualifyResult);
     } catch (error) {
-        console.log({ error });
+        console.log("Error trying to disqualify bid: ", error);
         return json({
             success: false,
-            error: (error as Error).message || "An unknown error occurred."
+            error: JSON.stringify(error)
         } satisfies AdminEventBidDisqualifyResult);
     }
 } satisfies ActionFunction;

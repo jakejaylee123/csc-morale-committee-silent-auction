@@ -128,7 +128,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             concluded: false,
-            error: (error as Error).message || "An unknown error occurred."
+            error: JSON.stringify(error)
         } satisfies BidUpdateResult);
     }
 } satisfies ActionFunction;

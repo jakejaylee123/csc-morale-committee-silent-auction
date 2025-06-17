@@ -106,7 +106,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             success: false,
             errors: [{
                 index: "N/A",
-                messages: [(error as Error).message || "An unknown error occurred."]
+                messages: [JSON.stringify(error)]
             }]
         } satisfies EventItemUpdateResult);
     }

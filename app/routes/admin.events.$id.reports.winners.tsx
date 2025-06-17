@@ -29,14 +29,9 @@ export const loader = async function ({ request, params }) {
     });
     
     const { id } = params;
-    const event = await (async () => {
-        if (Identifiers.isIntegerId(id)) {
-            return await EventService
-                .get(parseInt(id), { withDisqualifiedItems: true }) as EventWithItems;
-        } else {
-            return null;
-        }
-    })() satisfies EventWithItems | null;
+    const event = Identifiers.isIntegerId(id)
+        ? await EventService.get(parseInt(id), { withDisqualifiedItems: true })
+        : null;
 
     if (!event) {
         return json({
@@ -53,7 +48,7 @@ export const loader = async function ({ request, params }) {
 
     return json({
         success: true,
-        event: event as Event,
+        event: event,
         disqualifiedItems: event.items,
         categories: await CategoryService.getAll(),
         winningBids

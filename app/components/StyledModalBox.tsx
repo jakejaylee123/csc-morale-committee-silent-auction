@@ -1,10 +1,10 @@
 import { styled } from "@mui/material/styles";
 
 export const StyledModalBox = styled("div")(({ theme }) => ({
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
     width: 400,
     borderRadius: theme.shape.borderRadius,
     backgroundColor: theme.palette.background.paper,

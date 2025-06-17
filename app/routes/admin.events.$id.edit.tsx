@@ -44,32 +44,27 @@ export const loader = async function ({ request, params }) {
     const { id } = params;
 
     const currentDate = DateTime.now().toUTC().toJSDate();
-    const event = await (async () => {
-        if (Identifiers.isNew(id)) {
-            return {
-                id: 0,
-                description: "",
-                startsAt: currentDate,
-                endsAt: currentDate,
-                createdAt: currentDate,
-                createdBy: bidder.id,
-                updatedAt: null,
-                updatedBy: null,
-                enabled: true,
-                disabledAt: null,
-                disabledBy: null,
-                items: [],
-                concluded: false,
-                active: false,
-                releaseWinners: false
-            } satisfies EventWithItems;
-        } else if (Identifiers.isIntegerId(id)) {
-            return await EventService
-                .get(parseInt(id), { withItems: true }) as EventWithItems;
-        } else {
-            return null;
-        }
-    })() satisfies EventWithItems | null;
+    const event = Identifiers.isNew(id)
+        ? {
+            id: 0,
+            description: "",
+            startsAt: currentDate,
+            endsAt: currentDate,
+            createdAt: currentDate,
+            createdBy: bidder.id,
+            updatedAt: null,
+            updatedBy: null,
+            enabled: true,
+            disabledAt: null,
+            disabledBy: null,
+            items: [],
+            concluded: false,
+            active: false,
+            releaseWinners: false
+        } satisfies EventWithItems
+        : Identifiers.isIntegerId(id)
+            ? await EventService.get(parseInt(id), { withItems: true })
+            : null;
 
     return json({
         event,
@@ -89,6 +84,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     const { id } = params;
     const formData = await request.formData();
     console.log(formData);
+
     const description = formData.get("description") as string;
     const enabled = "true" === formData.get("enabled");
     const startDate = formData.get("startDate") as string;
@@ -134,14 +130,14 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({
             success: false,
             type,
-            error: (error as Error).message || "Unknown error occurred."
+            error: JSON.stringify(error)
         } satisfies EventUpdateResult);
     }
 
     return json({
         success: true,
         type,
-        event: changedEvent as Event
+        event: changedEvent
     } satisfies EventUpdateResult);
 } satisfies ActionFunction;
 
