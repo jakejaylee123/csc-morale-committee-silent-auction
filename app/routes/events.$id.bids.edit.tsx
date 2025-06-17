@@ -1,5 +1,5 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
@@ -20,9 +20,8 @@ type EventBidLoaderFunctionData = {
     success: false,
     error: string
 };
-type SerializedEventBidLoaderFunctionData = SerializeFrom<EventBidLoaderFunctionData>;
 
-export const loader = async function ({ request, params }) {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventBidLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
@@ -31,36 +30,36 @@ export const loader = async function ({ request, params }) {
         : null;
 
     if (!event) {
-        return json({
+        return {
             success: false,
             error: `Event "${id}" was not found.`
-        } satisfies EventBidLoaderFunctionData);
+        };
     } else if (!EventCommon.isEnabledAndActive(event)) {
-        return json({
+        return {
             success: false,
             error: `The event "${event.description}" is disabled/inactive.`
-        } satisfies EventBidLoaderFunctionData);
+        };
     } else if (!event.items.length) {
-        return json({
+        return {
             success: false,
             error: `Event "${event.description}" does not have any items to bid on.`
-        } satisfies EventBidLoaderFunctionData);
+        };
     }
 
-    return json({
+    return {
         success: true,
         event: event,
         categories: await CategoryService.getAll(),
         bids: await BidService.getMany({ forEventId: event.id, forBidderId: bidder.id })
-    } satisfies EventBidLoaderFunctionData);
-} satisfies LoaderFunction;
+    };
+};
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export function meta() {
     return [{ title: `${APP_NAME}: Bid` }];
 };
 
 export default function EventBidsEdit() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedEventBidLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     if (!result?.success) {
         return (
             <>

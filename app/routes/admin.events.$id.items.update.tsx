@@ -1,9 +1,9 @@
-import { json, type ActionFunction, type ActionFunctionArgs, type SerializeFrom } from "@remix-run/node";
+import { type ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
 import { ItemCreate, ItemService, ItemUpdate } from "~/services/item.server";
-import { Identifiers } from "~/commons/general.common";
+import { Identifiers, SerializeFrom } from "~/commons/general.common";
 import { Item } from "@prisma/client";
 
 export type ItemUpdateResult = {
@@ -20,34 +20,30 @@ export type EventItemUpdateResult = {
 };
 export type SerializedEventItemUpdateResult = SerializeFrom<EventItemUpdateResult>;
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventItemUpdateResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
 
     const { id } = params;
-    if (!Identifiers.isIntegerId(id)) {
-        return json({
-            success: false,
-            errors: [{
-                index: "N/A",
-                messages: [`The passed event ID "${id}" was not valid`]
-            }]
-        } satisfies EventItemUpdateResult);
-    }
+    if (!Identifiers.isIntegerId(id)) return {
+        success: false,
+        errors: [{
+            index: "N/A",
+            messages: [`The passed event ID "${id}" was not valid`]
+        }]
+    };
 
     const formData = await request.formData();
     console.log(formData);
     const itemId = formData.get("id") as string;
-    if (!Identifiers.isIntegerId(itemId) && !Identifiers.isNew(itemId)) {
-        return json({
-            success: false,
-            errors: [{
-                index: "N/A",
-                messages: [`The passed item ID "${itemId}" was not valid`]
-            }]
-        } satisfies EventItemUpdateResult);
-    }
+    if (!Identifiers.isIntegerId(itemId) && !Identifiers.isNew(itemId)) return {
+        success: false,
+        errors: [{
+            index: "N/A",
+            messages: [`The passed item ID "${itemId}" was not valid`]
+        }]
+    };
 
     const itemRowArray = [
         formData.get("categoryId") as string,
@@ -67,17 +63,15 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         itemRowArrays: [itemRowArray]
     });
     console.log(requestResult);
-    if (!requestResult.success) {
-        return json({
-            success: false,
-            errors: Object
-                .keys(requestResult.errors)
-                .map(key => ({
-                    index: key,
-                    messages: requestResult.errors[key]
-                }))
-        } satisfies EventItemUpdateResult);
-    }
+    if (!requestResult.success) return {
+        success: false,
+        errors: Object
+            .keys(requestResult.errors)
+            .map(key => ({
+                index: key,
+                messages: requestResult.errors[key]
+            }))
+    };
 
     try {
         const updateRequests = requestResult.requests
@@ -96,18 +90,19 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         const createResults = createdItems
             .map(item => ({ operation: "create", item } satisfies ItemUpdateResult));
 
-        return json({ 
+        return { 
             success: true,
             results: [...updateResults, ...createResults]
-        } satisfies EventItemUpdateResult);
+        };
     } catch (error) {
         console.log({ error });
-        return json({
+
+        return {
             success: false,
             errors: [{
                 index: "N/A",
                 messages: [JSON.stringify(error)]
             }]
-        } satisfies EventItemUpdateResult);
+        };
     }
-} satisfies ActionFunction;
+};

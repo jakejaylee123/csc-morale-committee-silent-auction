@@ -1,8 +1,7 @@
-import { SerializeFrom } from "@remix-run/node";
-
 import { PrismaClient, Event, Item } from "@prisma/client";
 import { DateTime } from "luxon";
-import { DateTimeField } from "@mui/x-date-pickers";
+
+import { SerializeFrom } from "~/commons/general.common";
 
 export interface EventGetOptions {
     withItems?: boolean,
@@ -95,13 +94,18 @@ export class EventService {
      * @param id ID of the corresponding event to get.
      * @returns Event that corresponds to passed ID.
      */
-    public static async get(id: number, options?: ({ 
+    public static async get(id: number, options: ({ 
         withItems: true 
     } | { 
         withQualifiedItems: true 
     } | { 
         withDisqualifiedItems: true 
     }) & EventGetOptions): Promise<EventWithItems | null>;
+    public static async get(id: number, options?: {
+        withItems?: false,
+        withQualifiedItems?: false,
+        withDisqualifiedItems?: false 
+    } & EventGetOptions): Promise<EventWithConvenience | null>;
     public static async get(id: number, options?: EventGetOptions): Promise<EventWithItems | EventWithConvenience | null> {
         options = EventService.defaultifyEventGetOptions(options);
 

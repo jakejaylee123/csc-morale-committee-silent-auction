@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 export const DEFAULT_MODE_STORAGE_KEY = 'mode';
 export const DEFAULT_COLOR_SCHEME_STORAGE_KEY = 'color-scheme';
 export const DEFAULT_ATTRIBUTE = 'data-color-scheme';

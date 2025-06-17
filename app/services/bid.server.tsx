@@ -1,6 +1,7 @@
 import { PrismaClient, Bid, Item, Bidder } from "@prisma/client";
-import { SerializeFrom } from "@remix-run/node";
 import { DateTime } from "luxon";
+
+import { SerializeFrom } from "~/commons/general.common";
 
 type BidVariant = Bid | BidWithItem | BidWithBidder | BidWithItemAndBidder;
 

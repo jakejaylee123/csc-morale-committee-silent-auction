@@ -34,10 +34,11 @@ import {
     ToolbarButton
 } from "@mui/x-data-grid";
 
-import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
-import { SerializedCategoryCode } from "~/services/category.server";
-import { EventItemUpdateResult, SerializedEventItemUpdateResult} from "~/routes/admin.events.$id.items.update";
-import { EventItemDeleteResult, SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
+import { CategoryCode, Item } from "@prisma/client";
+
+import { EventWithItems } from "~/services/event.server";
+import { EventItemUpdateResult } from "~/routes/admin.events.$id.items.update";
+import { EventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
 import { MoneyFormatter } from "~/commons/general.common";
 
 import { StyledBox } from "./StyledBox";
@@ -45,13 +46,13 @@ import { FileUploadModal } from "./FileUploadModal";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 
 export interface EventItemsEditorToolbarProps {
-    event: SerializedNullableEventWithItems,
-    categories: SerializedCategoryCode[],
-    itemFetcher: FetcherWithComponents<SerializedEventItemUpdateResult>
+    event: EventWithItems | null,
+    categories: CategoryCode[],
+    itemFetcher: FetcherWithComponents<EventItemUpdateResult>
 }
 export interface EventItemsEditorProps {
-    event: SerializedNullableEventWithItems,
-    categories: SerializedCategoryCode[]
+    event: EventWithItems | null,
+    categories: CategoryCode[]
 }
 
 function EventItemsEditorToolbar({
@@ -210,7 +211,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     }
 
     const [uploadCsvModalOpen, setUploadCsvModalOpen] = React.useState(false);
-    const [rows, setRows] = React.useState<SerializedItem[]>(event?.items || []);
+    const [rows, setRows] = React.useState<Item[]>(event?.items || []);
     const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
     const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
     const [sortModel, _] = React.useState<GridSortModel>([{ field: "id", sort: "desc" }]);
@@ -250,7 +251,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     const itemDeleteFetcher = useFetcher<EventItemDeleteResult>();
     React.useEffect(() => {
         if (itemDeleteFetcher.state === "idle" && itemDeleteFetcher.data) {
-            const deleteData = itemDeleteFetcher.data as SerializedEventItemDeleteResult;
+            const deleteData = itemDeleteFetcher.data;
             if (deleteData.success) {
                 setRows(rows.filter((row) => row.id !== deleteData.deletedItemId));
 
@@ -284,11 +285,11 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         }
     };
 
-    const onRowUpdate = function (newItem: SerializedItem, oldItem: SerializedItem) {
+    const onRowUpdate = function (newItem: Item, oldItem: Item) {
         try {
             // We will process the result of this submission
             // in the "useEffect" that listens to this "itemFetcher"
-            itemFetcher.submit(newItem, {
+            itemFetcher.submit(newItem as any, {
                 method: "POST",
                 action: `/admin/events/${event.id}/items/update`
             });
@@ -310,12 +311,12 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         setSnackbar(null);
     };
 
-    const columns: GridColDef<SerializedItem>[] = [
+    const columns: GridColDef<Item>[] = [
         {
             field: "delete",
             headerName: "",
             type: "actions",
-            getActions: ({ id }: GridRowParams<SerializedItem>) => {
+            getActions: ({ id }: GridRowParams<Item>) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
                 return isInEditMode ? [] : [
                     <GridActionsCellItem
@@ -440,7 +441,12 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                     <DataGrid
                         sortModel={sortModel}
                         columns={columns}
-                        rows={rows}
+                        rows={rows.map(row => ({
+                            ...row,
+                            minimumBid: row.minimumBid !== null && typeof row.minimumBid === "object" && "toNumber" in row.minimumBid
+                                ? (row.minimumBid as any).toNumber()
+                                : row.minimumBid
+                        }))}
                         density="compact"
                         rowModesModel={rowModesModel}
                         onRowModesModelChange={onRowModesModelChange}

@@ -1,5 +1,5 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithConvenience } from "~/services/event.server";
@@ -19,9 +19,8 @@ type AdminEventBidLoaderFunctionData = {
     success: false,
     error: string
 };
-type SerializedAdminEventBidLoaderFunctionData = SerializeFrom<AdminEventBidLoaderFunctionData>;
 
-export const loader = async function ({ request, params }) {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<AdminEventBidLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -31,14 +30,12 @@ export const loader = async function ({ request, params }) {
         ? await EventService.get(parseInt(id), { withItems: true })
         : null;
 
-    if (!event) {
-        return json({
-            success: false,
-            error: `Event "${id}" was not found.`
-        } satisfies AdminEventBidLoaderFunctionData);
-    }
+    if (!event) return {
+        success: false,
+        error: `Event "${id}" was not found.`
+    };
 
-    return json({
+    return {
         success: true,
         event: event,
         categories: await CategoryService.getAll(),
@@ -49,15 +46,15 @@ export const loader = async function ({ request, params }) {
             withBidder: true,
             withItem: true
         })
-    } satisfies AdminEventBidLoaderFunctionData);
-} satisfies LoaderFunction;
+    };
+}
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export function meta() {
     return [{ title: `${APP_NAME}: Manage bids` }];
 };
 
 export default function AdminEventBidsEdit() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventBidLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     if (!result?.success) {
         return (
             <>

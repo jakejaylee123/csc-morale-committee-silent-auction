@@ -1,5 +1,6 @@
 import { PrismaClient, CategoryCode } from "@prisma/client";
-import { SerializeFrom } from "@remix-run/node";
+
+import { SerializeFrom } from "~/commons/general.common";
 
 export type SerializedCategoryCode = SerializeFrom<CategoryCode>;
 

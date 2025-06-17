@@ -1,5 +1,6 @@
-import { SerializeFrom } from "@remix-run/node";
 import { PrismaClient, Bidder, AdministrationAssignment } from "@prisma/client";
+
+import { SerializeFrom } from "~/commons/general.common";
 
 export interface BidderFindOrCreateOptions {
     profileId: string,

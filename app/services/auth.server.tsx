@@ -1,7 +1,8 @@
 import { Authenticator } from "remix-auth";
 import { MicrosoftStrategy } from "remix-auth-microsoft";
-import { redirect, SerializeFrom } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 
+import { SerializeFrom } from "~/commons/general.common";
 import { sessionStorage } from "./session.server";
 import { BidderService, AuthenticatedBidder, BidderWithAdmin } from "./users.server";
 

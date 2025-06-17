@@ -1,5 +1,5 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import Fab from "@mui/material/Fab"; 
 
@@ -22,10 +22,8 @@ type EventReportBidSheetLoaderFunctionData = {
     success: false,
     error: string
 };
-type SerializedEventReportBidSheetLoaderFunctionData 
-    = SerializeFrom<EventReportBidSheetLoaderFunctionData>;
 
-export const loader = async function ({ request, params }) {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventReportBidSheetLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
@@ -34,35 +32,35 @@ export const loader = async function ({ request, params }) {
         : null;
 
     if (!event) {
-        return json({
+        return {
             success: false,
             error: `Event "${id}" was not found.`
-        } satisfies EventReportBidSheetLoaderFunctionData);
+        };
     } else if (!EventCommon.isEnabledAndActive(event) && !bidder.adminAssignment) {
-        return json({
+        return {
             success: false,
             error: "Only administrators can view bid sheets for disabled/inactive  events."
-        } satisfies EventReportBidSheetLoaderFunctionData);
+        };
     } else if (!event.items.length) {
-        return json({
+        return {
             success: false,
             error: `Event "${event.description}" does not have any items for a bid sheet report.`
-        } satisfies EventReportBidSheetLoaderFunctionData);
+        };
     }
 
-    return json({
+    return {
         success: true,
         event,
         categories: await CategoryService.getAll()
-    } satisfies EventReportBidSheetLoaderFunctionData);
-} satisfies LoaderFunction;
+    };
+};
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export function meta() {
     return [{ title: `${APP_NAME}: Bid sheet report` }];
 };
 
 export default function EventReportBidSheet() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedEventReportBidSheetLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     if (!result?.success) {
         return (
             <>

@@ -1,8 +1,8 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithItems } from "~/services/event.server";
+import { EventService } from "~/services/event.server";
 import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryCode, Event, Item } from "@prisma/client";
@@ -20,10 +20,9 @@ type AdminEventReportWinnersLoaderFunctionData = {
     success: false,
     error: string
 };
-type SerializedAdminEventReportWinnersLoaderFunctionData
-    = SerializeFrom<AdminEventReportWinnersLoaderFunctionData>;
+type SerializedAdminEventReportWinnersLoaderFunctionData = ReturnType<typeof useLoaderData<typeof loader>>;
 
-export const loader = async function ({ request, params }) {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<AdminEventReportWinnersLoaderFunctionData> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -33,12 +32,10 @@ export const loader = async function ({ request, params }) {
         ? await EventService.get(parseInt(id), { withDisqualifiedItems: true })
         : null;
 
-    if (!event) {
-        return json({
-            success: false,
-            error: `Event "${id}" was not found.`
-        } satisfies AdminEventReportWinnersLoaderFunctionData);
-    }
+    if (!event) return {
+        success: false,
+        error: `Event "${id}" was not found.`
+    };
 
     const winningBids = await BidService.getWinning({ 
         forEventId: event.id,
@@ -46,21 +43,21 @@ export const loader = async function ({ request, params }) {
         withBidder: true
     });
 
-    return json({
+    return {
         success: true,
         event: event,
         disqualifiedItems: event.items,
         categories: await CategoryService.getAll(),
         winningBids
-    } satisfies AdminEventReportWinnersLoaderFunctionData);
-} satisfies LoaderFunction;
+    };
+};
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export function meta() {
     return [{ title: `${APP_NAME}: Event winners report` }];
 };
 
 export default function AdminEventReportWinners() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventReportWinnersLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     console.log(result);
     if (!result?.success) {
         return (

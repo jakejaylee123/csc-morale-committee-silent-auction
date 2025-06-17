@@ -1,3 +1,6 @@
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+
 export const APP_NAME = "CSC Silent Auction"
 
 export class Identifiers {
@@ -40,3 +43,6 @@ export type Result<TSuccessValue, TErrorValue> = {
 };
 
 export type GetPropertyType<T, K extends keyof T> = T[K];
+
+type LoaderFunctionWithPromisedValue<T> = (_: LoaderFunctionArgs) => Promise<T>;
+export type SerializeFrom<T> = ReturnType<typeof useLoaderData<LoaderFunctionWithPromisedValue<T>>>;

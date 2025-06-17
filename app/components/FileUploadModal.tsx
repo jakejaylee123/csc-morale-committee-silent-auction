@@ -11,14 +11,14 @@ import Typography from "@mui/material/Typography";
 
 import UploadFile from "@mui/icons-material/UploadFile";
 
-import { SerializedNullableEventWithItems } from "~/services/event.server";
+import { EventWithItems } from "~/services/event.server";
 
 import { StyledModalBox } from "./StyledModalBox";
 import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
 
 export interface FileUploadModalProps {
     open: boolean,
-    event: SerializedNullableEventWithItems,
+    event: EventWithItems | null,
     title?: string,
     description?: string,
     onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void

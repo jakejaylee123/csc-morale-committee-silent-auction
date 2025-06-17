@@ -18,16 +18,16 @@ import Save from "@mui/icons-material/Save";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
-import { SerializedNullableEventWithItems } from "~/services/event.server";
-import { SerializedCategoryCode } from "~/services/category.server";
+import { EventWithItems } from "~/services/event.server";
+import { CategoryCode } from "@prisma/client";
 
 import { StyledBox } from "./StyledBox";
 import { EventItemsEditor } from "./EventItemsEditor";
 import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
 
 export interface EventEditorProps {
-    event: SerializedNullableEventWithItems,
-    categories: SerializedCategoryCode[]
+    event: EventWithItems | null,
+    categories: CategoryCode[]
 };
 
 type NullableDateTime = DateTime<true> | DateTime<false> | null;
@@ -48,8 +48,8 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [endDate, setEndDate] = React.useState<NullableDateTime>(null);
 
     React.useEffect(() => {
-        setStartDate(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt))
-        setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt))
+        setStartDate(isNew ? DateTime.now() : DateTime.fromJSDate(event.startsAt))
+        setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromJSDate(event.endsAt))
     }, []);
 
     return (

@@ -1,6 +1,6 @@
 import {
-    LoaderFunction,
-    LinksFunction
+    LinksFunction,
+    LoaderFunctionArgs
 } from "@remix-run/node";
 import {
     Links,
@@ -8,7 +8,6 @@ import {
     Outlet,
     Scripts,
     ScrollRestoration,
-    json,
     useLoaderData
 } from "@remix-run/react";
 
@@ -29,8 +28,7 @@ import { Footer } from "./components/Footer";
 
 import {
     FullBidderAuthentication,
-    getAuthenticatedBidder,
-    SerializedFullBidderAuthentication
+    getAuthenticatedBidder
 } from "./services/auth.server";
 
 import Stack from "@mui/material/Stack";
@@ -38,27 +36,23 @@ import Stack from "@mui/material/Stack";
 export interface RootLoaderFunctionData {
     authentication?: FullBidderAuthentication
 };
-export interface SerializedRootLoaderFunctionData {
-    authentication?: SerializedFullBidderAuthentication
-};
 
 export const links: LinksFunction = () => [...getMuiLinks()];
 
-export const loader = async function ({ request }) {
+export async function loader({ request }: LoaderFunctionArgs): Promise<RootLoaderFunctionData> {
     const authentication = await getAuthenticatedBidder(request, {
         withFullBidder: true
     });
-    const data = {
-        authentication
-    } satisfies RootLoaderFunctionData;
 
-    return json(data);
-} satisfies LoaderFunction;
+    return {
+        authentication
+    };
+};
 
 function LayoutInner({ title, children }: { title: string, children: React.ReactNode }) {
     const colorSchemeState = useColorScheme();
 
-    const loaderData = useLoaderData() satisfies SerializedRootLoaderFunctionData;
+    const loaderData = useLoaderData<typeof loader>();
     const authentication = loaderData?.authentication;
 
     return (

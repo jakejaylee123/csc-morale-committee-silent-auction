@@ -1,4 +1,4 @@
-import type { ActionFunction, ActionFunctionArgs, LoaderFunction, SerializeFrom } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 
 import List from "@mui/material/List";
@@ -23,8 +23,6 @@ export type EventItemUploadResult = {
     success: false,
     errors: { index: number | string, messages: string[] }[];
 };
-export type SerializedEventUploadResult = SerializeFrom<EventItemUploadResult>;
-export type SerializedNullableEventUploadResult = SerializedEventUploadResult | null | undefined;
 
 const ITEM_UPLOAD_FORM_DATA_FILE = "uploadFile";
 
@@ -43,21 +41,19 @@ export const loader = async function () {
     return null;
 } satisfies LoaderFunction;
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventItemUploadResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
 
     const { id } = params;
-    if (!Identifiers.isIntegerId(id)) {
-        return {
-            success: false,
-            errors: [{
-                index: "N/A",
-                messages: [`The passed event ID "${id}" was not valid`]
-            }]
-        } satisfies EventItemUploadResult;
-    }
+    if (!Identifiers.isIntegerId(id)) return {
+        success: false,
+        errors: [{
+            index: "N/A",
+            messages: [`The passed event ID "${id}" was not valid`]
+        }]
+    };
 
     const formData = await request.formData();
     const uploadFile = formData.get(ITEM_UPLOAD_FORM_DATA_FILE) as File;
@@ -76,15 +72,13 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     const badRowArrayValidations = rowArrayValidations
         .filter(validation => !validation.valid);
 
-    if (badRowArrayValidations.length) {
-        return {
-            success: false,
-            errors: badRowArrayValidations.map((_, index) => ({
-                index,
-                messages: [`Row did not have ${ITEM_ROW_ARRAY_INDICES.length} cells of data.`]
-            }))
-        } satisfies EventItemUploadResult;
-    }
+    if (badRowArrayValidations.length) return {
+        success: false,
+        errors: badRowArrayValidations.map((_, index) => ({
+            index,
+            messages: [`Row did not have ${ITEM_ROW_ARRAY_INDICES.length} cells of data.`]
+        }))
+    };
 
     const requestResult = await ItemService.createBulkChangeRequest({
         eventId: parseInt(id),
@@ -92,21 +86,19 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         itemRowArrays: rowArrays
     });
     
-    if (!requestResult.success) {
-        return {
-            success: false,
-            errors: Object
-                .keys(requestResult.errors)
-                .map(key => ({
-                    index: key,
-                    messages: requestResult.errors[key]
-                }))
-        } satisfies EventItemUploadResult;
-    }
+    if (!requestResult.success) return {
+        success: false,
+        errors: Object
+            .keys(requestResult.errors)
+            .map(key => ({
+                index: key,
+                messages: requestResult.errors[key]
+            }))
+    };
 
     try {
         await ItemService.createBulk(requestResult.requests);
-        return { success: true } satisfies EventItemUploadResult;
+        return { success: true };
     } catch (error) {
         return {
             success: false,
@@ -114,12 +106,12 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                 index: "N/A",
                 messages: [JSON.stringify(error)]
             }]
-        } satisfies EventItemUploadResult;
+        };
     }
-} satisfies ActionFunction;
+};
 
 export default function EventItemUploadResults() {
-    const result = useActionData<typeof action>() satisfies SerializedNullableEventUploadResult;
+    const result = useActionData<typeof action>();
     
     return (
         <>

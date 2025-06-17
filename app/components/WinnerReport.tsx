@@ -15,7 +15,6 @@ import { CategoryCommon } from "~/commons/category.common";
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { MoneyFormatter } from "~/commons/general.common";
 
-
 export interface WinnerReportProps {
     title: string,
     event: Omit<SerializedEvent, "active" | "concluded">,

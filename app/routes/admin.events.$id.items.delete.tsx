@@ -1,9 +1,9 @@
-import { json, type ActionFunction, type ActionFunctionArgs, type SerializeFrom } from "@remix-run/node";
+import { type ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
 import { ItemService } from "~/services/item.server";
-import { Identifiers } from "~/commons/general.common";
+import { Identifiers, SerializeFrom } from "~/commons/general.common";
 
 export type EventItemDeleteResult = {
     success: true,
@@ -14,42 +14,38 @@ export type EventItemDeleteResult = {
 };
 export type SerializedEventItemDeleteResult = SerializeFrom<EventItemDeleteResult>;
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventItemDeleteResult> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
 
     const { id } = params;
-    if (!Identifiers.isIntegerId(id)) {
-        return json({
-            success: false,
-            errors: [`The passed event ID "${id}" was not valid`]
-        } satisfies EventItemDeleteResult);
-    }
+    if (!Identifiers.isIntegerId(id)) return {
+        success: false,
+        errors: [`The passed event ID "${id}" was not valid`]
+    };
 
     const formData = await request.formData();
     console.log(formData);
     const itemId = formData.get("id") as string;
-    if (!Identifiers.isIntegerId(itemId)) {
-        return json({
-            success: false,
-            errors: [`The passed item ID "${itemId}" was not valid`]
-        } satisfies EventItemDeleteResult);
-    }
+    if (!Identifiers.isIntegerId(itemId)) return {
+        success: false,
+        errors: [`The passed item ID "${itemId}" was not valid`]
+    };
 
     try {
         const itemIdInt = parseInt(itemId);
         await ItemService.delete(itemIdInt);
 
-        return json({ 
+        return { 
             success: true,
             deletedItemId: itemIdInt
-        } satisfies EventItemDeleteResult);
+        };
     } catch (error) {
         console.log({ error });
-        return json({
+        return {
             success: false,
             errors: [JSON.stringify(error)]
-        } satisfies EventItemDeleteResult);
+        };
     }
-} satisfies ActionFunction;
+};

@@ -1,9 +1,9 @@
-import type { ActionFunction } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticator } from "~/services/auth.server";
 import { redirect } from "@remix-run/node";
 
-export const loader = () => redirect("/login");
+export function loader() { return redirect("/login"); };
 
-export const action: ActionFunction = ({ request }) => {
-    return authenticator.authenticate("microsoft", request);
+export async function action({ request }: ActionFunctionArgs) {
+    return await authenticator.authenticate("microsoft", request);
 };

@@ -1,11 +1,9 @@
-import { MetaFunction } from "@remix-run/react";
-
 import { APP_NAME } from "~/commons/general.common";
 
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { LoginWithMicrosoft } from "~/components/LoginWithMicrosoft";
 
-export const meta: MetaFunction = function () {
+export function meta() {
     return [{ title: `${APP_NAME}: Login` }];
 };
 

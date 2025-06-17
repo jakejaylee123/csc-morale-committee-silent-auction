@@ -20,9 +20,10 @@ import {
     GridRowParams
 } from "@mui/x-data-grid";
 
-import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
-import { SerializedBid } from "~/services/bid.server";
-import { SerializedEventWithItems } from "~/services/event.server";
+import { Bid, CategoryCode } from "@prisma/client";
+
+import { CategoryHash } from "~/services/category.server";
+import { EventWithItems } from "~/services/event.server";
 
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { MoneyFormatter } from "~/commons/general.common";
@@ -34,19 +35,20 @@ import { StyledBox } from "./StyledBox";
 import { GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
+import { Decimal } from "@prisma/client/runtime/library";
 
 const FILTER_ID_CONFIRMED_BIDS = "confirmed-bids-filter";
 
 export interface BidEditorProps {
-    event: SerializedEventWithItems,
-    categories: SerializedCategoryCode[],
-    bids: SerializedBid[]
+    event: EventWithItems,
+    categories: CategoryCode[],
+    bids: Bid[]
 }
 
 interface BidEditorDataSourceArgs {
-    event: SerializedEventWithItems,
+    event: EventWithItems,
     categoryHash: CategoryHash,
-    bids: SerializedBid[]
+    bids: Bid[]
 };
 interface BidEditorDataSourceItem {
     // This ID is only used for the DataGridView we're using
@@ -84,17 +86,12 @@ type GetConfirmedBidTotalArgs = {
     asFormattedString?: boolean
 };
 
-function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataSourceArgs) {
+function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataSourceArgs): BidEditorDataSource {
     const generator = new ItemTagNumberGenerator(categoryHash);
     const sorter = new ItemTagNumberSorter(categoryHash);
 
     const precursor = event.items.map(item => {
         const currentBid = bids.find(bid => bid.itemId === item.id);
-        const minimumBid = item.minimumBid
-            ? parseFloat(item.minimumBid) : undefined;
-        const bidAmount = currentBid?.bidAmount
-            ? parseFloat(currentBid.bidAmount) : undefined;
-
         return {
             itemId: item.id,
             categoryId: item.categoryId,
@@ -105,10 +102,10 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
                 itemNumber: item.itemNumber
             }),
             itemDescription: item.itemDescription,
-            minimumBid,
+            minimumBid: item.minimumBid?.toNumber(),
             confirmed: !!currentBid,
             confirming: false,
-            bidAmount
+            bidAmount: currentBid?.bidAmount?.toNumber()
         };
     });
     
@@ -116,7 +113,7 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
     return sortedPrecursor.map((item, index) => ({
         ...item,
         id: index + 1
-    } satisfies BidEditorDataSourceItem));
+    }));
 }
 
 const createBidConfirmButton: BidConfirmButtonCreator = function ({ params, onClick }) {
@@ -200,7 +197,7 @@ function ConfirmedBidsOnlyCheckbox({ statesRef, onFilterModelChange }: Confirmed
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     
-    const [currentBids, setCurrentBids] = React.useState(bids || []);
+    const [currentBids, setCurrentBids] = React.useState<Bid[]>(bids || []);
     const refreshCurrentBids = function () {
         setCurrentBids(oldBids => oldBids);
     };
@@ -266,7 +263,10 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             console.log("Bid fetcher data: ", bidFetcher.data);
             if (true === bidFetcher.data.success) {
                 const newBid = bidFetcher.data.bid;
-                setCurrentBids(oldBids => [...oldBids, newBid]);
+                setCurrentBids(oldBids => [...oldBids, {
+                    ...newBid,
+                    ...(newBid?.bidAmount && { bidAmount: Decimal.numb newBid.bidAmount.toNumber() })
+                } satisfies Bid]);
 
                 setSnackbar({ alerts: [{ message: "Bid confirmed", severity: "success" }] });
             } else if (bidFetcher.data.concluded) {
