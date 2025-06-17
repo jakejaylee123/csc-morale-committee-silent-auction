@@ -46,7 +46,7 @@ export const loader = async function ({ request, params }) {
     }
 
     const winningBids = await BidService.getWinning({ 
-        eventId: event.id,
+        forEventId: event.id,
         withItem: true,
         withBidder: true
     });
@@ -56,7 +56,7 @@ export const loader = async function ({ request, params }) {
         event: event as Event,
         disqualifiedItems: event.items,
         categories: await CategoryService.getAll(),
-        winningBids: winningBids.filter(bid => BidService.isBidWithItemAndBidder(bid))
+        winningBids
     } satisfies AdminEventReportWinnersLoaderFunctionData);
 } satisfies LoaderFunction;
 

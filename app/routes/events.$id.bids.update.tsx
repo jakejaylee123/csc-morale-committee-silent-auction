@@ -99,9 +99,9 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     }
     
     const currentBid = await BidService.get({
-        eventId: parsedEventId,
-        bidderId: bidder.id,
-        itemId: parsedItemId
+        forEventId: parsedEventId,
+        forBidderId: bidder.id,
+        forItemId: parsedItemId
     });
     if (currentBid) {
         return json({

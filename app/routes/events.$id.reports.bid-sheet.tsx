@@ -29,14 +29,9 @@ export const loader = async function ({ request, params }) {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
-    const event = await (async () => {
-        if (Identifiers.isIntegerId(id)) {
-            return await EventService
-                .get(parseInt(id), { withItems: true }) as EventWithItems;
-        } else {
-            return null;
-        }
-    })() satisfies EventWithItems | null;
+    const event = Identifiers.isIntegerId(id)
+        ? await EventService.get(parseInt(id), { withItems: true })
+        : null;
 
     if (!event) {
         return json({

@@ -95,6 +95,13 @@ export class EventService {
      * @param id ID of the corresponding event to get.
      * @returns Event that corresponds to passed ID.
      */
+    public static async get(id: number, options?: ({ 
+        withItems: true 
+    } | { 
+        withQualifiedItems: true 
+    } | { 
+        withDisqualifiedItems: true 
+    }) & EventGetOptions): Promise<EventWithItems | null>;
     public static async get(id: number, options?: EventGetOptions): Promise<EventWithItems | EventWithConvenience | null> {
         options = EventService.defaultifyEventGetOptions(options);
 
@@ -124,6 +131,7 @@ export class EventService {
                 }
             }))
         });
+
         return event
             ? EventService.injectConvenienceProperties([event])[0]
             : null;

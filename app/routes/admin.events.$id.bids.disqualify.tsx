@@ -39,7 +39,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
 
     const parsedBidId = parseInt(bidId);
     const currentBid = await BidService.get({ 
-        bidId: parsedBidId
+        forBidId: parsedBidId
     });
     if (!currentBid) {
         return json({
@@ -52,7 +52,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
         return json({ 
             success: true,
             bid: await BidService.disqualify(bidder.id, {
-                bidId: parsedBidId
+                forBidId: parsedBidId
             })
         } satisfies AdminEventBidDisqualifyResult);
     } catch (error) {

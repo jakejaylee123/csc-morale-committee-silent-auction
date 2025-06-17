@@ -56,7 +56,7 @@ export const loader = async function ({ request, params }) {
         success: true,
         event: event,
         categories: await CategoryService.getAll(),
-        bids: await BidService.getMany({ eventId: event.id, bidderId: bidder.id })
+        bids: await BidService.getMany({ forEventId: event.id, forBidderId: bidder.id })
     } satisfies EventBidLoaderFunctionData);
 } satisfies LoaderFunction;
 

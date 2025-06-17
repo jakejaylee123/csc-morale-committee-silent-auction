@@ -7,7 +7,7 @@ import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
-import { BidService, BidWithItem, BidWithItemAndBidder } from "~/services/bid.server";
+import { BidService, BidWithItem } from "~/services/bid.server";
 import { Winnings } from "~/components/Winnings";
 import { EventCommon } from "~/commons/event.common";
 
@@ -58,10 +58,10 @@ export const loader = async function ({ request, params }) {
         event: event,
         categories: await CategoryService.getAll(),
         winningBids: await BidService.getWinning({ 
-            eventId: event.id, 
-            bidderId: bidder.id,
+            forEventId: event.id, 
+            forBidderId: bidder.id,
             withItem: true
-        }) as BidWithItem[]
+        })
     } satisfies EventWinningsLoaderFunctionData);
 } satisfies LoaderFunction;
 

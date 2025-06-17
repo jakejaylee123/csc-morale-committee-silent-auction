@@ -5,7 +5,7 @@ import { Dashboard } from "~/components/Dashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithConvenience, SerializedEvent } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { BidderService, BidderWithAdmin, SerializedBidderWithAdmin } from "~/services/users.server";
+import { BidderWithAdmin, SerializedBidderWithAdmin } from "~/services/users.server";
 import { APP_NAME } from "~/commons/general.common";
 
 interface IndexLoaderFunctionData {

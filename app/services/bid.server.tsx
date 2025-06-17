@@ -2,16 +2,43 @@ import { PrismaClient, Bid, Item, Bidder } from "@prisma/client";
 import { SerializeFrom } from "@remix-run/node";
 import { DateTime } from "luxon";
 
+type BidVariant = Bid | BidWithItem | BidWithBidder | BidWithItemAndBidder;
+
 export type SerializedBid = SerializeFrom<Bid>;
 
-export type GetBidArgs = {
-    bidId?: number,
-    eventId?: number,
-    bidderId?: number,
-    itemId?: number,
+type IdBasedGetBidArgs = {
+    forBidId: number
+};
+type NonIdBasedGetBidArgs = {
+    forEventId: number,
+    forBidderId: number,
+    forItemId: number
+};
+export type GetBidArgs = IdBasedGetBidArgs | NonIdBasedGetBidArgs;
+
+type InclusionArgs = {
     withItem?: boolean,
     withBidder?: boolean
-}
+};
+
+export type GetBidsArgs = {
+    forBidId?: number,
+    forEventId?: number,
+    forBidderId?: number,
+    forItemId?: number
+} & InclusionArgs;
+
+type GetWinningBidsFilterArgs = { forEventId: number } & ({
+    forItemId?: undefined,
+    forBidderId: number
+} | {
+    forItemId: number,
+    forBidderId?: undefined
+} | {
+    forItemId?: undefined,
+    forBidderId?: undefined
+});
+export type GetWinningBidsArgs = GetWinningBidsFilterArgs & InclusionArgs;
 
 export interface BidCreation {
     eventId: number,
@@ -25,73 +52,92 @@ export type BidWithItem = Bid & {
 };
 export type SerializedBidWithItem = SerializeFrom<BidWithItem>;
 
+export type BidWithBidder = Bid & {
+    bidder: Bidder
+};
+export type SerializedBidWithBidder = SerializeFrom<BidWithBidder>;
+
 export type BidWithItemAndBidder = BidWithItem & {
     bidder: Bidder
 };
 export type SerializedBidWithItemAndBidder = SerializeFrom<BidWithItemAndBidder>;
 
-type BidComparisonField = keyof Bid;
-const DefaultBidComparisonFields: readonly BidComparisonField[] = [
-    "bidAmount",
-    "createdAt"
-];
-
 export class BidService {
     private static readonly client = new PrismaClient();
 
-    public static async get({ eventId, bidderId, itemId }: GetBidArgs): Promise<Bid | null> {
+    public static async get(args: GetBidArgs): Promise<Bid | null | undefined> {
         return await BidService.client.bid.findFirst({
-            where: { eventId, bidderId, itemId }
+            where: {
+                ...("forBidId" in args ? { id: args.forBidId } : {
+                    eventId: args.forEventId,
+                    bidderId: args.forBidderId,
+                    itemId: args.forItemId
+                })
+            }
         });
     }
 
+    public static async getMany(args: { withItem: true, withBidder: true } & GetBidsArgs): Promise<BidWithItemAndBidder[]>;
+    public static async getMany(args: { withItem: true } & GetBidsArgs): Promise<BidWithItem[]>;
+    public static async getMany(args: { withBidder: true } & GetBidsArgs): Promise<BidWithBidder[]>;
+    public static async getMany(args: GetBidsArgs): Promise<Bid[]>;
     public static async getMany({
-        bidId,
-        eventId, 
-        bidderId, 
-        itemId, 
+        forEventId, 
+        forBidderId, 
+        forItemId, 
         withItem,
         withBidder
-    }: GetBidArgs): Promise<(Bid | BidWithItem | BidWithItemAndBidder)[]> {
+    }: GetBidsArgs): Promise<BidVariant[]> {
         return await BidService.client.bid.findMany({
-            where: { id: bidId, eventId, bidderId, itemId },
+            relationLoadStrategy: "join",
+            where: { 
+                ...(forEventId && { eventId: forEventId }), 
+                ...(forBidderId && { bidderId: forBidderId }),
+                ...(forItemId && { itemId: forItemId })
+            },
             include: {
                 ...(withItem && { item: true }),
                 ...(withBidder && { bidder: true })
             },
             orderBy: [
+                { itemId: "asc" },
                 { bidAmount: "desc" },
                 { createdAt: "asc" }
             ]
         });
     }
 
+    public static async getWinning(args: { withItem: true, withBidder: true } & GetWinningBidsArgs): Promise<BidWithItemAndBidder[]>;
+    public static async getWinning(args: { withItem: true } & GetWinningBidsArgs): Promise<BidWithItem[]>;
+    public static async getWinning(args: { withBidder: true } & GetWinningBidsArgs): Promise<BidWithBidder[]>;
+    public static async getWinning(args: GetWinningBidsArgs): Promise<Bid[]>;
     public static async getWinning({
-        eventId, 
-        bidderId, 
-        itemId, 
-        withItem, 
-        withBidder 
-    }: GetBidArgs): Promise<(BidWithItemAndBidder | BidWithItem| Bid)[]> {
-        const eventBids = await BidService.getMany({ 
-            eventId, 
-            withItem,
-            withBidder
+        forEventId,
+        forBidderId,
+        forItemId,
+        withBidder,
+        withItem
+    }: GetWinningBidsArgs): Promise<BidVariant[]> {
+        const eventBids = await BidService.getMany({
+            forEventId,
+            forBidderId,
+            forItemId,
+            withBidder,
+            withItem
         });
-
-        const eventBidsWithItems = eventBids
-            .filter(bid => BidService.isBidWithItem(bid));
-        const biddedItems = eventBidsWithItems.map(bid => bid.item);
-        const winningBids = biddedItems.map(item => eventBidsWithItems.find(bid => bid.itemId === item.id));
         
-        const winningBidsHash: { [itemIdString: string]: BidWithItem } = {};
-        for (const bid of winningBids) {
-            winningBidsHash[`${bid?.itemId}`] = bid as BidWithItem;
+        const winningBids: BidVariant[] = []
+        for (const bid of eventBids) {
+            const canAddWinningBid = 
+                (!winningBids.length || winningBids[winningBids.length - 1].itemId !== bid.itemId)
+                && (!forEventId || forEventId === bid.eventId)
+                && (!forBidderId || forBidderId === bid.bidderId)
+                && (!forItemId || forItemId === bid.itemId);
+            
+            if (canAddWinningBid) winningBids.push(bid);
         }
-
-        return Object.values(winningBidsHash)
-            .filter(bid => undefined === bidderId || bidderId === bid.bidderId)
-            .filter(bid => undefined === itemId || itemId === bid.itemId);
+        
+        return winningBids;
     }
 
     public static async create({ eventId, bidderId, itemId, bidAmount }: BidCreation): Promise<Bid> {
@@ -110,40 +156,16 @@ export class BidService {
         });
     }
 
-    public static async disqualify(disqualifyingBidderId: number, { bidId, eventId, bidderId, itemId }: GetBidArgs): Promise<Bid> {
+    public static async disqualify(disqualifyingBidderId: number, { forBidId }: IdBasedGetBidArgs): Promise<Bid> {
         const currentDate = DateTime.now().toUTC().toJSDate();
 
         return await BidService.client.bid.update({
-            where: { id: bidId, eventId, bidderId, itemId }, 
+            where: { id: forBidId },
             data: {
                 disqualified: true,
                 disqualifiedBy: disqualifyingBidderId,
                 disqualifiedAt: currentDate
             }
         });
-    }
-
-    public static isBidWithItem(bid: Bid): bid is BidWithItem {
-        return !!(bid as BidWithItem).item;
-    }
-
-    public static isBidWithItemAndBidder(bid: Bid): bid is BidWithItemAndBidder {
-        return BidService.isBidWithItem(bid) && !!(bid as BidWithItemAndBidder).bidder;
-    }
-
-    public static compareBids(lhs: Bid, rhs: Bid): number {
-        for (let field of DefaultBidComparisonFields) {
-            const lhsFieldValue = lhs[field];
-            const rhsFieldValue = rhs[field];
-            if (null === lhsFieldValue || null === rhsFieldValue) {
-                throw new Error(`Cannot compare null values of bid fields.`);
-            } else if (lhsFieldValue > rhsFieldValue) {
-                return -1;
-            } else if (lhsFieldValue < rhsFieldValue) {
-                return 1;
-            }
-        }
-
-        return 0;
     }
 };

@@ -2,14 +2,12 @@ import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithConvenience, EventWithItems } from "~/services/event.server";
+import { EventService, EventWithConvenience } from "~/services/event.server";
 import { APP_NAME, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
-import { Bid, CategoryCode } from "@prisma/client";
-import { BidService, BidWithItem, BidWithItemAndBidder } from "~/services/bid.server";
-import { BidEditor } from "~/components/BidEditor";
-import { EventCommon } from "~/commons/event.common";
+import { CategoryCode } from "@prisma/client";
+import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { AdminBidEditor } from "~/components/AdminBidEditor";
 
 type AdminEventBidLoaderFunctionData = {
@@ -29,14 +27,9 @@ export const loader = async function ({ request, params }) {
     });
     
     const { id } = params;
-    const event = await (async () => {
-        if (Identifiers.isIntegerId(id)) {
-            return await EventService
-                .get(parseInt(id), { withItems: true }) as EventWithConvenience;
-        } else {
-            return null;
-        }
-    })() satisfies EventWithConvenience | null;
+    const event = Identifiers.isIntegerId(id)
+        ? await EventService.get(parseInt(id), { withItems: true })
+        : null;
 
     if (!event) {
         return json({
@@ -47,15 +40,15 @@ export const loader = async function ({ request, params }) {
 
     return json({
         success: true,
-        event: event as EventWithItems,
+        event: event,
         categories: await CategoryService.getAll(),
         bids: await BidService.getMany({ 
-            eventId: event.id, 
-            bidderId: 
+            forEventId: event.id, 
+            forBidderId: 
             bidder.id,
             withBidder: true,
             withItem: true
-        }) as BidWithItemAndBidder[]
+        })
     } satisfies AdminEventBidLoaderFunctionData);
 } satisfies LoaderFunction;
 

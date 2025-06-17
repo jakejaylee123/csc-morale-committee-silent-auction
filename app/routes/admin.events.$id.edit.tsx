@@ -1,5 +1,5 @@
 import type { ActionFunction, ActionFunctionArgs, LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, MetaFunction, redirect, useActionData, useLoaderData } from "@remix-run/react";
+import { json, MetaFunction, useActionData, useLoaderData } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
