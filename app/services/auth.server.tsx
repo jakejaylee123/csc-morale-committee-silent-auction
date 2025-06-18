@@ -4,6 +4,7 @@ import { redirect, SerializeFrom } from "@remix-run/node";
 
 import { sessionStorage } from "./session.server";
 import { BidderService, AuthenticatedBidder, BidderWithAdmin } from "./users.server";
+import { DateTime } from "luxon";
 
 declare global {
     namespace NodeJS {
@@ -17,14 +18,12 @@ declare global {
 };
 
 export interface BidderAuthentication {
-    accessToken: string,
-    bidder: AuthenticatedBidder
+    bidder: AuthenticatedBidder,
+    authenticatedAt: string
 };
 export type SerializedBidderAuthentication = SerializeFrom<BidderAuthentication>;
 
-export interface FullBidderAuthentication {
-    accessToken: string,
-    bidder: AuthenticatedBidder
+export interface FullBidderAuthentication extends BidderAuthentication {
     fullBidder: BidderWithAdmin
 };
 export type SerializedFullBidderAuthentication = SerializeFrom<FullBidderAuthentication>;
@@ -44,7 +43,7 @@ const microsoftStrategy = new MicrosoftStrategy(
         scope: "openid profile email", // optional
         prompt: "login", // optional
     },
-    async ({ accessToken, profile }) => {
+    async ({ profile }): Promise<BidderAuthentication> => {
         // Here you can fetch the user from database or return a user object based on profile
         // return {profile}
         // The returned object is stored in the session storage you are using by the authenticator
@@ -62,11 +61,7 @@ const microsoftStrategy = new MicrosoftStrategy(
         // it opens up a possibility of spoofing users!
 
         // Trying to store the least amount of data in the session to placate cookie size limits
-        const {
-            id,
-            windowsId,
-            adminAssignment
-        } = await BidderService.findOrCreate({ 
+        const bidder = await BidderService.findOrCreate({
             profileId: profile.id, 
             displayName: profile.displayName,
             emailAddress: profile.emails[0]?.value,
@@ -75,9 +70,13 @@ const microsoftStrategy = new MicrosoftStrategy(
         });
 
         return {
-            accessToken,
-            bidder: { id, windowsId, adminAssignment }
-        } satisfies BidderAuthentication;
+            authenticatedAt: DateTime.now().toISO(),
+            bidder: { 
+                id: bidder.id, 
+                windowsId: bidder.windowsId, 
+                adminAssignment: bidder.adminAssignment
+            }
+        };
     }
 );
 authenticator.use(microsoftStrategy);
