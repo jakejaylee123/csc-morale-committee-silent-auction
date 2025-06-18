@@ -21,13 +21,11 @@ import { SerializedBidderWithAdmin } from "~/services/users.server";
 import { CscIcon } from "./CscIcon";
 
 interface NavigationBarProps {
-    bidder?: SerializedBidderWithAdmin,
-    colorSchemeState: ReturnType<typeof useColorScheme>
+    bidder?: SerializedBidderWithAdmin
 }
 
-export function NavigationBar({ bidder, colorSchemeState }: NavigationBarProps) {
+export function NavigationBar({ bidder }: NavigationBarProps) {
     const [open, setOpen] = React.useState(false);
-    const { mode, setMode } = colorSchemeState;
 
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpen(newOpen);

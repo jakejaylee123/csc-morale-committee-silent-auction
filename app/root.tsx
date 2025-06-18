@@ -12,9 +12,11 @@ import {
     useLoaderData
 } from "@remix-run/react";
 
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
+
 import {
     ThemeProvider,
-    useColorScheme
+    useColorScheme,
 } from "@mui/material/styles";
 
 import theme from "./theme";
@@ -23,7 +25,6 @@ import { getMuiLinks } from "./components/getMuiLinks";
 import { MuiDocument } from "./components/MuiDocument";
 
 import { DefaultTransition } from "./components/DefaultTransition";
-import InitColorSchemeScript from "./components/danger/InitColorSchemeScript";
 import { NavigationBar } from "./components/NavigationBar";
 import { Footer } from "./components/Footer";
 
@@ -62,22 +63,18 @@ function LayoutInner({ title, children }: { title: string, children: React.React
     const authentication = loaderData?.authentication;
 
     return (
-        <html lang="en" data-mui-color-scheme={colorSchemeState.mode} suppressHydrationWarning>
-            <head suppressHydrationWarning>
-                <meta charSet="utf-8" suppressHydrationWarning />
-                <meta name="viewport" content="width=device-width,initial-scale=1" suppressHydrationWarning />
+        <html lang="en" suppressHydrationWarning>
+            <head>
+                <meta charSet="utf-8" />
+                <meta name="viewport" content="width=device-width,initial-scale=1" />
                 {title ? <title>{title}</title> : null}
                 <Meta />
                 <Links />
-                <meta name="emotion-insertion-point" content="emotion-insertion-point" suppressHydrationWarning />
             </head>
             <body>
                 <Scripts />
-                <InitColorSchemeScript />
-                <NavigationBar
-                    bidder={authentication?.fullBidder}
-                    colorSchemeState={colorSchemeState}
-                />
+                <InitColorSchemeScript defaultMode={colorSchemeState.mode} />
+                <NavigationBar bidder={authentication?.fullBidder} />
                 <DefaultTransition>
                     {children}
                 </DefaultTransition>
