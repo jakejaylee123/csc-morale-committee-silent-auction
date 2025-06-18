@@ -11,6 +11,7 @@ import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
 import { StandardSnackbar, StandardSnackbarProps } from "~/components/StandardSnackbar";
+import React from "react";
 
 interface EventEditLoaderFunctionData {
     event: EventWithItems | null,
@@ -150,13 +151,15 @@ export default function AdminEventEdit() {
 
     // If we successfully made an auction event, we can change the URL to
     // the proper URL of the newly created auction
-    if (result?.success) {
-        try {
-            window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);
-        } catch (error) { }
+    React.useEffect(() => {
+        if (result?.success) {
+            try {
+                window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);
+            } catch (error) { }
 
-        if (event) event.id = result.event.id;
-    }
+            if (event) event.id = result.event.id;
+        }
+    }, []);
     
     const snackBarProps = result ? {
         alerts: [{

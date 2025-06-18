@@ -46,10 +46,12 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [releaseWinners, setReleaseWinners] = React.useState(isNew ? false : event.releaseWinners)
     const [startDate, setStartDate] = React.useState<NullableDateTime>(null);
     const [endDate, setEndDate] = React.useState<NullableDateTime>(null);
+    const [zoneName, setZoneName] = React.useState("");
 
     React.useEffect(() => {
         setStartDate(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt))
         setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt))
+        setZoneName(DateTime.local().zoneName);
     }, []);
 
     return (
@@ -112,15 +114,10 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                     onChange={(newValue => setEndDate(newValue))}
                                 />
                                 <VisuallyHiddenInput
-                                    suppressHydrationWarning
                                     name="timezone"
-                                    defaultValue={DateTime.local().zoneName}
+                                    defaultValue={zoneName}
                                 />
-                                <FormLabel
-                                    suppressHydrationWarning
-                                >
-                                    {`Current timezone: ${DateTime.now().zoneName}`}
-                                </FormLabel>
+                                <FormLabel>{`Current timezone: ${zoneName}`}</FormLabel>
                                 <ButtonGroup fullWidth>
                                     <Button
                                         startIcon={isNew ? <Create /> : <Save />}
