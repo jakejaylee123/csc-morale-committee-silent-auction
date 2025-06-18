@@ -92,7 +92,7 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
         const canvas = document.createElement('canvas');
         canvas.width = 500;
         canvas.height = 250;
-        canvas.style.position = "absolute";
+        canvas.style.position = "fixed";
         canvas.style.width = "100%";
         canvas.style.height = "100%";
         document.body.prepend(canvas);
