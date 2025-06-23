@@ -1,4 +1,7 @@
-import * as React from "react";
+import {
+    useEffect,
+    useRef
+ } from "react";
 import * as confetti from "canvas-confetti";
 
 import Alert from "@mui/material/Alert";
@@ -13,36 +16,37 @@ import Typography from "@mui/material/Typography";
 
 import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
 
-import { SerializedBidWithItem } from "~/services/bid.server";
-import { SerializedCategoryCode } from "~/services/category.server";
-import { SerializedEvent } from "~/services/event.server";
+import { CategoryCode } from "@prisma/client";
+
+import { BidWithItem } from "~/services/bid.server";
+import { EventWithConvenience } from "~/services/event.server";
 
 import { ItemTagNumberGenerator } from "~/commons/item.common";
-import { MoneyFormatter } from "~/commons/general.common";
+import { Dto, MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 
 import { StyledBox } from "./StyledBox";
 
-export interface WrappedConfettiProps {
+export type WrappedConfettiProps = {
     width: number,
     height: number
 };
-export interface WinningsProps {
-    event: SerializedEvent,
-    categories: SerializedCategoryCode[],
-    winningBids: SerializedBidWithItem[]
+export type WinningsProps = {
+    event: Dto<EventWithConvenience>,
+    categories: Dto<CategoryCode>[],
+    winningBids: Dto<BidWithItem>[]
 };
 
-const getWinningBidTotal = function (bids: SerializedBidWithItem[]): string {
+const getWinningBidTotal = function (bids: Dto<BidWithItem>[]): string {
     return MoneyFormatter.getFormattedMoney({
         amount: bids
-            .map(bid => parseFloat(bid.bidAmount || "0"))
+            .map(bid => bid.bidAmount)
             .reduce((accumulator, bidAmount) => accumulator + bidAmount, 0)
     });
 };
 
 export function Winnings({ categories, winningBids }: WinningsProps) {
-    const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
+    const categoryHash = useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     const generator = new ItemTagNumberGenerator(categoryHash.current);
 
     const winningBidsWithTagNumbers = winningBids.map(bid => ({
@@ -73,7 +77,7 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
 
     // This is a function that shoots out confetti... Ya know, since
     // the user won something...
-    React.useEffect(() => {
+    useEffect(() => {
         const runConfettiStarter = (starter: confetti.CreateTypes) => {
             if (document.visibilityState !== "hidden") {
                 starter({

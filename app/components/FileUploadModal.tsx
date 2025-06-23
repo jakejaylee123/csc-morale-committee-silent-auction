@@ -1,4 +1,6 @@
-import * as React from "react";
+import {
+    useState
+} from "react";
 import { Form } from "@remix-run/react";
 
 import Backdrop from "@mui/material/Backdrop";
@@ -11,14 +13,15 @@ import Typography from "@mui/material/Typography";
 
 import UploadFile from "@mui/icons-material/UploadFile";
 
-import { SerializedNullableEventWithItems } from "~/services/event.server";
+import { EventWithItems } from "~/services/event.server";
 
 import { StyledModalBox } from "./StyledModalBox";
 import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
+import { Dto } from "~/commons/general.common";
 
-export interface FileUploadModalProps {
+export type FileUploadModalProps = {
     open: boolean,
-    event: SerializedNullableEventWithItems,
+    event: Dto<EventWithItems | null>,
     title?: string,
     description?: string,
     onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void
@@ -31,7 +34,7 @@ export function FileUploadModal({
     description,
     onClose
 }: FileUploadModalProps) {
-    const [file, setFile] = React.useState("");
+    const [file, setFile] = useState("");
     const canUpload = !!file;
 
     return (

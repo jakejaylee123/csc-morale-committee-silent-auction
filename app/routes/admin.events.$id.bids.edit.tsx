@@ -1,16 +1,16 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
+import { MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithConvenience } from "~/services/event.server";
-import { APP_NAME, Identifiers } from "~/commons/general.common";
+import { APP_NAME, Dto, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
 import { CategoryCode } from "@prisma/client";
 import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { AdminBidEditor } from "~/components/AdminBidEditor";
 
-type AdminEventBidLoaderFunctionData = {
+type AdminEventBidLoaderFunctionData = Dto<{
     success: true,
     event: EventWithConvenience,
     categories: CategoryCode[],
@@ -18,10 +18,9 @@ type AdminEventBidLoaderFunctionData = {
 } | {
     success: false,
     error: string
-};
-type SerializedAdminEventBidLoaderFunctionData = SerializeFrom<AdminEventBidLoaderFunctionData>;
+}>;
 
-export const loader = async function ({ request, params }) {
+export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<AdminEventBidLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -32,32 +31,34 @@ export const loader = async function ({ request, params }) {
         : null;
 
     if (!event) {
-        return json({
+        return {
             success: false,
             error: `Event "${id}" was not found.`
-        } satisfies AdminEventBidLoaderFunctionData);
+        };
     }
 
-    return json({
+    const bids = await BidService.getMany({ 
+        forEventId: event.id, 
+        forBidderId: 
+        bidder.id,
+        withBidder: true,
+        withItem: true
+    });
+
+    return {
         success: true,
         event: event,
         categories: await CategoryService.getAll(),
-        bids: await BidService.getMany({ 
-            forEventId: event.id, 
-            forBidderId: 
-            bidder.id,
-            withBidder: true,
-            withItem: true
-        })
-    } satisfies AdminEventBidLoaderFunctionData);
-} satisfies LoaderFunction;
+        bids: bids.map(BidService.toDtoWithItemAndBidder)
+    };
+};
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export const meta: MetaFunction<typeof loader> = function (_) {
     return [{ title: `${APP_NAME}: Manage bids` }];
 };
 
 export default function AdminEventBidsEdit() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventBidLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     if (!result?.success) {
         return (
             <>

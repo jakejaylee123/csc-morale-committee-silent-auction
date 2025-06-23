@@ -1,7 +1,7 @@
 import { PrismaClient, Item } from "@prisma/client";
 import { DateTime } from "luxon";
 
-import { Identifiers } from "~/commons/general.common";
+import { Dto, Identifiers } from "~/commons/general.common";
 import { CategoryService } from "./category.server";
 
 export interface ItemBulkChangeRequestOptions {
@@ -39,6 +39,13 @@ export type ItemCreationRequestsResult = {
 
 export class ItemService {
     private static readonly client = new PrismaClient();
+
+    public static toDto(item: Item): Dto<Item> {
+        return {
+            ...item,
+            minimumBid: item.minimumBid?.toNumber() || null
+        };
+    }
 
     public static async get(itemId: number): Promise<Item | null> {
         return await ItemService.client.item.findUnique({

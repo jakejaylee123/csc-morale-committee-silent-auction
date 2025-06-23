@@ -1,4 +1,7 @@
-import * as React from "react";
+import { 
+    ReactNode,
+    useState
+} from "react";
 
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -8,19 +11,20 @@ import Add from "@mui/icons-material/Add";
 import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import Edit from "@mui/icons-material/Edit";
 
-import { SerializedEvent } from "~/services/event.server";
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
+import { Dto } from "~/commons/general.common";
+import { EventWithConvenience } from "~/services/event.server";
 
 
-export interface AdminDashboardProps {
-    events: SerializedEvent[]
-};
+export type AdminDashboardProps = Dto<{
+    events: EventWithConvenience[]
+}>;
 
 export function AdminDashboard({ events }: AdminDashboardProps) {
-    const [selectedEventId, setSelectedEventId] = React.useState<string | undefined>(undefined);
+    const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);
 
-    const onEventSelectionUpdated = function (event: EventSelectChangeEvent, child: React.ReactNode) {
+    const onEventSelectionUpdated = function (event: EventSelectChangeEvent, _: ReactNode) {
         setSelectedEventId(event.target.value);
     };
 

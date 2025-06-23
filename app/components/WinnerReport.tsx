@@ -7,39 +7,40 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
-import { SerializedBidWithItemAndBidder } from "~/services/bid.server";
-import { SerializedBidder } from "~/services/users.server";
-import { SerializedEvent, SerializedItem } from "~/services/event.server";
-import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
+import { Bidder, CategoryCode, Item } from "@prisma/client";
+
+import { BidWithItemAndBidder } from "~/services/bid.server";
+import { EventWithConvenience } from "~/services/event.server";
+import { CategoryHash } from "~/services/category.server";
 import { CategoryCommon } from "~/commons/category.common";
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
-import { MoneyFormatter } from "~/commons/general.common";
+import { Dto, MoneyFormatter } from "~/commons/general.common";
 
 
-export interface WinnerReportProps {
+export type WinnerReportProps = Dto<{
     title: string,
-    event: Omit<SerializedEvent, "active" | "concluded">,
-    categories: SerializedCategoryCode[],
-    winningBids: SerializedBidWithItemAndBidder[],
-    disqualifiedItems: SerializedItem[]
-};
+    event: EventWithConvenience,
+    categories: CategoryCode[],
+    winningBids: BidWithItemAndBidder[],
+    disqualifiedItems: Item[]
+}>;
 
-type WinnerReportDataSourceItem = {
+type WinnerReportDataSourceItem = Dto<{
     bidderId: number,
     bidderString: string,
-    winningBids: SerializedBidWithItemAndBidder[],
+    winningBids: BidWithItemAndBidder[],
     total: number
-};
+}>;
 type WinnerReportDataSource = WinnerReportDataSourceItem[];
-export interface WinnerReportDataSourceProps {
+export type WinnerReportDataSourceProps = Dto<{
     categoryHash: CategoryHash,
-    winningBids: SerializedBidWithItemAndBidder[]
-};
+    winningBids: BidWithItemAndBidder[]
+}>;
 
-type DisqualifiedItemsSubReportProps = {
+type DisqualifiedItemsSubReportProps = Dto<{
     categoryHash: CategoryHash,
-    disqualifiedItems: SerializedItem[]
-};
+    disqualifiedItems: Item[]
+}>;
 
 type WinnerSubReportDataSource = WinnerReportDataSource;
 type WinnerSubReportProps = {
@@ -47,7 +48,7 @@ type WinnerSubReportProps = {
     source: WinnerSubReportDataSource
 };
 
-function createBidderString(bidder: SerializedBidder): string {
+function createBidderString(bidder: Bidder): string {
     return `${bidder.firstName} ${bidder.lastName} [${bidder.emailAddress}]`;
 }
 
@@ -73,7 +74,7 @@ function createWinnerReportDataSource({ winningBids, categoryHash }: WinnerRepor
             };
         }
         winningBidsHash[bidderIdString].winningBids.push(bid);
-        winningBidsHash[bidderIdString].total += parseFloat(bid.bidAmount);
+        winningBidsHash[bidderIdString].total += bid.bidAmount;
     });
 
     return Object.values(winningBidsHash).sort((lhs, rhs) => {
@@ -81,9 +82,9 @@ function createWinnerReportDataSource({ winningBids, categoryHash }: WinnerRepor
     });
 }
 
-function getAuctionEventGrossProfit(bids: SerializedBidWithItemAndBidder[]): number {
+function getAuctionEventGrossProfit(bids: Dto<BidWithItemAndBidder>[]): number {
     return bids.reduce((accumulator, bid) => {
-        return accumulator + parseFloat(bid.bidAmount);
+        return accumulator + bid.bidAmount;
     }, 0);
 }
 

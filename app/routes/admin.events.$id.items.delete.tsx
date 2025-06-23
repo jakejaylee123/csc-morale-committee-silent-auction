@@ -1,4 +1,4 @@
-import { json, type ActionFunction, type ActionFunctionArgs, type SerializeFrom } from "@remix-run/node";
+import { json, type ActionFunction, type ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
@@ -12,7 +12,6 @@ export type EventItemDeleteResult = {
     success: false,
     errors: string[]
 };
-export type SerializedEventItemDeleteResult = SerializeFrom<EventItemDeleteResult>;
 
 export const action = async function ({ request, params }: ActionFunctionArgs) {
     await requireAuthenticatedBidder(request, {

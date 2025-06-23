@@ -7,26 +7,24 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
-import { SerializedEventWithItems, SerializedItem } from "~/services/event.server";
-import { SerializedCategoryCode } from "~/services/category.server";
+import { EventWithItems } from "~/services/event.server";
+import { CategoryCode, Item } from "@prisma/client";
 
 import { CategoryCommon } from "~/commons/category.common";
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
-import { MoneyFormatter } from "~/commons/general.common";
+import { Dto, MoneyFormatter } from "~/commons/general.common";
 
-type CategoryHash = { [key: number]: SerializedCategoryCode };
-
-export interface BidSheetReportProps {
+export type BidSheetReportProps = Dto<{
     title: string,
-    event: SerializedEventWithItems,
-    categories: SerializedCategoryCode[]
-};
-interface BidSheetReportRowFragmentProps {
-    item: SerializedItem,
-    category: SerializedCategoryCode
-};
-interface BidSheetReportRangeHeaderFragmentProps {
-    items: SerializedItem[],
+    event: EventWithItems,
+    categories: CategoryCode[]
+}>;
+type BidSheetReportRowFragmentProps = Dto<{
+    item: Item,
+    category: CategoryCode
+}>;
+type BidSheetReportRangeHeaderFragmentProps = {
+    items: Dto<Item>[],
     itemTagNumberGenerator: ItemTagNumberGenerator
 };
 
@@ -134,7 +132,7 @@ export function BidSheetReport({ title, event, categories }: BidSheetReportProps
 
     // This should split our items in half so they can
     // fit into two columns
-    const splitItems: SerializedItem[][] = [[], []];
+    const splitItems: Dto<Item>[][] = [[], []];
     const splitIndex = Math.trunc(sortedItems.length / 2 + 0.5);
     for (let i = 0; i < sortedItems.length; ++i) {
         splitItems[i < splitIndex ? 0 : 1].push(sortedItems[i]);

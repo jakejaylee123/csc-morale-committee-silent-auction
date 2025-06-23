@@ -1,4 +1,4 @@
-import * as React from "react";
+import { ReactElement, JSXElementConstructor } from "react";
 
 import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
@@ -14,7 +14,7 @@ export interface StandardModalProps {
     open: boolean,
     title?: string,
     description?: string,
-    children?: React.ReactElement<any, string | React.JSXElementConstructor<any>>,
+    children?: ReactElement<any, string | JSXElementConstructor<any>>,
     onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void
 };
 export type StandardOkModalProps = Omit<StandardModalProps, "children"> & {

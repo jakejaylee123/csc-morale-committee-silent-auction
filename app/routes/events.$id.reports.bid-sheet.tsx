@@ -1,4 +1,4 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
+import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import Fab from "@mui/material/Fab"; 
@@ -7,25 +7,23 @@ import Print from "@mui/icons-material/Print";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
-import { APP_NAME, Identifiers } from "~/commons/general.common";
+import { APP_NAME, Dto, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { BidSheetReport } from "~/components/BidSheetReport";
 import { CategoryCode } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
 import { EventCommon } from "~/commons/event.common";
 
-type EventReportBidSheetLoaderFunctionData = {
+type EventReportBidSheetLoaderFunctionData = Dto<{
     success: true,
     event: EventWithItems,
     categories: CategoryCode[]
 } | {
     success: false,
     error: string
-};
-type SerializedEventReportBidSheetLoaderFunctionData 
-    = SerializeFrom<EventReportBidSheetLoaderFunctionData>;
+}>;
 
-export const loader = async function ({ request, params }) {
+export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<EventReportBidSheetLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
@@ -34,35 +32,35 @@ export const loader = async function ({ request, params }) {
         : null;
 
     if (!event) {
-        return json({
+        return {
             success: false,
             error: `Event "${id}" was not found.`
-        } satisfies EventReportBidSheetLoaderFunctionData);
+        };
     } else if (!EventCommon.isEnabledAndActive(event) && !bidder.adminAssignment) {
-        return json({
+        return {
             success: false,
             error: "Only administrators can view bid sheets for disabled/inactive  events."
-        } satisfies EventReportBidSheetLoaderFunctionData);
+        };
     } else if (!event.items.length) {
-        return json({
+        return {
             success: false,
             error: `Event "${event.description}" does not have any items for a bid sheet report.`
-        } satisfies EventReportBidSheetLoaderFunctionData);
+        };
     }
 
-    return json({
+    return {
         success: true,
-        event,
+        event: EventService.toDtoWithItems(event),
         categories: await CategoryService.getAll()
-    } satisfies EventReportBidSheetLoaderFunctionData);
-} satisfies LoaderFunction;
+    };
+};
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export const meta: MetaFunction<typeof loader> = function (_) {
     return [{ title: `${APP_NAME}: Bid sheet report` }];
 };
 
 export default function EventReportBidSheet() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedEventReportBidSheetLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     if (!result?.success) {
         return (
             <>

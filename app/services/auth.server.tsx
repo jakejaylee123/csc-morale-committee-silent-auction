@@ -1,6 +1,6 @@
 import { Authenticator } from "remix-auth";
 import { MicrosoftStrategy } from "remix-auth-microsoft";
-import { redirect, SerializeFrom } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 
 import { sessionStorage } from "./session.server";
 import { BidderService, AuthenticatedBidder, BidderWithAdmin } from "./users.server";
@@ -17,18 +17,16 @@ declare global {
     }
 };
 
-export interface BidderAuthentication {
+export type BidderAuthentication = {
     bidder: AuthenticatedBidder,
     authenticatedAt: string
 };
-export type SerializedBidderAuthentication = SerializeFrom<BidderAuthentication>;
 
-export interface FullBidderAuthentication extends BidderAuthentication {
+export type FullBidderAuthentication = BidderAuthentication & {
     fullBidder: BidderWithAdmin
 };
-export type SerializedFullBidderAuthentication = SerializeFrom<FullBidderAuthentication>;
 
-export interface AuthenticatedBidderOptions {
+export type AuthenticatedBidderOptions = {
     mustBeAdmin?: boolean,
     withFullBidder?: boolean
 };

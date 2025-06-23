@@ -1,6 +1,5 @@
 import { Item } from "@prisma/client";
 import { CategoryHash } from "~/services/category.server";
-import { SerializedItem } from "~/services/event.server";
 
 export type ItemTagNumberGeneratorArgs = {
     categoryId: number,

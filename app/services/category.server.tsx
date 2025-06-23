@@ -1,12 +1,14 @@
 import { PrismaClient, CategoryCode } from "@prisma/client";
-import { SerializeFrom } from "@remix-run/node";
+import { Dto } from "~/commons/general.common";
 
-export type SerializedCategoryCode = SerializeFrom<CategoryCode>;
-
-export type CategoryHash = { [key: number]: SerializedCategoryCode };
+export type CategoryHash = Dto<{ [key: number]: CategoryCode }>;
 
 export class CategoryService {
     private static readonly client = new PrismaClient();
+
+    public static toDto(code: CategoryCode): Dto<CategoryCode> {
+        return { ...code };
+    }
 
     public static async getAll(): Promise<CategoryCode[]> {
         return await CategoryService.client.categoryCode.findMany({

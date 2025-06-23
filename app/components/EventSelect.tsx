@@ -8,8 +8,8 @@ import Typography, { TypographyOwnProps } from "@mui/material/Typography";
 
 import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
 
-import { SerializedEvent } from "~/services/event.server";
-import { GetPropertyType } from "~/commons/general.common";
+import { EventWithConvenience } from "~/services/event.server";
+import { Dto, GetPropertyType } from "~/commons/general.common";
 
 type TypographyVariant = GetPropertyType<TypographyOwnProps, "variant">;
 export type EventSelectChangeEvent = SelectChangeEvent<string>;
@@ -17,7 +17,7 @@ export interface EventSelectProps {
     title: string,
     emptyMessage?: string,
     emptyMessageStyle?: TypographyVariant,
-    events: SerializedEvent[]
+    events: Dto<EventWithConvenience>[]
     value: string | undefined,
     onBlur?: React.FocusEventHandler<any>;
     onChange?: (event: EventSelectChangeEvent, child: React.ReactNode) => void;

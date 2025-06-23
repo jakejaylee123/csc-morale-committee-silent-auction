@@ -1,8 +1,7 @@
-import { SerializeFrom } from "@remix-run/node";
-
 import { PrismaClient, Event, Item } from "@prisma/client";
 import { DateTime } from "luxon";
-import { DateTimeField } from "@mui/x-date-pickers";
+import { Dto } from "~/commons/general.common";
+import { ItemService } from "./item.server";
 
 export interface EventGetOptions {
     withItems?: boolean,
@@ -34,15 +33,27 @@ export type EventWithConvenience = Event & {
 };
 export type EventWithItems = EventWithConvenience & { items: Item[] };
 
-export type SerializedEvent = SerializeFrom<EventWithConvenience>;
-export type SerializedNullableEvent = SerializeFrom<EventWithConvenience | null>;
-export type SerializedEventWithItems = SerializeFrom<EventWithItems>;
-export type SerializedNullableEventWithItems = SerializeFrom<EventWithItems | null>;
-
-export type SerializedItem = SerializeFrom<Item>;
-
 export class EventService {
     private static readonly client = new PrismaClient();
+
+    public static toDto(event: Event): Dto<Event> {
+        return {
+            ...event
+        };
+    }
+
+    public static toDtoWithConvenience(event: EventWithConvenience): Dto<EventWithConvenience> {
+        return {
+            ...event
+        };
+    }
+
+    public static toDtoWithItems(event: EventWithItems): Dto<EventWithItems> {
+        return {
+            ...event,
+            items: event.items.map(ItemService.toDto)
+        };
+    }
 
     /**
      * @returns All auctions.

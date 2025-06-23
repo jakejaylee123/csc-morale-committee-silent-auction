@@ -1,29 +1,28 @@
-import type { LoaderFunction, SerializeFrom } from "@remix-run/node";
+import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json, MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
-import { APP_NAME, Identifiers } from "~/commons/general.common";
+import { APP_NAME, Dto, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryCode, Event, Item } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
 import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { WinnerReport } from "~/components/WinnerReport";
+import { ItemService } from "~/services/item.server";
 
-type AdminEventReportWinnersLoaderFunctionData = {
+type AdminEventReportWinnersLoaderFunctionData = Dto<{
     success: true,
-    event: Event,
+    event: EventWithItems,
     categories: CategoryCode[],
     winningBids: BidWithItemAndBidder[],
     disqualifiedItems: Item[]
 } | {
     success: false,
     error: string
-};
-type SerializedAdminEventReportWinnersLoaderFunctionData
-    = SerializeFrom<AdminEventReportWinnersLoaderFunctionData>;
+}>;
 
-export const loader = async function ({ request, params }) {
+export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<AdminEventReportWinnersLoaderFunctionData> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -34,10 +33,10 @@ export const loader = async function ({ request, params }) {
         : null;
 
     if (!event) {
-        return json({
+        return {
             success: false,
             error: `Event "${id}" was not found.`
-        } satisfies AdminEventReportWinnersLoaderFunctionData);
+        };
     }
 
     const winningBids = await BidService.getWinning({ 
@@ -46,21 +45,21 @@ export const loader = async function ({ request, params }) {
         withBidder: true
     });
 
-    return json({
+    return {
         success: true,
-        event: event,
-        disqualifiedItems: event.items,
+        event: EventService.toDtoWithItems(event),
+        disqualifiedItems: event.items.map(ItemService.toDto),
         categories: await CategoryService.getAll(),
-        winningBids
-    } satisfies AdminEventReportWinnersLoaderFunctionData);
-} satisfies LoaderFunction;
+        winningBids: winningBids.map(BidService.toDtoWithItemAndBidder)
+    };
+};
 
 export const meta: MetaFunction<typeof loader> = function ({ data }) {
     return [{ title: `${APP_NAME}: Event winners report` }];
 };
 
 export default function AdminEventReportWinners() {
-    const result = useLoaderData<typeof loader>() satisfies SerializedAdminEventReportWinnersLoaderFunctionData;
+    const result = useLoaderData<typeof loader>();
     console.log(result);
     if (!result?.success) {
         return (
@@ -73,13 +72,21 @@ export default function AdminEventReportWinners() {
         );
     }
     
-    const { event } = result;
+    const { 
+        event,
+        categories,
+        winningBids,
+        disqualifiedItems
+    } = result;
     return (
         <>
             <GleamingHeader />
             <WinnerReport 
                 title={`Winning Bids for Auction Event: "${event.description}"`}
-                {...result} 
+                event={event}
+                categories={categories}
+                winningBids={winningBids}
+                disqualifiedItems={disqualifiedItems}
             />
         </>
     );

@@ -1,4 +1,7 @@
-import * as React from "react";
+import { 
+    ReactNode,
+    useState
+} from "react";
 
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -8,36 +11,38 @@ import PlayArrow from "@mui/icons-material/PlayArrow";
 import Article from "@mui/icons-material/Article";
 import AutoAwesome from "@mui/icons-material/AutoAwesome";
 
+import { Event } from "@prisma/client";
+
 import { EventCommon } from "~/commons/event.common";
-import { SerializedEvent } from "~/services/event.server";
 
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
 import { StyledBox } from "./StyledBox";
+import { Dto } from "~/commons/general.common";
+import { EventWithConvenience } from "~/services/event.server";
 
-
-export interface DashboardProps {
-    events: SerializedEvent[]
-};
+export type DashboardProps = Dto<{
+    events: EventWithConvenience[]
+}>;
 
 export function Dashboard({ events }: DashboardProps) {
-    const [selectedEventId, setSelectedEventId] = React.useState<string | undefined>(undefined);
+    const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);
 
-    const onEventSelectionUpdated = function (event: EventSelectChangeEvent, child: React.ReactNode) {
+    const onEventSelectionUpdated = function (event: EventSelectChangeEvent, _: ReactNode) {
         setSelectedEventId(event.target.value);
     };
 
-    const getEvent = function (eventIdString: string | undefined): SerializedEvent | undefined {
+    const getEvent = function (eventIdString: string | undefined): Dto<EventWithConvenience> | undefined {
         return eventIdString 
             ? events.find(event => event.id === parseInt(eventIdString))
             : undefined;
     };
 
-    const isEnabledAndActive = function (event: SerializedEvent | undefined): boolean {
+    const isEnabledAndActive = function (event: Dto<EventWithConvenience> | undefined): boolean {
         if (!event) return false;
         return EventCommon.isEnabledAndActive(event);
     };
 
-    const isEnabledAndConcluded = function (event: SerializedEvent | undefined): boolean {
+    const isEnabledAndConcluded = function (event: Dto<EventWithConvenience> | undefined): boolean {
         if (!event) return false;
         return EventCommon.isEnabledAndConcluded(event);
     }

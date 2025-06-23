@@ -1,10 +1,10 @@
 import { PrismaClient, Bid, Item, Bidder } from "@prisma/client";
-import { SerializeFrom } from "@remix-run/node";
 import { DateTime } from "luxon";
+import { Dto } from "~/commons/general.common";
+import { ItemService } from "./item.server";
+import { BidderService } from "./users.server";
 
 type BidVariant = Bid | BidWithItem | BidWithBidder | BidWithItemAndBidder;
-
-export type SerializedBid = SerializeFrom<Bid>;
 
 type GetBidArgs = {
     forEventId: number,
@@ -46,20 +46,45 @@ export interface BidCreation {
 export type BidWithItem = Bid & {
     item: Item
 };
-export type SerializedBidWithItem = SerializeFrom<BidWithItem>;
-
 export type BidWithBidder = Bid & {
     bidder: Bidder
 };
-export type SerializedBidWithBidder = SerializeFrom<BidWithBidder>;
-
-export type BidWithItemAndBidder = BidWithItem & {
-    bidder: Bidder
-};
-export type SerializedBidWithItemAndBidder = SerializeFrom<BidWithItemAndBidder>;
+export type BidWithItemAndBidder = BidWithItem & BidWithBidder;
 
 export class BidService {
     private static readonly client = new PrismaClient();
+
+    public static toDto(bid: Bid): Dto<Bid> {
+        return {
+            ...bid,
+            bidAmount: bid.bidAmount.toNumber()
+        }   
+    }
+
+    public static toDtoWithItem(bid: BidWithItem): Dto<BidWithItem> {
+        return {
+            ...bid,
+            bidAmount: bid.bidAmount.toNumber(),
+            item: ItemService.toDto(bid.item)
+        };
+    }
+
+    public static toDtoWithBidder(bid: BidWithBidder): Dto<BidWithBidder> {
+        return {
+            ...bid,
+            bidAmount: bid.bidAmount.toNumber(),
+            bidder: BidderService.toDto(bid.bidder)
+        };
+    }
+
+    public static toDtoWithItemAndBidder(bid: BidWithItemAndBidder): Dto<BidWithItemAndBidder> {
+        return {
+            ...bid,
+            bidAmount: bid.bidAmount.toNumber(),
+            item: ItemService.toDto(bid.item),
+            bidder: BidderService.toDto(bid.bidder)
+        };
+    }
 
     public static async getById(id: number): Promise<Bid | null | undefined> {
         return await BidService.client.bid.findUnique({

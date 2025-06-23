@@ -1,11 +1,11 @@
-import * as React from "react";
+import { ReactNode } from "react";
 
 import Grow from "@mui/material/Grow";
 
 import theme from "~/theme";
 
 export type DefaultTransitionProps = {
-    children: React.ReactNode
+    children: ReactNode
 };
 
 export function DefaultTransition({ children }: DefaultTransitionProps) {

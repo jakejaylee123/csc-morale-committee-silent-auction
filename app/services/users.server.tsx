@@ -1,5 +1,6 @@
 import { SerializeFrom } from "@remix-run/node";
 import { PrismaClient, Bidder, AdministrationAssignment } from "@prisma/client";
+import { Dto } from "~/commons/general.common";
 
 export interface BidderFindOrCreateOptions {
     profileId: string,
@@ -9,21 +10,25 @@ export interface BidderFindOrCreateOptions {
     lastName: string
 };
 
-export type SerializedBidder = SerializeFrom<Bidder>;
-
 export type BidderWithAdmin = Bidder & {
     adminAssignment: AdministrationAssignment | null
 };
-export type SerializedBidderWithAdmin = SerializeFrom<BidderWithAdmin>;
 
 // This is a typical bidder object, but only with minimal (and uniquely identifiable) information
 // that can be stored in a cookie session without hitting the size limit. If you need more information
 // than just the IDs, you should use the `BidderWithAdmin` type (and its serialized version).
 export type AuthenticatedBidder = Pick<BidderWithAdmin, 
     "windowsId" | "id" | "adminAssignment">;
-export type SerializedAuthenticatedBidder = SerializeFrom<AuthenticatedBidder>;
 
 export class BidderService {
+    public static toDto(bidder: Bidder): Dto<Bidder> {
+        return { ...bidder }
+    }
+
+    public static toDtoWithAdminAssignment(bidder: BidderWithAdmin): Dto<BidderWithAdmin> {
+        return { ...bidder };
+    }
+
     /**
      * Finds a bidder based on the provided ID
      * @param id The ID of the user/bidder to retrieve.

@@ -1,52 +1,51 @@
-import { json, type ActionFunction, type ActionFunctionArgs, type SerializeFrom } from "@remix-run/node";
+import { json, type ActionFunction, type ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
 import { ItemCreate, ItemService, ItemUpdate } from "~/services/item.server";
-import { Identifiers } from "~/commons/general.common";
+import { Dto, Identifiers } from "~/commons/general.common";
 import { Item } from "@prisma/client";
 
-export type ItemUpdateResult = {
+export type ItemUpdateResult = Dto<{
     operation: "create" | "update"
     item: Item
-};
+}>;
 
-export type EventItemUpdateResult = {
+export type EventItemUpdateResult = Dto<{
     success: true
     results: ItemUpdateResult[]
 } | {
     success: false,
     errors: { index: number | string, messages: string[] }[];
-};
-export type SerializedEventItemUpdateResult = SerializeFrom<EventItemUpdateResult>;
+}>;
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export const action = async function ({ request, params }: ActionFunctionArgs): Promise<EventItemUpdateResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
 
     const { id } = params;
     if (!Identifiers.isIntegerId(id)) {
-        return json({
+        return {
             success: false,
             errors: [{
                 index: "N/A",
                 messages: [`The passed event ID "${id}" was not valid`]
             }]
-        } satisfies EventItemUpdateResult);
+        };
     }
 
     const formData = await request.formData();
     console.log(formData);
     const itemId = formData.get("id") as string;
     if (!Identifiers.isIntegerId(itemId) && !Identifiers.isNew(itemId)) {
-        return json({
+        return {
             success: false,
             errors: [{
                 index: "N/A",
                 messages: [`The passed item ID "${itemId}" was not valid`]
             }]
-        } satisfies EventItemUpdateResult);
+        };
     }
 
     const itemRowArray = [
@@ -68,7 +67,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     });
     console.log(requestResult);
     if (!requestResult.success) {
-        return json({
+        return {
             success: false,
             errors: Object
                 .keys(requestResult.errors)
@@ -76,7 +75,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                     index: key,
                     messages: requestResult.errors[key]
                 }))
-        } satisfies EventItemUpdateResult);
+        };
     }
 
     try {
@@ -86,7 +85,10 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             ? await ItemService.updateBulk(updateRequests as ItemUpdate[])
             : [];
         const updateResults = updatedItems
-            .map(item => ({ operation: "update", item } satisfies ItemUpdateResult));
+            .map(item => ({ 
+                operation: "update", 
+                item: ItemService.toDto(item)
+            } satisfies ItemUpdateResult));
 
         const createRequests = requestResult.requests
             .filter(request => !Object.hasOwn(request, "id"));
@@ -94,20 +96,23 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
             ? await ItemService.createBulk(createRequests as ItemCreate[])
             : [];
         const createResults = createdItems
-            .map(item => ({ operation: "create", item } satisfies ItemUpdateResult));
+            .map(item => ({ 
+                operation: "create", 
+                item: ItemService.toDto(item)
+            } satisfies ItemUpdateResult));
 
-        return json({ 
+        return { 
             success: true,
             results: [...updateResults, ...createResults]
-        } satisfies EventItemUpdateResult);
+        };
     } catch (error) {
         console.log({ error });
-        return json({
+        return {
             success: false,
             errors: [{
                 index: "N/A",
                 messages: [JSON.stringify(error)]
             }]
-        } satisfies EventItemUpdateResult);
+        };
     }
-} satisfies ActionFunction;
+};

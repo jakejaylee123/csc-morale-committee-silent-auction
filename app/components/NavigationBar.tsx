@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 
 import Avatar from "@mui/material/Avatar";
 import Link from "@mui/material/Link";
@@ -12,20 +12,19 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 
-import { useColorScheme } from "@mui/material/styles";
-
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import Menu from "@mui/icons-material/Menu";
 
-import { SerializedBidderWithAdmin } from "~/services/users.server";
+import { BidderWithAdmin } from "~/services/users.server";
 import { CscIcon } from "./CscIcon";
+import { Dto } from "~/commons/general.common";
 
-interface NavigationBarProps {
-    bidder?: SerializedBidderWithAdmin
-}
+type NavigationBarProps = {
+    bidder?: Dto<BidderWithAdmin>
+};
 
 export function NavigationBar({ bidder }: NavigationBarProps) {
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
 
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpen(newOpen);

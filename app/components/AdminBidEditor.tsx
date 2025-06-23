@@ -1,4 +1,8 @@
-import * as React from "react";
+import { 
+    useEffect,
+    useRef,
+    useState
+} from "react";
 import { useFetcher } from "@remix-run/react";
 
 import Button from "@mui/material/Button";
@@ -16,30 +20,31 @@ import {
     GridRowParams 
 } from "@mui/x-data-grid";
 
+import { CategoryCode } from "@prisma/client";
+
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
-import { MoneyFormatter } from "~/commons/general.common";
+import { Dto, MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
-import { SerializedAdminEventBidDisqualifyResult } from "~/routes/admin.events.$id.bids.disqualify";
-import { SerializedEvent } from "~/services/event.server";
-import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
-import { SerializedBidWithItemAndBidder } from "~/services/bid.server";
+import { EventWithConvenience } from "~/services/event.server";
+import { CategoryHash } from "~/services/category.server";
+import { BidWithItemAndBidder } from "~/services/bid.server";
 
 import { StyledBox } from "./StyledBox";
 import { GridQuickSearchToolbar } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
+import { AdminEventBidDisqualifyResult } from "~/routes/admin.events.$id.bids.disqualify";
 
-export interface AdminBidEditorProps {
-    event: SerializedEvent,
-    categories: SerializedCategoryCode[],
-    bids: SerializedBidWithItemAndBidder[]
-}
+export type AdminBidEditorProps = Dto<{
+    event: EventWithConvenience,
+    categories: CategoryCode[],
+    bids: BidWithItemAndBidder[]
+}>;
 
-interface AdminBidEditorDataSourceArgs {
-    event: SerializedEvent,
+type AdminBidEditorDataSourceArgs = Dto<{
     categoryHash: CategoryHash,
-    bids: SerializedBidWithItemAndBidder[]
-};
-interface AdminBidEditorDataSourceItem {
+    bids: BidWithItemAndBidder[]
+}>;
+type AdminBidEditorDataSourceItem = {
     // This ID is only used for the DataGridView we're using
     id: number
 
@@ -63,37 +68,26 @@ type BidConfirmButtonCreator = (
     args: BidConfirmButtonCreatorArgs
 ) => readonly React.ReactElement<GridActionsCellItemProps>[];
 
-type GetConfirmedBidTotalArgs = {
-    dataSource: AdminBidEditorDataSource
-    asFormattedString?: boolean
-};
-
 function createAdminBidEditorDataSource({ categoryHash, bids }: AdminBidEditorDataSourceArgs) {
     const generator = new ItemTagNumberGenerator(categoryHash);
     const sorter = new ItemTagNumberSorter(categoryHash);
 
-    const precursor = bids.map(bid => {
-        const minimumBid = bid.item.minimumBid
-            ? parseFloat(bid.item.minimumBid) : undefined;
-        const bidAmount = parseFloat(bid.bidAmount);
-
-        return {
-            bidId: bid.id,
-            itemId: bid.item.id,
+    const precursor = bids.map(bid => ({
+        bidId: bid.id,
+        itemId: bid.item.id,
+        categoryId: bid.item.categoryId,
+        categoryPrefix: categoryHash[bid.item.categoryId].prefix,
+        itemNumber: bid.item.itemNumber,
+        bidderName: `${bid.bidder.lastName}, ${bid.bidder.firstName}`,
+        itemTagNumber: generator.getItemTagNumber({
             categoryId: bid.item.categoryId,
-            categoryPrefix: categoryHash[bid.item.categoryId].prefix,
-            itemNumber: bid.item.itemNumber,
-            bidderName: `${bid.bidder.lastName}, ${bid.bidder.firstName}`,
-            itemTagNumber: generator.getItemTagNumber({
-                categoryId: bid.item.categoryId,
-                itemNumber: bid.item.itemNumber
-            }),
-            itemDescription: bid.item.itemDescription,
-            minimumBid,
-            bidAmount,
-            disqualified: bid.disqualified || bid.item.disqualified
-        };
-    });
+            itemNumber: bid.item.itemNumber
+        }),
+        itemDescription: bid.item.itemDescription,
+        minimumBid: bid?.item?.minimumBid || undefined,
+        bidAmount: bid.bidAmount,
+        disqualified: bid.disqualified || bid.item.disqualified
+    }));
     
     const sortedPrecursor = sorter.getSortedItems(precursor);
     return sortedPrecursor.map((item, index) => ({
@@ -118,31 +112,29 @@ const getRowClassName = function (params: GridRowClassNameParams<AdminBidEditorD
 }
 
 export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps) {
-    const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
-    const [currentBids, setCurrentBids] = React.useState(bids || []);
+    const categoryHash = useRef(CategoryCommon.convertCategoryArrayToHash(categories));
+    const [currentBids, setCurrentBids] = useState(bids || []);
     
-    const [rows, setRows] = React.useState<AdminBidEditorDataSource>(createAdminBidEditorDataSource({
-        event,
+    const [rows, setRows] = useState<AdminBidEditorDataSource>(createAdminBidEditorDataSource({
         categoryHash: categoryHash.current,
         bids: currentBids
     }));
-    React.useEffect(() => {
+    useEffect(() => {
         setRows(() => createAdminBidEditorDataSource({
-            event,
             categoryHash: categoryHash.current,
             bids: currentBids
         }));
     }, [currentBids]);
 
-    const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
+    const [snackbar, setSnackbar] = useState<StandardSnackbarProps | null>(null);
     const columnVisibilityModel: GridColumnVisibilityModel = {
         "disqualified": false
     };
 
     // We use this fetcher to submit bids, and then
     // we use an effect to listen for the response we get back
-    const bidDisqualifyFetcher = useFetcher<SerializedAdminEventBidDisqualifyResult>();
-    React.useEffect(() => {
+    const bidDisqualifyFetcher = useFetcher<AdminEventBidDisqualifyResult>();
+    useEffect(() => {
         if (bidDisqualifyFetcher.state === "idle" && bidDisqualifyFetcher.data) {
             if (true === bidDisqualifyFetcher.data.success) {
                 const updatedBid = bidDisqualifyFetcher.data.bid;

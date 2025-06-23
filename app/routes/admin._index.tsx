@@ -1,39 +1,33 @@
-import type { LoaderFunction } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
-
-import { Event } from "@prisma/client";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { AdminDashboard } from "~/components/AdminDashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, SerializedEvent } from "~/services/event.server";
+import { EventService, EventWithConvenience } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { APP_NAME } from "~/commons/general.common";
+import { APP_NAME, Dto } from "~/commons/general.common";
 
-interface AdminLoaderFunctionData {
-    events: Event[]
-};
-interface SerializedAdminLoaderFunctionData {
-    events: SerializedEvent[]
-};
+type AdminLoaderFunctionData = Dto<{
+    events: EventWithConvenience[]
+}>;
 
-export const loader = async function ({ request }) {
+export const loader = async function ({ request }: LoaderFunctionArgs): Promise<AdminLoaderFunctionData> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
     
-    const data = {
-        events: await EventService.getAll()
-    } satisfies AdminLoaderFunctionData;
-
-    return json(data);
-} satisfies LoaderFunction;
+    const events = await EventService.getAll();
+    return {
+        events: events.map(EventService.toDtoWithConvenience)
+    };
+};
 
 export const meta: MetaFunction<typeof loader> = function ({ data }) {
     return [{ title: `${APP_NAME}: Administration` }];
 };
 
 export default function Admin() {
-    const { events } = useLoaderData<typeof loader>() satisfies SerializedAdminLoaderFunctionData;
+    const { events } = useLoaderData<typeof loader>();
     
     return (
         <>

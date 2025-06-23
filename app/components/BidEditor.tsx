@@ -1,4 +1,8 @@
-import * as React from "react";
+import { 
+    useEffect,
+    useRef,
+    useState
+} from "react";
 import { useFetcher } from "@remix-run/react";
 
 import Alert from "@mui/material/Alert";
@@ -20,33 +24,33 @@ import {
     GridRowParams
 } from "@mui/x-data-grid";
 
-import { CategoryHash, SerializedCategoryCode } from "~/services/category.server";
-import { SerializedBid } from "~/services/bid.server";
-import { SerializedEventWithItems } from "~/services/event.server";
+import { CategoryCode, Bid } from "@prisma/client";
+
+import { CategoryHash } from "~/services/category.server";
 
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
-import { MoneyFormatter } from "~/commons/general.common";
+import { Dto, MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
-
-import { SerializedBidUpdateResult } from "~/routes/events.$id.bids.update";
+import { EventWithItems } from "~/services/event.server";
 
 import { StyledBox } from "./StyledBox";
 import { GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
+import { BidUpdateResult } from "~/routes/events.$id.bids.update";
 
 const FILTER_ID_CONFIRMED_BIDS = "confirmed-bids-filter";
 
-export interface BidEditorProps {
-    event: SerializedEventWithItems,
-    categories: SerializedCategoryCode[],
-    bids: SerializedBid[]
-}
+export type BidEditorProps = {
+    event: Dto<EventWithItems>,
+    categories: Dto<CategoryCode>[],
+    bids: Dto<Bid>[]
+};
 
-interface BidEditorDataSourceArgs {
-    event: SerializedEventWithItems,
+type BidEditorDataSourceArgs = {
+    event: Dto<EventWithItems>,
     categoryHash: CategoryHash,
-    bids: SerializedBid[]
+    bids: Dto<Bid>[]
 };
 interface BidEditorDataSourceItem {
     // This ID is only used for the DataGridView we're using
@@ -84,17 +88,12 @@ type GetConfirmedBidTotalArgs = {
     asFormattedString?: boolean
 };
 
-function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataSourceArgs) {
+function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataSourceArgs): BidEditorDataSource {
     const generator = new ItemTagNumberGenerator(categoryHash);
     const sorter = new ItemTagNumberSorter(categoryHash);
 
     const precursor = event.items.map(item => {
         const currentBid = bids.find(bid => bid.itemId === item.id);
-        const minimumBid = item.minimumBid
-            ? parseFloat(item.minimumBid) : undefined;
-        const bidAmount = currentBid?.bidAmount
-            ? parseFloat(currentBid.bidAmount) : undefined;
-
         return {
             itemId: item.id,
             categoryId: item.categoryId,
@@ -105,10 +104,10 @@ function createBidEditorDataSource({ event, categoryHash, bids }: BidEditorDataS
                 itemNumber: item.itemNumber
             }),
             itemDescription: item.itemDescription,
-            minimumBid,
+            minimumBid: item?.minimumBid || undefined,
             confirmed: !!currentBid,
             confirming: false,
-            bidAmount
+            bidAmount: currentBid?.bidAmount
         };
     });
     
@@ -198,20 +197,20 @@ function ConfirmedBidsOnlyCheckbox({ statesRef, onFilterModelChange }: Confirmed
 }
 
 export function BidEditor({ event, categories, bids }: BidEditorProps) {
-    const categoryHash = React.useRef(CategoryCommon.convertCategoryArrayToHash(categories));
+    const categoryHash = useRef(CategoryCommon.convertCategoryArrayToHash(categories));
     
-    const [currentBids, setCurrentBids] = React.useState(bids || []);
+    const [currentBids, setCurrentBids] = useState(bids || []);
     const refreshCurrentBids = function () {
         setCurrentBids(oldBids => oldBids);
     };
-    const [auctionConcludedModalOpen, setAuctionConcludedModalOpen] = React.useState(false);
+    const [auctionConcludedModalOpen, setAuctionConcludedModalOpen] = useState(false);
     
-    const [rows, setRows] = React.useState<BidEditorDataSource>(createBidEditorDataSource({
+    const [rows, setRows] = useState<BidEditorDataSource>(createBidEditorDataSource({
         event,
         categoryHash: categoryHash.current,
         bids: currentBids
     }));
-    React.useEffect(() => {
+    useEffect(() => {
         setRows(() => createBidEditorDataSource({
             event,
             categoryHash: categoryHash.current,
@@ -219,9 +218,9 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
         }));
     }, [currentBids]);
 
-    const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
+    const [snackbar, setSnackbar] = useState<StandardSnackbarProps | null>(null);
 
-    const checkboxFilterStatesRef = React.useRef<GridQuickSearchFilterCheckboxStates>({
+    const checkboxFilterStatesRef = useRef<GridQuickSearchFilterCheckboxStates>({
         [FILTER_ID_CONFIRMED_BIDS]: {
             apply: false,
             filter: { 
@@ -233,7 +232,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
             }
         }
     });
-    const [filterModel, setFilterModel] = React.useState<GridFilterModel>({
+    const [filterModel, setFilterModel] = useState<GridFilterModel>({
         items: []
     });
     const onFilterModelChange = function (model?: GridFilterModel) {
@@ -260,8 +259,8 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
 
     // We use this fetcher to submit bids, and then
     // we use an effect to listen for the response we get back
-    const bidFetcher = useFetcher<SerializedBidUpdateResult>();
-    React.useEffect(() => {
+    const bidFetcher = useFetcher<BidUpdateResult>();
+    useEffect(() => {
         if (bidFetcher.state !== "idle" && bidFetcher.data) {
             console.log("Bid fetcher data: ", bidFetcher.data);
             if (true === bidFetcher.data.success) {

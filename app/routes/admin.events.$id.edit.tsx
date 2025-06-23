@@ -1,29 +1,25 @@
-import type { ActionFunction, ActionFunctionArgs, LoaderFunction, SerializeFrom } from "@remix-run/node";
+import type { ActionFunction, ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json, MetaFunction, useActionData, useLoaderData } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithItems, SerializedNullableEventWithItems } from "~/services/event.server";
-import { APP_NAME, Identifiers } from "~/commons/general.common";
+import { EventService, EventWithItems } from "~/services/event.server";
+import { APP_NAME, Dto, Identifiers } from "~/commons/general.common";
 import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { CategoryService, SerializedCategoryCode } from "~/services/category.server";
+import { CategoryService } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
 import { StandardSnackbar, StandardSnackbarProps } from "~/components/StandardSnackbar";
 import React from "react";
 
-interface EventEditLoaderFunctionData {
+type EventEditLoaderFunctionData = Dto<{
     event: EventWithItems | null,
     categories: CategoryCode[]
-};
-interface SerializedEventEditLoaderFunctionData {
-    event: SerializedNullableEventWithItems
-    categories: SerializedCategoryCode[]
-};
+}>;
 
 export type EventUpdateType = "create" | "update" | "none";
-export type EventUpdateResult = {
+export type EventUpdateResult = Dto<{
     success: false,
     type: EventUpdateType,
     error: string
@@ -31,13 +27,11 @@ export type EventUpdateResult = {
     success: true,
     type: EventUpdateType,
     event: Event
-};
-export type SerializedEventUpdateResult = SerializeFrom<EventUpdateResult>;
-export type SerializedNullableEventUpdateResult = SerializedEventUpdateResult | null | undefined;
+}>;
 
 const REQUEST_DATE_FORMAT = "MM/dd/yyyy hh:mm a";
 
-export const loader = async function ({ request, params }) {
+export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<EventEditLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -45,7 +39,7 @@ export const loader = async function ({ request, params }) {
     const { id } = params;
 
     const currentDate = DateTime.now().toUTC().toJSDate();
-    const event = Identifiers.isNew(id)
+    const event: EventWithItems | null = Identifiers.isNew(id)
         ? {
             id: 0,
             description: "",
@@ -62,22 +56,29 @@ export const loader = async function ({ request, params }) {
             concluded: false,
             active: false,
             releaseWinners: false
-        } satisfies EventWithItems
+        }
         : Identifiers.isIntegerId(id)
             ? await EventService.get(parseInt(id), { withItems: true })
             : null;
+    const eventDto: Dto<EventWithItems | null> = event === null ? null : {
+        ...event,
+        items: event.items.map(item => ({
+            ...item,
+            minimumBid: item?.minimumBid?.toNumber() || null
+        }))
+    };
 
-    return json({
-        event,
+    return {
+        event: event === null ? null : EventService.toDtoWithItems(event),
         categories: await CategoryService.getAll()
-    } satisfies EventEditLoaderFunctionData);
-} satisfies LoaderFunction;
+    };
+};
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export const meta: MetaFunction<typeof loader> = function (_) {
     return [{ title: `${APP_NAME}: Manage event` }];
 };
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export const action = async function ({ request, params }: ActionFunctionArgs): Promise<EventUpdateResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -121,33 +122,33 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
                 }
             });
         } else {
-            return json({
+            return {
                 success: false,
                 type,
                 error: `The passed event ID "${id}" was not valid.`
-            } satisfies EventUpdateResult);
+            };
         }
     } catch (error) {
-        return json({
+        return {
             success: false,
             type,
             error: JSON.stringify(error)
-        } satisfies EventUpdateResult);
+        };
     }
 
-    return json({
+    return {
         success: true,
         type,
         event: changedEvent
-    } satisfies EventUpdateResult);
-} satisfies ActionFunction;
+    };
+};
 
 export default function AdminEventEdit() {
     const {
         event,
         categories
-    } = useLoaderData<typeof loader>() satisfies SerializedEventEditLoaderFunctionData;
-    const result = useActionData<typeof action>() satisfies SerializedNullableEventUpdateResult;
+    } = useLoaderData<typeof loader>();
+    const result = useActionData<typeof action>();
 
     // If we successfully made an auction event, we can change the URL to
     // the proper URL of the newly created auction

@@ -1,4 +1,7 @@
-import * as React from "react";
+import { 
+    useEffect,
+    useState
+} from "react";
 import { Form } from "@remix-run/react";
 
 import { DateTime } from "luxon";
@@ -18,17 +21,17 @@ import Save from "@mui/icons-material/Save";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
-import { SerializedNullableEventWithItems } from "~/services/event.server";
-import { SerializedCategoryCode } from "~/services/category.server";
-
 import { StyledBox } from "./StyledBox";
 import { EventItemsEditor } from "./EventItemsEditor";
 import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
+import { Dto } from "~/commons/general.common";
+import { CategoryCode } from "@prisma/client";
+import { EventWithItems } from "~/services/event.server";
 
-export interface EventEditorProps {
-    event: SerializedNullableEventWithItems,
-    categories: SerializedCategoryCode[]
-};
+export type EventEditorProps = Dto<{
+    event: EventWithItems | null,
+    categories: CategoryCode[]
+}>;
 
 type NullableDateTime = DateTime<true> | DateTime<false> | null;
 
@@ -41,16 +44,16 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     }
 
     const isNew = event.id === 0;
-    const [description, setDescription] = React.useState(isNew ? "" : event.description);
-    const [enabled, setEnabled] = React.useState(isNew ? true : event.enabled);
-    const [releaseWinners, setReleaseWinners] = React.useState(isNew ? false : event.releaseWinners)
-    const [startDate, setStartDate] = React.useState<NullableDateTime>(null);
-    const [endDate, setEndDate] = React.useState<NullableDateTime>(null);
-    const [zoneName, setZoneName] = React.useState("");
+    const [description, setDescription] = useState(isNew ? "" : event.description);
+    const [enabled, setEnabled] = useState(isNew ? true : event.enabled);
+    const [releaseWinners, setReleaseWinners] = useState(isNew ? false : event.releaseWinners)
+    const [startDate, setStartDate] = useState<NullableDateTime>(null);
+    const [endDate, setEndDate] = useState<NullableDateTime>(null);
+    const [zoneName, setZoneName] = useState("");
 
-    React.useEffect(() => {
-        setStartDate(isNew ? DateTime.now() : DateTime.fromISO(event.startsAt))
-        setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromISO(event.endsAt))
+    useEffect(() => {
+        setStartDate(isNew ? DateTime.now() : DateTime.fromJSDate(event.startsAt))
+        setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromJSDate(event.endsAt))
         setZoneName(DateTime.local().zoneName);
     }, []);
 

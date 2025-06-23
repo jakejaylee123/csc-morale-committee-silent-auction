@@ -1,61 +1,65 @@
-import type { ActionFunction, ActionFunctionArgs, SerializeFrom } from "@remix-run/node";
-import { json } from "@remix-run/react";
+import type { ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { Identifiers } from "~/commons/general.common";
+import { Dto, Identifiers } from "~/commons/general.common";
 import { Bid } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 
-type AdminEventBidDisqualifyResult = {
+export type AdminEventBidDisqualifyResult = Dto<{
     success: true,
     bid: Bid
 } | {
     success: false,
     error: string
-};
-export type SerializedAdminEventBidDisqualifyResult = SerializeFrom<AdminEventBidDisqualifyResult>;
+}>;
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export const action = async function ({ request, params }: ActionFunctionArgs): Promise<AdminEventBidDisqualifyResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
 
     const { id } = params;
     if (!Identifiers.isIntegerId(id)) {
-        return json({
+        return {
             success: false,
             error: `The passed event ID "${id}" was not valid.`
-        } satisfies AdminEventBidDisqualifyResult);
+        };
     }
 
     const formData = await request.formData();
     const bidId = formData.get("bidId") as string;
     if (!Identifiers.isIntegerId(bidId)) {
-        return json({
+        return {
             success: false,
             error: `The passed bid ID "${bidId}" was not valid.`
-        } satisfies AdminEventBidDisqualifyResult);
+        };
     }
 
     const parsedBidId = parseInt(bidId);
     const currentBid = await BidService.getById(parsedBidId);
     if (!currentBid) {
-        return json({
+        return {
             success: false,
             error: `The bid referenced by ID "${bidId}" was not found.`
-        } satisfies AdminEventBidDisqualifyResult);
+        };
     }
 
+    const disqualifiedBid = await BidService.disqualify(parsedBidId, bidder.id);
+    const disqualifiedBidDto = {
+        ...disqualifiedBid,
+        bidAmount: disqualifiedBid.bidAmount.toNumber()
+    };
+
     try {
-        return json({ 
+        return { 
             success: true,
-            bid: await BidService.disqualify(parsedBidId, bidder.id)
-        } satisfies AdminEventBidDisqualifyResult);
+            bid: disqualifiedBidDto
+        };
     } catch (error) {
         console.log("Error trying to disqualify bid: ", error);
-        return json({
+        return {
             success: false,
             error: JSON.stringify(error)
-        } satisfies AdminEventBidDisqualifyResult);
+        };
     }
-} satisfies ActionFunction;
+};

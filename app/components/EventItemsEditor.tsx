@@ -1,4 +1,8 @@
-import * as React from "react";
+import { 
+    useEffect,
+    useRef,
+    useState
+} from "react";
 import { FetcherWithComponents, useFetcher } from "@remix-run/react";
 
 import { DateTime } from "luxon";
@@ -34,33 +38,34 @@ import {
     ToolbarButton
 } from "@mui/x-data-grid";
 
-import { SerializedItem, SerializedNullableEventWithItems } from "~/services/event.server";
-import { SerializedCategoryCode } from "~/services/category.server";
-import { EventItemUpdateResult, SerializedEventItemUpdateResult} from "~/routes/admin.events.$id.items.update";
-import { EventItemDeleteResult, SerializedEventItemDeleteResult } from "~/routes/admin.events.$id.items.delete";
-import { MoneyFormatter } from "~/commons/general.common";
+import { CategoryCode, Item } from "@prisma/client";
+
+import { EventWithItems } from "~/services/event.server";
+import { EventItemUpdateResult} from "~/routes/admin.events.$id.items.update";
+import { EventItemDeleteResult, } from "~/routes/admin.events.$id.items.delete";
+import { Dto, MoneyFormatter } from "~/commons/general.common";
 
 import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 
-export interface EventItemsEditorToolbarProps {
-    event: SerializedNullableEventWithItems,
-    categories: SerializedCategoryCode[],
-    itemFetcher: FetcherWithComponents<SerializedEventItemUpdateResult>
-}
-export interface EventItemsEditorProps {
-    event: SerializedNullableEventWithItems,
-    categories: SerializedCategoryCode[]
-}
+export type EventItemsEditorToolbarProps = {
+    event: Dto<EventWithItems | null>,
+    categories: Dto<CategoryCode>[],
+    itemFetcher: FetcherWithComponents<EventItemUpdateResult>
+};
+export type EventItemsEditorProps = Dto<{
+    event: EventWithItems | null,
+    categories: CategoryCode[]
+}>;
 
 function EventItemsEditorToolbar({
     event,
     categories,
     itemFetcher
 }: EventItemsEditorToolbarProps) {
-    const [newPanelOpen, setNewPanelOpen] = React.useState(false);
-    const newPanelTriggerRef = React.useRef<HTMLButtonElement>(null);
+    const [newPanelOpen, setNewPanelOpen] = useState(false);
+    const newPanelTriggerRef = useRef<HTMLButtonElement>(null);
 
     const handleClose = () => {
         setNewPanelOpen(false);
@@ -87,7 +92,7 @@ function EventItemsEditorToolbar({
                 disqualifiedBy: null
             };
 
-            itemFetcher.submit(newItem, {
+            itemFetcher.submit(newItem as any, {
                 method: "POST",
                 action: `/admin/events/${event.id}/items/update`
             });
@@ -209,16 +214,16 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         );
     }
 
-    const [uploadCsvModalOpen, setUploadCsvModalOpen] = React.useState(false);
-    const [rows, setRows] = React.useState<SerializedItem[]>(event?.items || []);
-    const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
-    const [snackbar, setSnackbar] = React.useState<StandardSnackbarProps | null>(null);
-    const [sortModel, _] = React.useState<GridSortModel>([{ field: "id", sort: "desc" }]);
+    const [uploadCsvModalOpen, setUploadCsvModalOpen] = useState(false);
+    const [rows, setRows] = useState<Dto<Item>[]>(event?.items || []);
+    const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+    const [snackbar, setSnackbar] = useState<StandardSnackbarProps | null>(null);
+    const [sortModel, _] = useState<GridSortModel>([{ field: "id", sort: "desc" }]);
 
     // We use this fetcher to send requests to update/create items, and then
     // we use an effect to listen for the response we get back
     const itemFetcher = useFetcher<EventItemUpdateResult>();
-    React.useEffect(() => {
+    useEffect(() => {
         if (itemFetcher.state === "idle" && itemFetcher.data) {
             console.log(itemFetcher.data);
             setRows(oldRows => oldRows.filter((row) => row.id !== 0));
@@ -248,9 +253,9 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     // We use this fetcher to send requests to delete items, and then
     // we use an effect to listen for the response we get back
     const itemDeleteFetcher = useFetcher<EventItemDeleteResult>();
-    React.useEffect(() => {
+    useEffect(() => {
         if (itemDeleteFetcher.state === "idle" && itemDeleteFetcher.data) {
-            const deleteData = itemDeleteFetcher.data as SerializedEventItemDeleteResult;
+            const deleteData = itemDeleteFetcher.data;
             if (deleteData.success) {
                 setRows(rows.filter((row) => row.id !== deleteData.deletedItemId));
 
@@ -284,11 +289,11 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         }
     };
 
-    const onRowUpdate = function (newItem: SerializedItem, oldItem: SerializedItem) {
+    const onRowUpdate = function (newItem: Dto<Item>, oldItem: Dto<Item>) {
         try {
             // We will process the result of this submission
             // in the "useEffect" that listens to this "itemFetcher"
-            itemFetcher.submit(newItem, {
+            itemFetcher.submit(newItem as any, {
                 method: "POST",
                 action: `/admin/events/${event.id}/items/update`
             });
@@ -310,12 +315,12 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         setSnackbar(null);
     };
 
-    const columns: GridColDef<SerializedItem>[] = [
+    const columns: GridColDef<Dto<Item>>[] = [
         {
             field: "delete",
             headerName: "",
             type: "actions",
-            getActions: ({ id }: GridRowParams<SerializedItem>) => {
+            getActions: ({ id }: GridRowParams<Dto<Item>>) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
                 return isInEditMode ? [] : [
                     <GridActionsCellItem

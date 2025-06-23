@@ -1,41 +1,35 @@
-import type { LoaderFunction } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { Dashboard } from "~/components/Dashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithConvenience, SerializedEvent } from "~/services/event.server";
+import { EventService, EventWithConvenience } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { BidderWithAdmin, SerializedBidderWithAdmin } from "~/services/users.server";
-import { APP_NAME } from "~/commons/general.common";
+import { BidderWithAdmin } from "~/services/users.server";
+import { APP_NAME, Dto } from "~/commons/general.common";
 
-interface IndexLoaderFunctionData {
+type IndexLoaderFunctionData = Dto<{
     bidder: BidderWithAdmin,
     events: EventWithConvenience[]
-};
-interface SerializedIndexLoaderFunctionData {
-    bidder: SerializedBidderWithAdmin,
-    events: SerializedEvent[]
-};
+}>;
 
-export const loader = async function ({ request }) {
+export const loader = async function ({ request }: LoaderFunctionArgs): Promise<IndexLoaderFunctionData> {
     const { fullBidder } = await requireAuthenticatedBidder(request, {
         withFullBidder: true
     });
 
-    const data = {
+    return {
         bidder: fullBidder,
         events: await EventService.getEnabledActiveAndPast()
-    } satisfies IndexLoaderFunctionData;
+    };
+};
 
-    return json(data);
-} satisfies LoaderFunction;
-
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export const meta: MetaFunction<typeof loader> = function (_) {
     return [{ title: `${APP_NAME}: Dashboard` }];
 };
 
 export default function Index() {
-    const { events, bidder } = useLoaderData<typeof loader>() satisfies SerializedIndexLoaderFunctionData;
+    const { events, bidder } = useLoaderData<typeof loader>();
 
     return (
         <>
