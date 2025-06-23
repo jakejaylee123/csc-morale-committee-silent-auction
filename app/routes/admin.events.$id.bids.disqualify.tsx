@@ -38,9 +38,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     }
 
     const parsedBidId = parseInt(bidId);
-    const currentBid = await BidService.get({ 
-        forBidId: parsedBidId
-    });
+    const currentBid = await BidService.getById(parsedBidId);
     if (!currentBid) {
         return json({
             success: false,
@@ -51,9 +49,7 @@ export const action = async function ({ request, params }: ActionFunctionArgs) {
     try {
         return json({ 
             success: true,
-            bid: await BidService.disqualify(bidder.id, {
-                forBidId: parsedBidId
-            })
+            bid: await BidService.disqualify(parsedBidId, bidder.id)
         } satisfies AdminEventBidDisqualifyResult);
     } catch (error) {
         console.log("Error trying to disqualify bid: ", error);

@@ -6,15 +6,11 @@ type BidVariant = Bid | BidWithItem | BidWithBidder | BidWithItemAndBidder;
 
 export type SerializedBid = SerializeFrom<Bid>;
 
-type IdBasedGetBidArgs = {
-    forBidId: number
-};
-type NonIdBasedGetBidArgs = {
+type GetBidArgs = {
     forEventId: number,
     forBidderId: number,
     forItemId: number
 };
-export type GetBidArgs = IdBasedGetBidArgs | NonIdBasedGetBidArgs;
 
 type InclusionArgs = {
     withItem?: boolean,
@@ -65,14 +61,18 @@ export type SerializedBidWithItemAndBidder = SerializeFrom<BidWithItemAndBidder>
 export class BidService {
     private static readonly client = new PrismaClient();
 
+    public static async getById(id: number): Promise<Bid | null | undefined> {
+        return await BidService.client.bid.findUnique({
+            where: { id }
+        });
+    }
+
     public static async get(args: GetBidArgs): Promise<Bid | null | undefined> {
         return await BidService.client.bid.findFirst({
             where: {
-                ...("forBidId" in args ? { id: args.forBidId } : {
-                    eventId: args.forEventId,
-                    bidderId: args.forBidderId,
-                    itemId: args.forItemId
-                })
+                eventId: args.forEventId,
+                bidderId: args.forBidderId,
+                itemId: args.forItemId
             }
         });
     }
@@ -156,11 +156,11 @@ export class BidService {
         });
     }
 
-    public static async disqualify(disqualifyingBidderId: number, { forBidId }: IdBasedGetBidArgs): Promise<Bid> {
+    public static async disqualify(id: number, disqualifyingBidderId: number): Promise<Bid> {
         const currentDate = DateTime.now().toUTC().toJSDate();
 
         return await BidService.client.bid.update({
-            where: { id: forBidId },
+            where: { id },
             data: {
                 disqualified: true,
                 disqualifiedBy: disqualifyingBidderId,
