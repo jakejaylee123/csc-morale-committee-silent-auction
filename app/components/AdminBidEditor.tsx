@@ -3,7 +3,7 @@ import {
     useRef,
     useState
 } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher } from "react-router";
 
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -150,7 +150,7 @@ export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps)
         }
     }, [bidDisqualifyFetcher]);
 
-    const onRowEditStop: GridEventListener<'rowEditStop'> = function (params, event) {
+    const onRowEditStop: GridEventListener<"rowEditStop"> = function (params, event) {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
         }

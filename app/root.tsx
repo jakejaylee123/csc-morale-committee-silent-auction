@@ -1,15 +1,5 @@
-import {
-    LinksFunction,
-    LoaderFunctionArgs
-} from "@remix-run/node";
-import {
-    Links,
-    Meta,
-    Outlet,
-    Scripts,
-    ScrollRestoration,
-    useLoaderData
-} from "@remix-run/react";
+import { LinksFunction, LoaderFunctionArgs } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "react-router";
 
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 

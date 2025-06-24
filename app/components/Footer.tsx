@@ -26,7 +26,7 @@ export function Footer() {
                 displayPrint: "none",
                 borderRadius: "0px",
                 display: "flex",
-                position: 'fixed',
+                position: "fixed",
                 bottom: 0,
                 left: 0,
                 right: 0

@@ -1,4 +1,4 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "react-router";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { Dto, Identifiers } from "~/commons/general.common";

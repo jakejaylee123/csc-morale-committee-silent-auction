@@ -1,6 +1,6 @@
 import { Authenticator } from "remix-auth";
 import { MicrosoftStrategy } from "remix-auth-microsoft";
-import { redirect } from "@remix-run/node";
+import { redirect } from "react-router";
 
 import { sessionStorage } from "./session.server";
 import { BidderService, AuthenticatedBidder, BidderWithAdmin } from "./users.server";

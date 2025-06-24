@@ -1,4 +1,4 @@
-import { LinksFunction } from "@remix-run/node";
+import { LinksFunction } from "react-router";
 
 export const getMuiLinks: LinksFunction = () => [
     // Google Fonts for MUI

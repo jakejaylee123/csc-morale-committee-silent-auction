@@ -6,37 +6,33 @@
 
 import { PassThrough } from "node:stream";
 
-import type { AppLoadContext, EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
-import { RemixServer } from "@remix-run/react";
+import type { EntryContext } from "react-router";
+import { createReadableStreamFromReadable } from "@react-router/node";
+import { ServerRouter } from "react-router";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import { MuiProvider } from "./components/MuiProvider";
 
-const ABORT_DELAY = 5_000;
+export const streamTimeout = 5000;
 
 export default function handleRequest(
     request: Request,
     responseStatusCode: number,
     responseHeaders: Headers,
-    remixContext: EntryContext,
-    // This is ignored so we can keep it in the template for visibility.  Feel
-    // free to delete this parameter in your app if you're not using it!
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    loadContext: AppLoadContext
+    reactRouterContext: EntryContext
 ) {
     return isbot(request.headers.get("user-agent") || "")
         ? handleBotRequest(
             request,
             responseStatusCode,
             responseHeaders,
-            remixContext
+            reactRouterContext
         )
         : handleBrowserRequest(
             request,
             responseStatusCode,
             responseHeaders,
-            remixContext
+            reactRouterContext
         );
 }
 
@@ -44,15 +40,14 @@ function handleBotRequest(
     request: Request,
     responseStatusCode: number,
     responseHeaders: Headers,
-    remixContext: EntryContext
+    reactRouterContext: EntryContext
 ) {
     return new Promise((resolve, reject) => {
         let shellRendered = false;
         const { pipe, abort } = renderToPipeableStream(
-            <RemixServer
-                context={remixContext}
+            <ServerRouter
+                context={reactRouterContext}
                 url={request.url}
-                abortDelay={ABORT_DELAY}
             />,
             {
                 onAllReady() {
@@ -86,7 +81,7 @@ function handleBotRequest(
             }
         );
 
-        setTimeout(abort, ABORT_DELAY);
+        setTimeout(abort, streamTimeout + 1000);
     });
 }
 
@@ -94,16 +89,15 @@ function handleBrowserRequest(
     request: Request,
     responseStatusCode: number,
     responseHeaders: Headers,
-    remixContext: EntryContext
+    reactRouterContext: EntryContext
 ) {
     return new Promise((resolve, reject) => {
         let shellRendered = false;
         const { pipe, abort } = renderToPipeableStream(
             <MuiProvider>
-                <RemixServer
-                    context={remixContext}
+                <ServerRouter
+                    context={reactRouterContext}
                     url={request.url}
-                    abortDelay={ABORT_DELAY}
                 />
             </MuiProvider>,
             {
@@ -138,6 +132,6 @@ function handleBrowserRequest(
             }
         );
 
-        setTimeout(abort, ABORT_DELAY);
+        setTimeout(abort, streamTimeout + 1000);
     });
 }

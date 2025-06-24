@@ -3,7 +3,7 @@ import {
     useRef,
     useState
 } from "react";
-import { FetcherWithComponents, useFetcher } from "@remix-run/react";
+import { FetcherWithComponents, useFetcher } from "react-router";
 
 import { DateTime } from "luxon";
 
@@ -104,7 +104,7 @@ function EventItemsEditorToolbar({
     };
 
     const handleKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === 'Escape') {
+        if (event.key === "Escape") {
             handleClose();
         }
     };
@@ -131,8 +131,8 @@ function EventItemsEditorToolbar({
             >
                 <Paper 
                     sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
+                        display: "flex",
+                        flexDirection: "column",
                         gap: 2,
                         width: 300,
                         p: 2,
@@ -233,7 +233,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                     .map(result => result.item);
                 setRows(oldRows => [...oldRows, ...createdRows]);
 
-                setSnackbar({ alerts: [{ message: 'Item successfully saved', severity: 'success' }] });
+                setSnackbar({ alerts: [{ message: "Item successfully saved", severity: "success" }] });
             } else {
                 setSnackbar({
                     alerts: [{

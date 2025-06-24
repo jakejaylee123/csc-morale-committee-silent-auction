@@ -13,7 +13,7 @@ export class CategoryService {
     public static async getAll(): Promise<CategoryCode[]> {
         return await CategoryService.client.categoryCode.findMany({
             orderBy: [
-                { prefix: 'asc' }
+                { prefix: "asc" }
             ]
         });
     }

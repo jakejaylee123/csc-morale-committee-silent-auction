@@ -1,5 +1,5 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import type { ActionFunctionArgs } from "react-router";
+import { useActionData } from "react-router";
 
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -148,7 +148,7 @@ export default function EventItemUploadResults() {
                                         (result.errors || []).map((error, index) => (
                                             <TableRow
                                                 key={`row-${index}`}
-                                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                                             >
                                                 <TableCell
                                                     component="th"

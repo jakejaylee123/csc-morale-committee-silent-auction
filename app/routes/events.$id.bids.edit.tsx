@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs, MetaDescriptor } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaDescriptor } from "react-router";
+import { useLoaderData } from "react-router";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";

@@ -1,4 +1,4 @@
-import { createTheme, alpha } from '@mui/material/styles';
+import { createTheme, alpha } from "@mui/material/styles";
 
 export const brand = {
     50: "hsl(210, 100%, 97%)",
@@ -243,7 +243,7 @@ export default createTheme({
                 root: ({ theme }) => ({
                     padding: "6px",
                     border: "1px solid black",
-                    ...theme.applyStyles('dark', {
+                    ...theme.applyStyles("dark", {
                         border: "1px solid white",
                         "@media print": {
                             border: "1px solid black",
@@ -256,7 +256,7 @@ export default createTheme({
         MuiTypography: {
             styleOverrides: {
                 root: ({ theme }) => ({
-                    ...theme.applyStyles('dark', {
+                    ...theme.applyStyles("dark", {
                         "@media print": {
                             color: "black",
                         }
@@ -268,7 +268,7 @@ export default createTheme({
             styleOverrides: {
                 root: ({ theme }) => ({
                     backgroundColor: "rgba(0, 0, 0, 0)",
-                    ...theme.applyStyles('dark', {
+                    ...theme.applyStyles("dark", {
                         backgroundColor: "rgba(0, 0, 0, 0)",
                     }),
                 })

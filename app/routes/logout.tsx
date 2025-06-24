@@ -1,4 +1,4 @@
-import { redirect } from "@remix-run/node";
+import { redirect } from "react-router";
 
 import { SESSION_COOKIE_HEADER, sessionStorage } from "~/services/session.server";
 
