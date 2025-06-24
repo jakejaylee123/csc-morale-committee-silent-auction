@@ -13,7 +13,7 @@ import { Dto, GetPropertyType } from "~/commons/general.common";
 
 type TypographyVariant = GetPropertyType<TypographyOwnProps, "variant">;
 export type EventSelectChangeEvent = SelectChangeEvent<string>;
-export interface EventSelectProps {
+export type EventSelectProps = {
     title: string,
     emptyMessage?: string,
     emptyMessageStyle?: TypographyVariant,

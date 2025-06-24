@@ -14,15 +14,15 @@ import { CategoryCommon } from "~/commons/category.common";
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { Dto, MoneyFormatter } from "~/commons/general.common";
 
-export type BidSheetReportProps = Dto<{
+export type BidSheetReportProps = {
     title: string,
-    event: EventWithItems,
-    categories: CategoryCode[]
-}>;
-type BidSheetReportRowFragmentProps = Dto<{
-    item: Item,
-    category: CategoryCode
-}>;
+    event: Dto<EventWithItems>,
+    categories: Dto<CategoryCode>[]
+};
+type BidSheetReportRowFragmentProps = {
+    item: Dto<Item>,
+    category: Dto<CategoryCode>
+};
 type BidSheetReportRangeHeaderFragmentProps = {
     items: Dto<Item>[],
     itemTagNumberGenerator: ItemTagNumberGenerator

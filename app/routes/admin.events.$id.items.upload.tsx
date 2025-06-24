@@ -1,4 +1,4 @@
-import type { ActionFunction, ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 
 import List from "@mui/material/List";
@@ -15,14 +15,14 @@ import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { ItemService } from "~/services/item.server";
 import { StyledBox } from "~/components/StyledBox";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { Dto, Identifiers } from "~/commons/general.common";
+import { Identifiers } from "~/commons/general.common";
 
-export type EventItemUploadResult = Dto<{
+export type EventItemUploadResult = {
     success: true
 } | {
     success: false,
     errors: { index: number | string, messages: string[] }[];
-}>;
+};
 
 const ITEM_UPLOAD_FORM_DATA_FILE = "uploadFile";
 
@@ -37,11 +37,11 @@ const ITEM_ROW_ARRAY_INDICES: readonly number[] = [
     ITEM_ROW_ARRAY_INDEX_MIN_BID
 ];
 
-export const loader = async function (_: LoaderFunctionArgs) {
+export async function loader() {
     return null;
 };
 
-export const action = async function ({ request, params }: ActionFunctionArgs): Promise<EventItemUploadResult> {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventItemUploadResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });

@@ -1,28 +1,28 @@
-import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { MetaFunction, useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
 import { APP_NAME, Dto, Identifiers } from "~/commons/general.common";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { CategoryCode, Event, Item } from "@prisma/client";
+import { CategoryCode, Item } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
 import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { WinnerReport } from "~/components/WinnerReport";
 import { ItemService } from "~/services/item.server";
 
-type AdminEventReportWinnersLoaderFunctionData = Dto<{
+type AdminEventReportWinnersLoaderFunctionData = {
     success: true,
-    event: EventWithItems,
-    categories: CategoryCode[],
-    winningBids: BidWithItemAndBidder[],
-    disqualifiedItems: Item[]
+    event: Dto<EventWithItems>,
+    categories: Dto<CategoryCode>[],
+    winningBids: Dto<BidWithItemAndBidder>[],
+    disqualifiedItems: Dto<Item>[]
 } | {
     success: false,
     error: string
-}>;
+};
 
-export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<AdminEventReportWinnersLoaderFunctionData> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<AdminEventReportWinnersLoaderFunctionData> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });

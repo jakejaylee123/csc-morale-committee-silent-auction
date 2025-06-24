@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaDescriptor } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { Dashboard } from "~/components/Dashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
@@ -8,12 +8,12 @@ import { GleamingHeader } from "~/components/GleamingHeader";
 import { BidderWithAdmin } from "~/services/users.server";
 import { APP_NAME, Dto } from "~/commons/general.common";
 
-type IndexLoaderFunctionData = Dto<{
-    bidder: BidderWithAdmin,
-    events: EventWithConvenience[]
-}>;
+type IndexLoaderFunctionData = {
+    bidder: Dto<BidderWithAdmin>,
+    events: Dto<EventWithConvenience>[]
+};
 
-export const loader = async function ({ request }: LoaderFunctionArgs): Promise<IndexLoaderFunctionData> {
+export async function loader({ request }: LoaderFunctionArgs): Promise<IndexLoaderFunctionData> {
     const { fullBidder } = await requireAuthenticatedBidder(request, {
         withFullBidder: true
     });
@@ -24,7 +24,7 @@ export const loader = async function ({ request }: LoaderFunctionArgs): Promise<
     };
 };
 
-export const meta: MetaFunction<typeof loader> = function (_) {
+export function meta(): MetaDescriptor[] {
     return [{ title: `${APP_NAME}: Dashboard` }];
 };
 

@@ -28,10 +28,10 @@ import { Dto } from "~/commons/general.common";
 import { CategoryCode } from "@prisma/client";
 import { EventWithItems } from "~/services/event.server";
 
-export type EventEditorProps = Dto<{
-    event: EventWithItems | null,
-    categories: CategoryCode[]
-}>;
+export type EventEditorProps = {
+    event: Dto<EventWithItems | null>,
+    categories: Dto<CategoryCode>[]
+};
 
 type NullableDateTime = DateTime<true> | DateTime<false> | null;
 

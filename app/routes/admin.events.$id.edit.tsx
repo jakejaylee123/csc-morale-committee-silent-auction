@@ -1,5 +1,6 @@
-import type { ActionFunction, ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { json, MetaFunction, useActionData, useLoaderData } from "@remix-run/react";
+import { useEffect } from "react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { useActionData, useLoaderData } from "@remix-run/react";
 
 import { DateTime } from "luxon";
 
@@ -11,27 +12,26 @@ import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
 import { CategoryCode, Event } from "@prisma/client";
 import { StandardSnackbar, StandardSnackbarProps } from "~/components/StandardSnackbar";
-import React from "react";
 
-type EventEditLoaderFunctionData = Dto<{
-    event: EventWithItems | null,
+type EventEditLoaderFunctionData = {
+    event: Dto<EventWithItems | null>,
     categories: CategoryCode[]
-}>;
+};
 
 export type EventUpdateType = "create" | "update" | "none";
-export type EventUpdateResult = Dto<{
+export type EventUpdateResult = {
     success: false,
     type: EventUpdateType,
     error: string
 } | {
     success: true,
     type: EventUpdateType,
-    event: Event
-}>;
+    event: Dto<Event>
+};
 
 const REQUEST_DATE_FORMAT = "MM/dd/yyyy hh:mm a";
 
-export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<EventEditLoaderFunctionData> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventEditLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -74,11 +74,11 @@ export const loader = async function ({ request, params }: LoaderFunctionArgs): 
     };
 };
 
-export const meta: MetaFunction<typeof loader> = function (_) {
+export function meta() {
     return [{ title: `${APP_NAME}: Manage event` }];
 };
 
-export const action = async function ({ request, params }: ActionFunctionArgs): Promise<EventUpdateResult> {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventUpdateResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -152,7 +152,7 @@ export default function AdminEventEdit() {
 
     // If we successfully made an auction event, we can change the URL to
     // the proper URL of the newly created auction
-    React.useEffect(() => {
+    useEffect(() => {
         if (result?.success) {
             try {
                 window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);

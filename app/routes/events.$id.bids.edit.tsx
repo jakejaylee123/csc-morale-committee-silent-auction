@@ -1,5 +1,5 @@
-import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaDescriptor } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithItems } from "~/services/event.server";
@@ -11,17 +11,17 @@ import { BidService } from "~/services/bid.server";
 import { BidEditor } from "~/components/BidEditor";
 import { EventCommon } from "~/commons/event.common";
 
-type EventBidLoaderFunctionData = Dto<{
+type EventBidLoaderFunctionData = {
     success: true,
-    event: EventWithItems,
-    categories: CategoryCode[],
-    bids: Bid[]
+    event: Dto<EventWithItems>,
+    categories: Dto<CategoryCode>[],
+    bids: Dto<Bid>[]
 } | {
     success: false,
     error: string
-}>;
+};
 
-export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<EventBidLoaderFunctionData> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventBidLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
@@ -55,7 +55,7 @@ export const loader = async function ({ request, params }: LoaderFunctionArgs): 
     };
 };
 
-export const meta: MetaFunction<typeof loader> = function (_) {
+export function meta(): MetaDescriptor[] {
     return [{ title: `${APP_NAME}: Bid` }];
 };
 

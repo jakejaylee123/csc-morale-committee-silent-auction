@@ -37,9 +37,9 @@ import {
 import Stack from "@mui/material/Stack";
 import { Dto } from "./commons/general.common";
 
-export type RootLoaderFunctionData = Dto<{
-    authentication?: FullBidderAuthentication
-}>;
+export type RootLoaderFunctionData = {
+    authentication?: Dto<FullBidderAuthentication>
+};
 
 export const links: LinksFunction = () => [...getMuiLinks()];
 

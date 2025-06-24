@@ -54,10 +54,10 @@ export type EventItemsEditorToolbarProps = {
     categories: Dto<CategoryCode>[],
     itemFetcher: FetcherWithComponents<EventItemUpdateResult>
 };
-export type EventItemsEditorProps = Dto<{
-    event: EventWithItems | null,
-    categories: CategoryCode[]
-}>;
+export type EventItemsEditorProps = {
+    event: Dto<EventWithItems | null>,
+    categories: Dto<CategoryCode>[]
+};
 
 function EventItemsEditorToolbar({
     event,

@@ -16,31 +16,30 @@ import { CategoryCommon } from "~/commons/category.common";
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
 import { Dto, MoneyFormatter } from "~/commons/general.common";
 
-
-export type WinnerReportProps = Dto<{
+export type WinnerReportProps = {
     title: string,
-    event: EventWithConvenience,
-    categories: CategoryCode[],
-    winningBids: BidWithItemAndBidder[],
-    disqualifiedItems: Item[]
-}>;
+    event: Dto<EventWithConvenience>,
+    categories: Dto<CategoryCode>[],
+    winningBids: Dto<BidWithItemAndBidder>[],
+    disqualifiedItems: Dto<Item>[]
+};
 
-type WinnerReportDataSourceItem = Dto<{
+type WinnerReportDataSourceItem = {
     bidderId: number,
     bidderString: string,
-    winningBids: BidWithItemAndBidder[],
+    winningBids: Dto<BidWithItemAndBidder>[],
     total: number
-}>;
+};
 type WinnerReportDataSource = WinnerReportDataSourceItem[];
-export type WinnerReportDataSourceProps = Dto<{
+export type WinnerReportDataSourceProps = {
     categoryHash: CategoryHash,
-    winningBids: BidWithItemAndBidder[]
-}>;
+    winningBids: Dto<BidWithItemAndBidder>[]
+};
 
-type DisqualifiedItemsSubReportProps = Dto<{
+type DisqualifiedItemsSubReportProps = {
     categoryHash: CategoryHash,
-    disqualifiedItems: Item[]
-}>;
+    disqualifiedItems: Dto<Item>[]
+};
 
 type WinnerSubReportDataSource = WinnerReportDataSource;
 type WinnerSubReportProps = {

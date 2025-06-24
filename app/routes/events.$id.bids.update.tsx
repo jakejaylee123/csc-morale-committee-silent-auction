@@ -9,16 +9,16 @@ import { EventService } from "~/services/event.server";
 import { EventCommon } from "~/commons/event.common";
 import { ItemService } from "~/services/item.server";
 
-export type BidUpdateResult = Dto<{
+export type BidUpdateResult = {
     success: true,
-    bid: Bid
+    bid: Dto<Bid>
 } | {
     success: false,
     concluded: boolean,
     error: string;
-}>;
+};
 
-export const action = async function ({ request, params }: ActionFunctionArgs): Promise<BidUpdateResult> {
+export async function action({ request, params }: ActionFunctionArgs): Promise<BidUpdateResult> {
     const { bidder } = await requireAuthenticatedBidder(request);
 
     const { id } = params;

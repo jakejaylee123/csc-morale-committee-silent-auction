@@ -5,15 +5,15 @@ import { Dto, Identifiers } from "~/commons/general.common";
 import { Bid } from "@prisma/client";
 import { BidService } from "~/services/bid.server";
 
-export type AdminEventBidDisqualifyResult = Dto<{
+export type AdminEventBidDisqualifyResult = {
     success: true,
-    bid: Bid
+    bid: Dto<Bid>
 } | {
     success: false,
     error: string
-}>;
+};
 
-export const action = async function ({ request, params }: ActionFunctionArgs): Promise<AdminEventBidDisqualifyResult> {
+export async function action({ request, params }: ActionFunctionArgs): Promise<AdminEventBidDisqualifyResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });

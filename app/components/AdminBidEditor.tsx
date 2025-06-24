@@ -34,16 +34,16 @@ import { GridQuickSearchToolbar } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { AdminEventBidDisqualifyResult } from "~/routes/admin.events.$id.bids.disqualify";
 
-export type AdminBidEditorProps = Dto<{
-    event: EventWithConvenience,
-    categories: CategoryCode[],
-    bids: BidWithItemAndBidder[]
-}>;
+export type AdminBidEditorProps = {
+    event: Dto<EventWithConvenience>,
+    categories: Dto<CategoryCode>[],
+    bids: Dto<BidWithItemAndBidder>[]
+};
 
-type AdminBidEditorDataSourceArgs = Dto<{
+type AdminBidEditorDataSourceArgs = {
     categoryHash: CategoryHash,
-    bids: BidWithItemAndBidder[]
-}>;
+    bids: Dto<BidWithItemAndBidder>[]
+};
 type AdminBidEditorDataSourceItem = {
     // This ID is only used for the DataGridView we're using
     id: number

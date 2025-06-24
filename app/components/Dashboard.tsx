@@ -11,8 +11,6 @@ import PlayArrow from "@mui/icons-material/PlayArrow";
 import Article from "@mui/icons-material/Article";
 import AutoAwesome from "@mui/icons-material/AutoAwesome";
 
-import { Event } from "@prisma/client";
-
 import { EventCommon } from "~/commons/event.common";
 
 import { EventSelect, EventSelectChangeEvent } from "./EventSelect";
@@ -20,9 +18,9 @@ import { StyledBox } from "./StyledBox";
 import { Dto } from "~/commons/general.common";
 import { EventWithConvenience } from "~/services/event.server";
 
-export type DashboardProps = Dto<{
-    events: EventWithConvenience[]
-}>;
+export type DashboardProps = {
+    events: Dto<EventWithConvenience>[]
+};
 
 export function Dashboard({ events }: DashboardProps) {
     const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);

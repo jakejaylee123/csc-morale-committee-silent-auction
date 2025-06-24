@@ -1,5 +1,5 @@
-import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaDescriptor } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { EventService, EventWithConvenience } from "~/services/event.server";
@@ -10,17 +10,17 @@ import { CategoryCode } from "@prisma/client";
 import { BidService, BidWithItemAndBidder } from "~/services/bid.server";
 import { AdminBidEditor } from "~/components/AdminBidEditor";
 
-type AdminEventBidLoaderFunctionData = Dto<{
+type AdminEventBidLoaderFunctionData = {
     success: true,
-    event: EventWithConvenience,
-    categories: CategoryCode[],
-    bids: BidWithItemAndBidder[]
+    event: Dto<EventWithConvenience>,
+    categories: Dto<CategoryCode>[],
+    bids: Dto<BidWithItemAndBidder>[]
 } | {
     success: false,
     error: string
-}>;
+};
 
-export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<AdminEventBidLoaderFunctionData> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<AdminEventBidLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -53,7 +53,7 @@ export const loader = async function ({ request, params }: LoaderFunctionArgs): 
     };
 };
 
-export const meta: MetaFunction<typeof loader> = function (_) {
+export function meta(): MetaDescriptor[] {
     return [{ title: `${APP_NAME}: Manage bids` }];
 };
 

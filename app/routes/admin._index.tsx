@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaDescriptor } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import { AdminDashboard } from "~/components/AdminDashboard";
 import { requireAuthenticatedBidder } from "~/services/auth.server";
@@ -7,11 +7,11 @@ import { EventService, EventWithConvenience } from "~/services/event.server";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { APP_NAME, Dto } from "~/commons/general.common";
 
-type AdminLoaderFunctionData = Dto<{
-    events: EventWithConvenience[]
-}>;
+type AdminLoaderFunctionData = {
+    events: Dto<EventWithConvenience>[]
+};
 
-export const loader = async function ({ request }: LoaderFunctionArgs): Promise<AdminLoaderFunctionData> {
+export async function loader({ request }: LoaderFunctionArgs): Promise<AdminLoaderFunctionData> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -22,7 +22,7 @@ export const loader = async function ({ request }: LoaderFunctionArgs): Promise<
     };
 };
 
-export const meta: MetaFunction<typeof loader> = function ({ data }) {
+export function meta(): MetaDescriptor[] {
     return [{ title: `${APP_NAME}: Administration` }];
 };
 

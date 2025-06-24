@@ -1,7 +1,7 @@
 import { PrismaClient, CategoryCode } from "@prisma/client";
 import { Dto } from "~/commons/general.common";
 
-export type CategoryHash = Dto<{ [key: number]: CategoryCode }>;
+export type CategoryHash = { [key: number]: Dto<CategoryCode> };
 
 export class CategoryService {
     private static readonly client = new PrismaClient();

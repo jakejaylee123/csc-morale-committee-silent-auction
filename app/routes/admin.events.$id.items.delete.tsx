@@ -1,4 +1,4 @@
-import { json, type ActionFunction, type ActionFunctionArgs } from "@remix-run/node";
+import { type ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
@@ -13,42 +13,42 @@ export type EventItemDeleteResult = {
     errors: string[]
 };
 
-export const action = async function ({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventItemDeleteResult> {
     await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
 
     const { id } = params;
     if (!Identifiers.isIntegerId(id)) {
-        return json({
+        return {
             success: false,
             errors: [`The passed event ID "${id}" was not valid`]
-        } satisfies EventItemDeleteResult);
+        };
     }
 
     const formData = await request.formData();
     console.log(formData);
     const itemId = formData.get("id") as string;
     if (!Identifiers.isIntegerId(itemId)) {
-        return json({
+        return {
             success: false,
             errors: [`The passed item ID "${itemId}" was not valid`]
-        } satisfies EventItemDeleteResult);
+        };
     }
 
     try {
         const itemIdInt = parseInt(itemId);
         await ItemService.delete(itemIdInt);
 
-        return json({ 
+        return { 
             success: true,
             deletedItemId: itemIdInt
-        } satisfies EventItemDeleteResult);
+        };
     } catch (error) {
         console.log({ error });
-        return json({
+        return {
             success: false,
             errors: [JSON.stringify(error)]
-        } satisfies EventItemDeleteResult);
+        };
     }
-} satisfies ActionFunction;
+};

@@ -1,4 +1,4 @@
-import { json, type ActionFunction, type ActionFunctionArgs } from "@remix-run/node";
+import { type ActionFunctionArgs } from "@remix-run/node";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
@@ -6,20 +6,20 @@ import { ItemCreate, ItemService, ItemUpdate } from "~/services/item.server";
 import { Dto, Identifiers } from "~/commons/general.common";
 import { Item } from "@prisma/client";
 
-export type ItemUpdateResult = Dto<{
+export type ItemUpdateResult = {
     operation: "create" | "update"
-    item: Item
-}>;
+    item: Dto<Item>
+};
 
-export type EventItemUpdateResult = Dto<{
+export type EventItemUpdateResult = {
     success: true
     results: ItemUpdateResult[]
 } | {
     success: false,
     errors: { index: number | string, messages: string[] }[];
-}>;
+};
 
-export const action = async function ({ request, params }: ActionFunctionArgs): Promise<EventItemUpdateResult> {
+export async function action({ request, params }: ActionFunctionArgs): Promise<EventItemUpdateResult> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
@@ -84,22 +84,22 @@ export const action = async function ({ request, params }: ActionFunctionArgs): 
         const updatedItems = updateRequests.length
             ? await ItemService.updateBulk(updateRequests as ItemUpdate[])
             : [];
-        const updateResults = updatedItems
+        const updateResults: ItemUpdateResult[] = updatedItems
             .map(item => ({ 
                 operation: "update", 
                 item: ItemService.toDto(item)
-            } satisfies ItemUpdateResult));
+            }));
 
         const createRequests = requestResult.requests
             .filter(request => !Object.hasOwn(request, "id"));
         const createdItems = createRequests.length 
             ? await ItemService.createBulk(createRequests as ItemCreate[])
             : [];
-        const createResults = createdItems
+        const createResults: ItemUpdateResult[] = createdItems
             .map(item => ({ 
                 operation: "create", 
                 item: ItemService.toDto(item)
-            } satisfies ItemUpdateResult));
+            }));
 
         return { 
             success: true,

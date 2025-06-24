@@ -17,9 +17,9 @@ import { Dto } from "~/commons/general.common";
 import { EventWithConvenience } from "~/services/event.server";
 
 
-export type AdminDashboardProps = Dto<{
-    events: EventWithConvenience[]
-}>;
+export type AdminDashboardProps = {
+    events: Dto<EventWithConvenience>[]
+};
 
 export function AdminDashboard({ events }: AdminDashboardProps) {
     const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);

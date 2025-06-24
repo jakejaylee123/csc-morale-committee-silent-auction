@@ -1,5 +1,5 @@
-import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaDescriptor } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import Fab from "@mui/material/Fab"; 
 
@@ -14,16 +14,16 @@ import { CategoryCode } from "@prisma/client";
 import { CategoryService } from "~/services/category.server";
 import { EventCommon } from "~/commons/event.common";
 
-type EventReportBidSheetLoaderFunctionData = Dto<{
+type EventReportBidSheetLoaderFunctionData = {
     success: true,
-    event: EventWithItems,
-    categories: CategoryCode[]
+    event: Dto<EventWithItems>,
+    categories: Dto<CategoryCode>[]
 } | {
     success: false,
     error: string
-}>;
+};
 
-export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<EventReportBidSheetLoaderFunctionData> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventReportBidSheetLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
@@ -55,7 +55,7 @@ export const loader = async function ({ request, params }: LoaderFunctionArgs): 
     };
 };
 
-export const meta: MetaFunction<typeof loader> = function (_) {
+export function meta(): MetaDescriptor[] {
     return [{ title: `${APP_NAME}: Bid sheet report` }];
 };
 

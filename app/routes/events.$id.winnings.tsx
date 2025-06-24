@@ -11,18 +11,18 @@ import { BidService, BidWithItem } from "~/services/bid.server";
 import { Winnings } from "~/components/Winnings";
 import { EventCommon } from "~/commons/event.common";
 
-type EventWinningsLoaderFunctionData = Dto<{
+type EventWinningsLoaderFunctionData = {
     success: true,
     bidderId: number,
-    event: EventWithConvenience,
-    categories: CategoryCode[],
-    winningBids: BidWithItem[]
+    event: Dto<EventWithConvenience>,
+    categories: Dto<CategoryCode>[],
+    winningBids: Dto<BidWithItem>[]
 } | {
     success: false,
     error: string
-}>;
+};
 
-export const loader = async function ({ request, params }: LoaderFunctionArgs): Promise<EventWinningsLoaderFunctionData> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventWinningsLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request);
     
     const { id } = params;
