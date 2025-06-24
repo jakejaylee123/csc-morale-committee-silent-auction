@@ -68,11 +68,9 @@ type ConvertToSerializable<T, U, V> = T extends U
 export type Dto<T> = {
     [K in keyof T]: T[K] extends BasicSerializable | RemixSingleFetchSupportedTypes
     ? T[K]
-    : T[K] extends Prisma.Decimal
+    : T[K] extends Maybe<Prisma.Decimal>
         ? ConvertToSerializable<T[K], Prisma.Decimal, number>
-        : T[K] extends Maybe<Prisma.Decimal>
-            ? ConvertToSerializable<T[K], Prisma.Decimal, number>
-            : T[K] extends Maybe<Record<string, any>>
-                ? Dto<T[K]>
-                : never;
+        : T[K] extends Maybe<Record<string, any>>
+            ? Dto<T[K]>
+            : never;
 };
