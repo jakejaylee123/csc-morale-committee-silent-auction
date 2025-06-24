@@ -1,5 +1,4 @@
 import {
-    LoaderFunction,
     LinksFunction,
     LoaderFunctionArgs
 } from "@remix-run/node";
@@ -9,7 +8,6 @@ import {
     Outlet,
     Scripts,
     ScrollRestoration,
-    json,
     useLoaderData
 } from "@remix-run/react";
 

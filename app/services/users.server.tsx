@@ -1,4 +1,3 @@
-import { SerializeFrom } from "@remix-run/node";
 import { PrismaClient, Bidder, AdministrationAssignment } from "@prisma/client";
 import { Dto } from "~/commons/general.common";
 
