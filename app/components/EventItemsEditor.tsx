@@ -225,7 +225,6 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     const itemFetcher = useFetcher<EventItemUpdateResult>();
     useEffect(() => {
         if (itemFetcher.state === "idle" && itemFetcher.data) {
-            console.log(itemFetcher.data);
             setRows(oldRows => oldRows.filter((row) => row.id !== 0));
 
             if (itemFetcher.data.success) {
@@ -236,7 +235,6 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
 
                 setSnackbar({ alerts: [{ message: 'Item successfully saved', severity: 'success' }] });
             } else {
-
                 setSnackbar({
                     alerts: [{
                         message: itemFetcher.data.errors
@@ -282,8 +280,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         });
     };
 
-    const onRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
-        console.log("Preventing row edit stop behavior...");
+    const onRowEditStop: GridEventListener<"rowEditStop"> = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
         }
@@ -308,7 +305,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     };
 
     const onProcessRowUpdateError = (error: Error) => {
-        setSnackbar({ alerts: [{ message: error.message, severity: 'error' }] });
+        setSnackbar({ alerts: [{ message: error.message, severity: "error" }] });
     };
 
     const onCloseSnackbar = () => {

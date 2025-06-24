@@ -47,7 +47,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
     }
 
     const formData = await request.formData();
-    console.log(formData);
+    console.log("Form data for updating bid: ", formData);
 
     const itemId = formData.get("itemId") as string;
     if (!Identifiers.isIntegerId(itemId)) {
@@ -121,7 +121,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
             bid: BidService.toDto(newBid)
         };
     } catch (error) {
-        console.log({ error });
+        console.log("Error updating bid: ", error);
+
         return {
             success: false,
             concluded: false,

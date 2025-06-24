@@ -27,7 +27,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
     }
 
     const formData = await request.formData();
-    console.log(formData);
+    console.log("Form data form event item deletion: ", formData);
+
     const itemId = formData.get("id") as string;
     if (!Identifiers.isIntegerId(itemId)) {
         return {
@@ -45,7 +46,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
             deletedItemId: itemIdInt
         };
     } catch (error) {
-        console.log({ error });
+        console.log("Error deleting event item: ", error);
+        
         return {
             success: false,
             errors: [JSON.stringify(error)]

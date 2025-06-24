@@ -85,7 +85,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
 
     const { id } = params;
     const formData = await request.formData();
-    console.log(formData);
+    console.log("Form data for event edit: ", formData);
 
     const description = formData.get("description") as string;
     const enabled = "true" === formData.get("enabled");

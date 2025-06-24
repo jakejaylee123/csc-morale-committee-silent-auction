@@ -59,7 +59,7 @@ export class EventService {
      * @returns All auctions.
      */
     public static async getAll(): Promise<EventWithConvenience[]> {
-        return EventService.injectConvenienceProperties(await EventService.client.event.findMany({}));
+        return EventService.injectEventsWithConvenienceProperties(await EventService.client.event.findMany({}));
     }
 
     /**
@@ -68,7 +68,7 @@ export class EventService {
     public static async getEnabledActiveAndPast(): Promise<EventWithConvenience[]> {
         const currentDateTime = DateTime.utc().toJSDate();
         
-        return EventService.injectConvenienceProperties(
+        return EventService.injectEventsWithConvenienceProperties(
             await EventService.client.event.findMany({
                 where: { 
                     disabledAt: {
@@ -88,7 +88,7 @@ export class EventService {
     public static async getActive(): Promise<EventWithConvenience[]> {
         const currentDateTime = DateTime.utc().toJSDate();
         
-        return EventService.injectConvenienceProperties(
+        return EventService.injectEventsWithConvenienceProperties(
             await EventService.client.event.findMany({
                 where: { 
                     startsAt: {
@@ -106,13 +106,7 @@ export class EventService {
      * @param id ID of the corresponding event to get.
      * @returns Event that corresponds to passed ID.
      */
-    public static async get(id: number, options?: ({ 
-        withItems: true 
-    } | { 
-        withQualifiedItems: true 
-    } | { 
-        withDisqualifiedItems: true 
-    }) & EventGetOptions): Promise<EventWithItems | null>;
+    public static async get(id: number, options?: ({ withItems: true } | { withQualifiedItems: true } | { withDisqualifiedItems: true }) & EventGetOptions): Promise<EventWithItems | null>;
     public static async get(id: number, options?: EventGetOptions): Promise<EventWithItems | EventWithConvenience | null> {
         options = EventService.defaultifyEventGetOptions(options);
 
@@ -144,7 +138,7 @@ export class EventService {
         });
 
         return event
-            ? EventService.injectConvenienceProperties([event])[0]
+            ? EventService.injectEventWithConvenienceProperties(event)
             : null;
     }
 
@@ -155,7 +149,7 @@ export class EventService {
     public static async create({ creatorId, event }: EventCreateOptions): Promise<EventWithConvenience> {
         const currentDate = DateTime.utc().toJSDate();
 
-        return EventService.injectConvenienceProperties([
+        return EventService.injectEventWithConvenienceProperties(
             await EventService.client.event.create({
                 data: {
                     description: event.description,
@@ -172,7 +166,7 @@ export class EventService {
                     })
                 }
             })
-        ])[0];
+        );
     }
 
     /**
@@ -180,20 +174,19 @@ export class EventService {
      * @returns Event that corresponds to passed ID.
      */
     public static async update({ updatorId, event }: EventUpdateOptions): Promise<EventWithConvenience> {
-        console.log(event);
         const currentDate = DateTime.utc().toJSDate();
 
-        return EventService.injectConvenienceProperties([
+        return EventService.injectEventWithConvenienceProperties(
             await EventService.client.event.update({
                 where: { id: event.id },
                 data: {
+                    enabled: event.enabled,
                     description: event.description,
                     startsAt: event.startDate.toJSDate(),
                     endsAt: event.endDate.toJSDate(),
-                    createdAt: currentDate,
-                    createdBy: updatorId,
-                    enabled: event.enabled,
                     releaseWinners: event.releaseWinners,
+                    updatedAt: currentDate,
+                    updatedBy: updatorId,
                     disabledAt: null,
                     disabledBy: null,
                     ...(!event.enabled && {
@@ -202,21 +195,21 @@ export class EventService {
                     })
                 }
             })
-        ])[0];
+        );
     }
 
-    private static injectConvenienceProperties(events: Event[]): EventWithConvenience[] {
-        const currentDate = DateTime.utc().toJSDate();
-
-        console.log({
-            currentDate, events
-        })
-
-        return events.map(event => ({
+    private static injectEventWithConvenienceProperties(event: Event, currentDate?: Date): EventWithConvenience {
+        const dateToUse = currentDate || DateTime.utc().toJSDate();
+        return {
             ...event,
-            active: event.startsAt <= currentDate && event.endsAt >=currentDate,
-            concluded: event.endsAt <= currentDate
-        }));
+            active: event.startsAt <= dateToUse && event.endsAt >= dateToUse,
+            concluded: event.endsAt <= dateToUse
+        };
+    }
+
+    private static injectEventsWithConvenienceProperties(events: Event[]): EventWithConvenience[] {
+        const currentDate = DateTime.utc().toJSDate();
+        return events.map(event => EventService.injectEventWithConvenienceProperties(event, currentDate));
     }
 
     private static defaultifyEventGetOptions(options?: EventGetOptions): EventGetOptions {

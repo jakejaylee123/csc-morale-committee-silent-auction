@@ -36,7 +36,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
     }
 
     const formData = await request.formData();
-    console.log(formData);
+    console.log("Form data for updating event item: ", formData);
+
     const itemId = formData.get("id") as string;
     if (!Identifiers.isIntegerId(itemId) && !Identifiers.isNew(itemId)) {
         return {
@@ -65,7 +66,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
         eventId: parseInt(id),
         itemRowArrays: [itemRowArray]
     });
-    console.log(requestResult);
+    
+    console.log("Bulk change request creation result: ", requestResult);
     if (!requestResult.success) {
         return {
             success: false,
@@ -106,7 +108,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
             results: [...updateResults, ...createResults]
         };
     } catch (error) {
-        console.log({ error });
+        console.log("Error bulk-updating items: ", error);
         return {
             success: false,
             errors: [{

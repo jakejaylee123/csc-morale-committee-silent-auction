@@ -25,8 +25,6 @@ sessionStoragePrecursor.getSession = async function(cookieHeader, options) {
 
 const defaultCommitSession = sessionStoragePrecursor.commitSession;
 sessionStoragePrecursor.commitSession = async function(session, options) {
-    console.log("Committing session: ", JSON.stringify(session || {}, undefined, "\t"));
-    
     return defaultCommitSession(session, options);
 };
 

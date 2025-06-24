@@ -167,8 +167,7 @@ export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps)
                 });
             }
         } catch (error) {
-            console.log(error);
-            console.log("Error confirming bid: ", error);
+            console.log("Error submitting request to confirm bid: ", error);
         }
     };
 

@@ -60,8 +60,7 @@ export const meta: MetaFunction<typeof loader> = function ({ data }) {
 
 export default function AdminEventReportWinners() {
     const result = useLoaderData<typeof loader>();
-    console.log(result);
-    if (!result?.success) {
+    if (!result.success) {
         return (
             <>
                 <GleamingHeader
@@ -72,12 +71,7 @@ export default function AdminEventReportWinners() {
         );
     }
     
-    const { 
-        event,
-        categories,
-        winningBids,
-        disqualifiedItems
-    } = result;
+    const { event, categories, winningBids, disqualifiedItems } = result;
     return (
         <>
             <GleamingHeader />

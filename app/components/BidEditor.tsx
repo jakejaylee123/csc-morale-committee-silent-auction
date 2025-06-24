@@ -262,7 +262,6 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
     const bidFetcher = useFetcher<BidUpdateResult>();
     useEffect(() => {
         if (bidFetcher.state !== "idle" && bidFetcher.data) {
-            console.log("Bid fetcher data: ", bidFetcher.data);
             if (true === bidFetcher.data.success) {
                 const newBid = bidFetcher.data.bid;
                 setCurrentBids(oldBids => [...oldBids, newBid]);
@@ -278,7 +277,7 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
         }
     }, [bidFetcher]);
 
-    const onRowEditStop: GridEventListener<'rowEditStop'> = function (params, event) {
+    const onRowEditStop: GridEventListener<"rowEditStop"> = function (params, event) {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
         }
@@ -302,7 +301,6 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                 });
             }
         } catch (error) {
-            console.log(error);
             console.log("Error confirming bid: ", error);
         }
     };
