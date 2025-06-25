@@ -54,21 +54,25 @@ export function EventEditor({ event, categories }: EventEditorProps) {
 
     const eventSubmit = useSubmit();
     const onEventSubmit = function (formEvent: FormEvent<HTMLFormElement>) {
-        const formData = new FormData(formEvent.target as HTMLFormElement);
+        formEvent.preventDefault();
+        
         const eventToSubmit: BasicDto<NewOrExistingEvent> = {
-            id: "new",
-            description: formData.get("description") as string,
-            startsAt: formData.get("startsAt") as string,
-            endsAt: formData.get("endsAt") as string,
-            releaseWinners: formData.get("releaseWinners") as string === "true",
-            enabled: formData.get("enabled") as string === "true",
-            timezone: formData.get("timezone") as string
+            id: isNew ? "new" : event.id,
+            description: description,
+            startsAt: startDate?.toISO() as string,
+            endsAt: endDate?.toISO() as string,
+            releaseWinners: releaseWinners,
+            enabled: enabled,
+            timezone: zoneName
         };
 
         eventSubmit(eventToSubmit, {
             action: `/admin/events/${isNew ? "new" : event.id}/edit`,
             method: "POST",
-            encType: "application/json"
+            encType: "application/json",
+            navigate: true,
+            preventScrollReset: false,
+            replace: eventToSubmit.id !== "new"
         });
     };
 

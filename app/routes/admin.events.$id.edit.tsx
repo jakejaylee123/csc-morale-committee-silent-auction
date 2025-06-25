@@ -60,13 +60,6 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<E
         : Identifiers.isIntegerId(id)
             ? await EventService.get(parseInt(id), { withItems: true })
             : null;
-    const eventDto: Dto<EventWithItems | null> = event === null ? null : {
-        ...event,
-        items: event.items.map(item => ({
-            ...item,
-            minimumBid: item?.minimumBid?.toNumber() || null
-        }))
-    };
 
     return {
         event: event === null ? null : EventService.toDtoWithItems(event),
@@ -106,8 +99,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
                 event: {
                     description,
                     enabled,
-                    startDate: DateTime.fromFormat(startsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
-                    endDate: DateTime.fromFormat(endsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    startDate: DateTime.fromISO(startsAt, { zone: timezone }).toUTC().toJSDate(),
+                    endDate: DateTime.fromISO(endsAt, { zone: timezone }).toUTC().toJSDate(),
                 }
             });
         } else if (Identifiers.isIntegerId(id)) {
@@ -118,8 +111,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
                     id: parseInt(id),
                     description,
                     enabled,
-                    startDate: DateTime.fromFormat(startsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
-                    endDate: DateTime.fromFormat(endsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    startDate: DateTime.fromISO(startsAt, { zone: timezone }).toUTC().toJSDate(),
+                    endDate: DateTime.fromISO(endsAt, { zone: timezone }).toUTC().toJSDate(),
                     releaseWinners
                 }
             });
@@ -131,6 +124,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
             };
         }
     } catch (error) {
+        console.log("Error saving event edit: ", error);
+
         return {
             success: false,
             type,

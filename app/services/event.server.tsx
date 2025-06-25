@@ -6,7 +6,8 @@ import { ItemService } from "./item.server";
 export type NewEvent = Omit<Partial<Event>, "id"> & Pick<Event, "description" | "enabled" | "releaseWinners" | "startsAt" | "endsAt"> & {
     id: "new"
 };
-export type NewOrExistingEvent = (Event | NewEvent) & {
+export type NewOrExistingEvent = Omit<(Event | NewEvent), "id"> & {
+    id: number | "new",
     timezone?: string
 };
 
@@ -17,8 +18,8 @@ export interface EventGetOptions {
 };
 export interface EventCreation {
     description: string,
-    startDate: DateTime,
-    endDate: DateTime,
+    startDate: Date,
+    endDate: Date,
     enabled: boolean
 };
 export interface EventUpdate extends EventCreation {
@@ -160,8 +161,8 @@ export class EventService {
             await EventService.client.event.create({
                 data: {
                     description: event.description,
-                    startsAt: event.startDate.toJSDate(),
-                    endsAt: event.endDate.toJSDate(),
+                    startsAt: event.startDate,
+                    endsAt: event.endDate,
                     createdAt: currentDate,
                     createdBy: creatorId,
                     enabled: event.enabled,
@@ -189,8 +190,8 @@ export class EventService {
                 data: {
                     enabled: event.enabled,
                     description: event.description,
-                    startsAt: event.startDate.toJSDate(),
-                    endsAt: event.endDate.toJSDate(),
+                    startsAt: event.startDate,
+                    endsAt: event.endDate,
                     releaseWinners: event.releaseWinners,
                     updatedAt: currentDate,
                     updatedBy: updatorId,

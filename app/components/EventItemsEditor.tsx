@@ -1,4 +1,5 @@
 import { 
+    FormEventHandler,
     useEffect,
     useRef,
     useState
@@ -72,7 +73,7 @@ function EventItemsEditorToolbar({
         setNewPanelOpen(false);
     };
 
-    const handleSubmit = (formEvent: React.FormEvent) => {
+    const handleSubmit: FormEventHandler<HTMLFormElement> = (formEvent) => {
         formEvent.preventDefault();
         
         if (event) {
