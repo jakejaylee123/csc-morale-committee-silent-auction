@@ -1,28 +1,33 @@
 import type { ActionFunctionArgs } from "react-router";
 import { useActionData } from "react-router";
 
+import Alert from "@mui/material/Alert";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 import { ItemService, NewOrExistingItem } from "~/services/item.server";
 import { StyledBox } from "~/components/StyledBox";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { BasicDto, Identifiers } from "~/commons/general.common";
-import { DateTime } from "luxon";
 
 export type EventItemUploadResult = {
     success: true
 } | {
     success: false,
-    errors: { index: number | string, messages: string[] }[];
+    errors: { 
+        index: number | string, 
+        content?: string,
+        messages: string[] 
+    }[];
 };
 
 const ITEM_UPLOAD_FORM_DATA_FILE = "uploadFile";
@@ -66,11 +71,12 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
     const lineSplit = useCarriageReturn ? "\r\n" : "\n";
     const lines = fileString.split(lineSplit);
 
-    const rowArrays = lines.map(line => line.split(","));
-    const rowArrayValidations = rowArrays.map((array, index) => ({
-        array,
+    const splitLines = lines.map(line => line.split(","));
+    const rowArrayValidations = splitLines.map((splitLine, index) => ({
+        line: lines[index],
+        splitLine,
         index,
-        valid: array.length === ITEM_ROW_ARRAY_INDICES.length
+        valid: splitLine.length === ITEM_ROW_ARRAY_INDICES.length
     }));
     const badRowArrayValidations = rowArrayValidations
         .filter(validation => !validation.valid);
@@ -78,28 +84,22 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
     if (badRowArrayValidations.length) {
         return {
             success: false,
-            errors: badRowArrayValidations.map((_, index) => ({
+            errors: badRowArrayValidations.map((validation, index) => ({
                 index,
+                content: validation.line,
                 messages: [`Row did not have ${ITEM_ROW_ARRAY_INDICES.length} cells of data.`]
             }))
         };
     }
 
-    const itemRequests: BasicDto<NewOrExistingItem>[] = rowArrays.map(array => ({
+    const itemRequests: BasicDto<NewOrExistingItem>[] = splitLines.map(splitLine => ({
         id: "new",
         eventId: id,
-        categoryPrefix: array[ITEM_ROW_ARRAY_INDEX_CATEGORY],
-        itemNumber: Number(array[ITEM_ROW_ARRAY_INDEX_NUMBER]),
-        itemDescription: array[ITEM_ROW_ARRAY_INDEX_DESC],
-        minimumBid: array[ITEM_ROW_ARRAY_INDEX_MIN_BID] ? Number(array[ITEM_ROW_ARRAY_INDEX_MIN_BID]) : null,
+        categoryPrefix: splitLine[ITEM_ROW_ARRAY_INDEX_CATEGORY],
+        itemNumber: Number(splitLine[ITEM_ROW_ARRAY_INDEX_NUMBER]),
+        itemDescription: splitLine[ITEM_ROW_ARRAY_INDEX_DESC],
+        minimumBid: splitLine[ITEM_ROW_ARRAY_INDEX_MIN_BID] ? Number(splitLine[ITEM_ROW_ARRAY_INDEX_MIN_BID]) : null,
         categoryId: 0, // We initialize this as zero because we're using the category prefix
-        disqualified: false,
-        disqualificationReason: "",
-        createdAt: DateTime.now().toISO(),
-        createdBy: 0,
-        updatedAt: null,
-        updatedBy: null,
-        disqualifiedBy: null
     }));
 
     const requestResult = await ItemService.createBulkChangeRequest({
@@ -139,58 +139,64 @@ export default function EventItemUploadResults() {
     return (
         <>
             <GleamingHeader
-                title=""
+                title="Item upload results"
                 description=""
             />
-            <StyledBox>
-                {
-                    result &&
-                    <>
-                        <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-                            {"The following errors happened on item upload:"}
-                        </Typography>
-                        <TableContainer>
-                            <Table
-                                size="small"
-                            >
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell align="right">Error number</TableCell>
-                                        <TableCell>Error message</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {
-                                        !result.success &&
-                                        (result.errors || []).map((error, index) => (
-                                            <TableRow
-                                                key={`row-${index}`}
-                                                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                                            >
-                                                <TableCell
-                                                    component="th"
-                                                    scope="row"
-                                                    align="right"
+            <Stack spacing={2} sx={{ marginBottom: 75 }}>
+                <StyledBox>
+                    <Stack spacing={2}>
+                        <Alert
+                            severity={result?.success ? "success" : "error"}
+                            sx={{ fontWeight: "bold" }}
+                        >{
+                            result?.success
+                                ? "Items uploaded successfully."
+                                : "The following errors happened on item upload. Once you finish reviewing errors, "
+                                    + "click the 'Back' button on your browser to try again."
+                        }</Alert>
+                        {
+                            !result?.success &&
+                            <TableContainer component={Paper}>
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell align="right">Error number</TableCell>
+                                            <TableCell>Content</TableCell>
+                                            <TableCell>Error message</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {
+                                            result?.errors.map((error, index) => (
+                                                <TableRow
+                                                    key={`row-${index}`}
                                                 >
-                                                    {error.index}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <List>
-                                                        {
-                                                            error.messages.map(message => (
-                                                                <ListItem>{message}</ListItem>
-                                                            ))
-                                                        }
-                                                </List>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </>
-                }
-            </StyledBox>
+                                                    <TableCell
+                                                        component="th"
+                                                        scope="row"
+                                                        align="right"
+                                                    >
+                                                        {error.index}
+                                                    </TableCell>
+                                                    <TableCell>{error.content || "N/A"}</TableCell>
+                                                    <TableCell>
+                                                        <List>
+                                                            {
+                                                                error.messages.map(message => (
+                                                                    <ListItem>{message}</ListItem>
+                                                                ))
+                                                            }
+                                                        </List>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        }
+                    </Stack>
+                </StyledBox>
+            </Stack>
         </>
     );
 }

@@ -29,8 +29,6 @@ export type EventUpdateResult = {
     event: Dto<Event>
 };
 
-const REQUEST_DATE_FORMAT = "MM/dd/yyyy hh:mm a";
-
 export async function loader({ request, params }: LoaderFunctionArgs): Promise<EventEditLoaderFunctionData> {
     const { bidder } = await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
