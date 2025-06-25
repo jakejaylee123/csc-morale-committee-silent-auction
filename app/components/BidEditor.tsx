@@ -400,9 +400,10 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
                         spacing={2}
                         sx={(theme) => ({
                             "& .confirmed": {
-                                backgroundColor: (theme.palette.mode === "dark"
-                                    ? theme.palette.success.dark
-                                    : theme.palette.success.light) + "!important"
+                                backgroundColor: theme.palette.success.light,
+                                ...theme.applyStyles("dark", {
+                                backgroundColor: theme.palette.success.dark,
+                                })
                             }
                         })}
                     >
