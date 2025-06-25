@@ -1,15 +1,20 @@
 import { PrismaClient, Item } from "@prisma/client";
 import { DateTime } from "luxon";
 
-import { Dto, Identifiers } from "~/commons/general.common";
+import { BasicDto, Dto, Identifiers } from "~/commons/general.common";
 import { CategoryService } from "./category.server";
 
+export type ItemWithJustId = Pick<Item, "id">;
+export type NewItem = Omit<Partial<Item>, "id"> & Pick<Item, "eventId" | "itemNumber" | "itemDescription" | "minimumBid" | "categoryId"> & {
+    id: "new"
+};
+export type NewOrExistingItem = (Item | NewItem) & {
+    categoryPrefix?: string
+};
+
 export interface ItemBulkChangeRequestOptions {
-    id?: number,
-    categoryCodeIsId?: boolean,
     bidderId: number,
-    eventId: number,
-    itemRowArrays: string[][]
+    itemRequests: BasicDto<NewOrExistingItem>[]
 };
 export interface ItemUpdate extends ItemCreate {
     id: number
@@ -127,49 +132,47 @@ export class ItemService {
     }
 
     public static async createBulkChangeRequest({ 
-        id,
-        categoryCodeIsId,
         bidderId, 
-        eventId,
-        itemRowArrays
+        itemRequests
     }: ItemBulkChangeRequestOptions): Promise<ItemCreationRequestsResult> {
         const errorHash: { [key: string]: string[] } = {};
         const categories = await CategoryService.getAll();
         
-        const requests = itemRowArrays.map((array, index) => {
+        const requests = itemRequests.map((request, index) => {
             const errorMessages: string[] = [];
-            const [
-                categoryCode, 
-                itemNumber, 
-                description, 
+            const {
+                id,
+                eventId,
+                categoryId,
+                categoryPrefix,
+                itemDescription,
                 minimumBid,
                 disqualified,
                 disqualificationReason
-            ] = array;
+            } = request;
             
             const associatedCategory = categories.find(category => {
-                if (categoryCodeIsId) {
-                    return Identifiers.isIntegerId(categoryCode) && category.id === parseInt(categoryCode);
+                if (categoryPrefix) {
+                    return categoryPrefix === category.prefix;
                 } else {
-                    return category.prefix === categoryCode;
+                    return categoryId === category.id;
                 }
             });
             if (!associatedCategory) {
-                errorMessages.push(`Proposed category by the ${categoryCodeIsId ? "ID" : "prefix"} of "${categoryCode}" was not found.`);
+                const categoryIdenitifierType = categoryPrefix ? "prefix" : "ID";
+                const categoryIdenitifier = categoryPrefix || categoryId;
+                errorMessages.push(`Proposed category by the ${categoryIdenitifierType} of "${categoryIdenitifier}" was not found.`);
             }
 
-            if (!Identifiers.isIntegerId(itemNumber)) {
+            if (!Identifiers.isNew(id) && !Identifiers.isIntegerId(id)) {
                 errorMessages.push(`Proposed identifier was not an integer.`);
             }
 
-            if ("" === (description || "").trim()) {
+            if ("" === (itemDescription || "").trim()) {
                 errorMessages.push(`No description was provided`);
             }
 
-            const bidInteger = parseInt(minimumBid);
-            const bidFloat = parseFloat(minimumBid);
-            const minimumBidEntered = minimumBid && ("null" !== minimumBid);
-            if (minimumBidEntered  && isNaN(bidInteger) && isNaN(bidFloat)) {
+            if (minimumBid && isNaN(minimumBid)) {
                 errorMessages.push(`Minimum bid must be a valid number.`);
             }
 
@@ -184,14 +187,12 @@ export class ItemService {
                 bidderId,
                 eventId,
                 categoryId: associatedCategory!.id,
-                itemNumber: parseInt(itemNumber),
-                description,
-                minimumBid: minimumBid 
-                    ? isNaN(bidFloat) ? bidInteger : bidFloat
-                    : null,
-                ...(disqualified && {
-                    disqualified: disqualified === "true",
-                    disqualificationReason: disqualified === "true"
+                itemNumber: request.itemNumber,
+                description: itemDescription,
+                minimumBid: minimumBid || null,
+                ...(request.disqualified && {
+                    disqualified: disqualified,
+                    disqualificationReason: disqualified
                         ? disqualificationReason || ""
                         : null
                 })

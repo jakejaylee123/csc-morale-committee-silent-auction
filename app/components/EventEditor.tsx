@@ -1,8 +1,9 @@
 import { 
+    FormEvent,
     useEffect,
     useState
 } from "react";
-import { Form } from "react-router";
+import { Form, useSubmit } from "react-router";
 
 import { DateTime } from "luxon";
 
@@ -24,9 +25,9 @@ import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { StyledBox } from "./StyledBox";
 import { EventItemsEditor } from "./EventItemsEditor";
 import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
-import { Dto } from "~/commons/general.common";
+import { BasicDto, Dto } from "~/commons/general.common";
 import { CategoryCode } from "@prisma/client";
-import { EventWithItems } from "~/services/event.server";
+import { EventWithItems, NewEvent, NewOrExistingEvent } from "~/services/event.server";
 
 export type EventEditorProps = {
     event: Dto<EventWithItems | null>,
@@ -51,6 +52,26 @@ export function EventEditor({ event, categories }: EventEditorProps) {
     const [endDate, setEndDate] = useState<NullableDateTime>(null);
     const [zoneName, setZoneName] = useState("");
 
+    const eventSubmit = useSubmit();
+    const onEventSubmit = function (formEvent: FormEvent<HTMLFormElement>) {
+        const formData = new FormData(formEvent.target as HTMLFormElement);
+        const eventToSubmit: BasicDto<NewOrExistingEvent> = {
+            id: "new",
+            description: formData.get("description") as string,
+            startsAt: formData.get("startsAt") as string,
+            endsAt: formData.get("endsAt") as string,
+            releaseWinners: formData.get("releaseWinners") as string === "true",
+            enabled: formData.get("enabled") as string === "true",
+            timezone: formData.get("timezone") as string
+        };
+
+        eventSubmit(eventToSubmit, {
+            action: `/admin/events/${isNew ? "new" : event.id}/edit`,
+            method: "POST",
+            encType: "application/json"
+        });
+    };
+
     useEffect(() => {
         setStartDate(isNew ? DateTime.now() : DateTime.fromJSDate(event.startsAt))
         setEndDate(isNew ? DateTime.now().plus({ hours: 1 }) : DateTime.fromJSDate(event.endsAt))
@@ -68,10 +89,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                 >
                     <StyledBox>
                         <Typography variant={"h4"} gutterBottom>{"Main properties"}</Typography>
-                        <Form
-                            method="post"
-                            action={`/admin/events/${isNew ? "new" : event.id}/edit`}
-                        >
+                        <Form onSubmit={onEventSubmit}>
                             <Stack spacing={2}>
                                 <TextField
                                     required
@@ -106,13 +124,13 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                                 />
                                 <DateTimePicker
                                     label="Start date"
-                                    name="startDate"
+                                    name="startsAt"
                                     value={startDate}
                                     onChange={(newValue) => setStartDate(newValue)}
                                 />
                                 <DateTimePicker
                                     label="End date"
-                                    name="endDate"
+                                    name="endsAt"
                                     value={endDate}
                                     onChange={(newValue => setEndDate(newValue))}
                                 />

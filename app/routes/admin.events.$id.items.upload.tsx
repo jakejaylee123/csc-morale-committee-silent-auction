@@ -12,10 +12,11 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { ItemService } from "~/services/item.server";
+import { ItemService, NewOrExistingItem } from "~/services/item.server";
 import { StyledBox } from "~/components/StyledBox";
 import { GleamingHeader } from "~/components/GleamingHeader";
-import { Identifiers } from "~/commons/general.common";
+import { BasicDto, Identifiers } from "~/commons/general.common";
+import { DateTime } from "luxon";
 
 export type EventItemUploadResult = {
     success: true
@@ -84,10 +85,26 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
         };
     }
 
+    const itemRequests: BasicDto<NewOrExistingItem>[] = rowArrays.map(array => ({
+        id: "new",
+        eventId: id,
+        categoryPrefix: array[ITEM_ROW_ARRAY_INDEX_CATEGORY],
+        itemNumber: Number(array[ITEM_ROW_ARRAY_INDEX_NUMBER]),
+        itemDescription: array[ITEM_ROW_ARRAY_INDEX_DESC],
+        minimumBid: array[ITEM_ROW_ARRAY_INDEX_MIN_BID] ? Number(array[ITEM_ROW_ARRAY_INDEX_MIN_BID]) : null,
+        categoryId: 0, // We initialize this as zero because we're using the category prefix
+        disqualified: false,
+        disqualificationReason: "",
+        createdAt: DateTime.now().toISO(),
+        createdBy: 0,
+        updatedAt: null,
+        updatedBy: null,
+        disqualifiedBy: null
+    }));
+
     const requestResult = await ItemService.createBulkChangeRequest({
-        eventId: parseInt(id),
         bidderId: bidder.id,
-        itemRowArrays: rowArrays
+        itemRequests
     });
     
     if (!requestResult.success) {

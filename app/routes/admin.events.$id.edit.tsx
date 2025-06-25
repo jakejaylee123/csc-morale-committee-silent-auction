@@ -5,8 +5,8 @@ import { useActionData, useLoaderData } from "react-router";
 import { DateTime } from "luxon";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { EventService, EventWithItems } from "~/services/event.server";
-import { APP_NAME, Dto, Identifiers } from "~/commons/general.common";
+import { EventService, EventWithItems, NewEvent, NewOrExistingEvent } from "~/services/event.server";
+import { APP_NAME, BasicDto, Dto, Identifiers } from "~/commons/general.common";
 import { EventEditor } from "~/components/EventEditor";
 import { GleamingHeader } from "~/components/GleamingHeader";
 import { CategoryService } from "~/services/category.server";
@@ -84,15 +84,17 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
     });
 
     const { id } = params;
-    const formData = await request.formData();
-    console.log("Form data for event edit: ", formData);
+    const eventRequest = await request.json() as BasicDto<NewOrExistingEvent>;
+    console.log("Form data for event edit: ", eventRequest);
 
-    const description = formData.get("description") as string;
-    const enabled = "true" === formData.get("enabled");
-    const startDate = formData.get("startDate") as string;
-    const endDate = formData.get("endDate") as string;
-    const timezone = formData.get("timezone") as string;
-    const releaseWinners = formData.get("releaseWinners") as string;
+    const {
+        description,
+        enabled,
+        startsAt,
+        endsAt,
+        timezone,
+        releaseWinners
+    } = eventRequest;
 
     let type: EventUpdateType = "none"; 
     let changedEvent: Event | null = null;
@@ -104,8 +106,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
                 event: {
                     description,
                     enabled,
-                    startDate: DateTime.fromFormat(startDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
-                    endDate: DateTime.fromFormat(endDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    startDate: DateTime.fromFormat(startsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    endDate: DateTime.fromFormat(endsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
                 }
             });
         } else if (Identifiers.isIntegerId(id)) {
@@ -116,9 +118,9 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
                     id: parseInt(id),
                     description,
                     enabled,
-                    startDate: DateTime.fromFormat(startDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
-                    endDate: DateTime.fromFormat(endDate, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
-                    releaseWinners: releaseWinners === "true"
+                    startDate: DateTime.fromFormat(startsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    endDate: DateTime.fromFormat(endsAt, REQUEST_DATE_FORMAT, { zone: timezone }).toUTC(),
+                    releaseWinners
                 }
             });
         } else {

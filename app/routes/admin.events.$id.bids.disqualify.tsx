@@ -1,9 +1,9 @@
 import type { ActionFunctionArgs } from "react-router";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
-import { Dto, Identifiers } from "~/commons/general.common";
+import { BasicDto, Dto, Identifiers } from "~/commons/general.common";
 import { Bid } from "@prisma/client";
-import { BidService } from "~/services/bid.server";
+import { BidService, BidWithJustId } from "~/services/bid.server";
 
 export type AdminEventBidDisqualifyResult = {
     success: true,
@@ -26,8 +26,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<A
         };
     }
 
-    const formData = await request.formData();
-    const bidId = formData.get("bidId") as string;
+    const bidToDisqualify = await request.json() as BasicDto<BidWithJustId>;
+    const bidId = bidToDisqualify.id;
     if (!Identifiers.isIntegerId(bidId)) {
         return {
             success: false,
@@ -35,8 +35,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<A
         };
     }
 
-    const parsedBidId = parseInt(bidId);
-    const currentBid = await BidService.getById(parsedBidId);
+    const currentBid = await BidService.getById(bidId);
     if (!currentBid) {
         return {
             success: false,
@@ -44,7 +43,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<A
         };
     }
 
-    const disqualifiedBid = await BidService.disqualify(parsedBidId, bidder.id);
+    const disqualifiedBid = await BidService.disqualify(bidId, bidder.id);
     const disqualifiedBidDto = {
         ...disqualifiedBid,
         bidAmount: disqualifiedBid.bidAmount.toNumber()

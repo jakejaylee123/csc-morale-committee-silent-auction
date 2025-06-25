@@ -2,8 +2,8 @@ import { type ActionFunctionArgs } from "react-router";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
-import { ItemCreate, ItemService, ItemUpdate } from "~/services/item.server";
-import { Dto, Identifiers } from "~/commons/general.common";
+import { ItemCreate, ItemService, ItemUpdate, NewOrExistingItem } from "~/services/item.server";
+import { BasicDto, Dto, Identifiers } from "~/commons/general.common";
 import { Item } from "@prisma/client";
 
 export type ItemUpdateResult = {
@@ -35,36 +35,23 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
         };
     }
 
-    const formData = await request.formData();
-    console.log("Form data for updating event item: ", formData);
+    const itemRequest = await request.json() as BasicDto<NewOrExistingItem>;
+    console.log("Request for updating/creating event item: ", itemRequest);
 
-    const itemId = formData.get("id") as string;
-    if (!Identifiers.isIntegerId(itemId) && !Identifiers.isNew(itemId)) {
+    if (!Identifiers.isIntegerId(itemRequest.id) && !Identifiers.isNew(itemRequest.id)) {
         return {
             success: false,
             errors: [{
                 index: "N/A",
-                messages: [`The passed item ID "${itemId}" was not valid`]
+                messages: [`The passed item ID "${itemRequest.id}" was not valid`]
             }]
         };
     }
-
-    const itemRowArray = [
-        formData.get("categoryId") as string,
-        formData.get("itemNumber") as string,
-        formData.get("itemDescription") as string,
-        formData.get("minimumBid") as string,
-        formData.get("disqualified") as string,
-        formData.get("disqualificationReason") as string
-    ];
-    console.log("Item row array: ", itemRowArray);
     
     const requestResult = await ItemService.createBulkChangeRequest({
-        ...(Identifiers.isIntegerId(itemId) && { id: parseInt(itemId) }),
-        categoryCodeIsId: true,
+        ...(Identifiers.isIntegerId(itemRequest.id) && { id: itemRequest.id }),
         bidderId: bidder.id,
-        eventId: parseInt(id),
-        itemRowArrays: [itemRowArray]
+        itemRequests: [itemRequest]
     });
     
     console.log("Bulk change request creation result: ", requestResult);

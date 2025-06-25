@@ -2,9 +2,9 @@ import { type ActionFunctionArgs } from "react-router";
 
 import { requireAuthenticatedBidder } from "~/services/auth.server";
 
-import { Dto, Identifiers } from "~/commons/general.common";
+import { BasicDto, Dto, Identifiers } from "~/commons/general.common";
 import { Bid } from "@prisma/client";
-import { BidService } from "~/services/bid.server";
+import { BidService, NewBid } from "~/services/bid.server";
 import { EventService } from "~/services/event.server";
 import { EventCommon } from "~/commons/event.common";
 import { ItemService } from "~/services/item.server";
@@ -46,10 +46,14 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
         };
     }
 
-    const formData = await request.formData();
-    console.log("Form data for updating bid: ", formData);
+    const bidUpdateRequest = await request.json() as BasicDto<NewBid>;
+    console.log("Form data for updating bid: ", bidUpdateRequest);
 
-    const itemId = formData.get("itemId") as string;
+    const {
+        itemId,
+        bidAmount
+    } = bidUpdateRequest;
+
     if (!Identifiers.isIntegerId(itemId)) {
         return {
             success: false,
@@ -58,8 +62,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
         };
     }
 
-    const parsedItemId = parseInt(itemId);
-    const item = await ItemService.get(parsedItemId);
+    const item = await ItemService.get(itemId);
     if (!item) {
         return {
             success: false,
@@ -76,9 +79,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
         };
     }
     
-    const bidAmount = formData.get("bidAmount") as string;
-    const parsedBidAmount = parseFloat(bidAmount);
-    if (isNaN(parsedBidAmount) || parsedBidAmount <= 0) {
+    if (isNaN(bidAmount) || bidAmount <= 0) {
         return {
             success: false,
             concluded: false,
@@ -86,7 +87,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
         };
     }
 
-    if (item.minimumBid && item.minimumBid.greaterThan(parsedBidAmount)) {
+    if (item.minimumBid && item.minimumBid.greaterThan(bidAmount)) {
         return {
             success: false,
             concluded: false,
@@ -98,7 +99,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
     const currentBid = await BidService.get({
         forEventId: parsedEventId,
         forBidderId: bidder.id,
-        forItemId: parsedItemId
+        forItemId: itemId
     });
     if (currentBid) {
         return {
@@ -112,8 +113,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<B
         const newBid = await BidService.create({
             eventId: parsedEventId,
             bidderId: bidder.id,
-            itemId: parsedItemId,
-            bidAmount: parsedBidAmount
+            itemId: itemId,
+            bidAmount: bidAmount
         });
 
         return { 

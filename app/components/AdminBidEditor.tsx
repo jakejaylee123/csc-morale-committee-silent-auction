@@ -20,14 +20,14 @@ import {
     GridRowParams 
 } from "@mui/x-data-grid";
 
-import { CategoryCode } from "@prisma/client";
+import { Bid, CategoryCode } from "@prisma/client";
 
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
-import { Dto, MoneyFormatter } from "~/commons/general.common";
+import { BasicDto, Dto, MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 import { EventWithConvenience } from "~/services/event.server";
 import { CategoryHash } from "~/services/category.server";
-import { BidWithItemAndBidder } from "~/services/bid.server";
+import { BidWithItemAndBidder, BidWithJustId } from "~/services/bid.server";
 
 import { StyledBox } from "./StyledBox";
 import { GridQuickSearchToolbar } from "./GridQuickSearchToolbar";
@@ -45,9 +45,7 @@ type AdminBidEditorDataSourceArgs = {
     bids: Dto<BidWithItemAndBidder>[]
 };
 type AdminBidEditorDataSourceItem = {
-    // This ID is only used for the DataGridView we're using
     id: number
-
     bidId: number,
     itemId: number,
     categoryPrefix: string,
@@ -159,11 +157,14 @@ export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps)
     const onBidDisqualify = async function (bid: AdminBidEditorDataSourceItem): Promise<void> {
         try {
             if (!bid.disqualified) {
-                // We will process the result of this submission
-                // in the "useEffect" that listens to this "bidFetcher"
-                bidDisqualifyFetcher.submit(bid as any, {
+                const bidToDisqualify: BasicDto<BidWithJustId> = {
+                    id: bid.bidId
+                };
+
+                bidDisqualifyFetcher.submit(bidToDisqualify, {
                     method: "POST",
-                    action: `/admin/events/${event.id}/bids/disqualify`
+                    action: `/admin/events/${event.id}/bids/disqualify`,
+                    encType: "application/json"
                 });
             }
         } catch (error) {

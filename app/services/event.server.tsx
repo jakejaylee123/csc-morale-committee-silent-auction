@@ -3,6 +3,13 @@ import { DateTime } from "luxon";
 import { Dto } from "~/commons/general.common";
 import { ItemService } from "./item.server";
 
+export type NewEvent = Omit<Partial<Event>, "id"> & Pick<Event, "description" | "enabled" | "releaseWinners" | "startsAt" | "endsAt"> & {
+    id: "new"
+};
+export type NewOrExistingEvent = (Event | NewEvent) & {
+    timezone?: string
+};
+
 export interface EventGetOptions {
     withItems?: boolean,
     withQualifiedItems?: boolean

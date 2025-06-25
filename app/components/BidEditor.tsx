@@ -29,7 +29,7 @@ import { CategoryCode, Bid } from "@prisma/client";
 import { CategoryHash } from "~/services/category.server";
 
 import { ItemTagNumberGenerator, ItemTagNumberSorter } from "~/commons/item.common";
-import { Dto, MoneyFormatter } from "~/commons/general.common";
+import { BasicDto, Dto, MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 import { EventWithItems } from "~/services/event.server";
 
@@ -38,6 +38,7 @@ import { GridQuickSearchFilterCheckboxStates } from "./GridQuickSearchToolbar";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
 import { StandardOkModal } from "./StandardModal";
 import { BidUpdateResult } from "~/routes/events.$id.bids.update";
+import { NewBid } from "~/services/bid.server";
 
 const FILTER_ID_CONFIRMED_BIDS = "confirmed-bids-filter";
 
@@ -287,17 +288,23 @@ export function BidEditor({ event, categories, bids }: BidEditorProps) {
         try {
             if (bid.confirmed) {
                 setSnackbar({ alerts: [{ message: "This bid is already confirmed.", severity: "error" }] });
-            } else if ((bid.bidAmount || 0) <= 0) {
+            } else if (!bid.bidAmount || bid.bidAmount <= 0) {
                 setSnackbar({ alerts: [{ message: "Bid must be greater than $0.00", severity: "error" }] });
             } else {
                 bid.confirming = true;
                 refreshCurrentBids();
                 
-                // We will process the result of this submission
-                // in the "useEffect" that listens to this "bidFetcher"
-                bidFetcher.submit(bid as any, {
+                const bidToConfirm: BasicDto<NewBid> = {
+                    id: "new",
+                    eventId: event.id,
+                    itemId: bid.itemId,
+                    bidAmount: bid.bidAmount
+                };
+
+                bidFetcher.submit(bidToConfirm, {
                     method: "POST",
-                    action: `/events/${event.id}/bids/update`
+                    action: `/events/${event.id}/bids/update`,
+                    encType: "application/json"
                 });
             }
         } catch (error) {

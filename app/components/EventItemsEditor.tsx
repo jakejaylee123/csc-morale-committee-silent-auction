@@ -43,16 +43,17 @@ import { CategoryCode, Item } from "@prisma/client";
 import { EventWithItems } from "~/services/event.server";
 import { EventItemUpdateResult} from "~/routes/admin.events.$id.items.update";
 import { EventItemDeleteResult, } from "~/routes/admin.events.$id.items.delete";
-import { Dto, MoneyFormatter } from "~/commons/general.common";
+import { BasicDto, Dto, MoneyFormatter } from "~/commons/general.common";
 
 import { StyledBox } from "./StyledBox";
 import { FileUploadModal } from "./FileUploadModal";
 import { StandardSnackbar, StandardSnackbarProps } from "./StandardSnackbar";
+import { ItemWithJustId, NewItem, NewOrExistingItem } from "~/services/item.server";
 
 export type EventItemsEditorToolbarProps = {
     event: Dto<EventWithItems | null>,
     categories: Dto<CategoryCode>[],
-    itemFetcher: FetcherWithComponents<EventItemUpdateResult>
+    itemUpdateFetcher: FetcherWithComponents<EventItemUpdateResult>
 };
 export type EventItemsEditorProps = {
     event: Dto<EventWithItems | null>,
@@ -62,7 +63,7 @@ export type EventItemsEditorProps = {
 function EventItemsEditorToolbar({
     event,
     categories,
-    itemFetcher
+    itemUpdateFetcher
 }: EventItemsEditorToolbarProps) {
     const [newPanelOpen, setNewPanelOpen] = useState(false);
     const newPanelTriggerRef = useRef<HTMLButtonElement>(null);
@@ -71,30 +72,24 @@ function EventItemsEditorToolbar({
         setNewPanelOpen(false);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (formEvent: React.FormEvent) => {
+        formEvent.preventDefault();
         
         if (event) {
-            const formData = new FormData(e.target as HTMLFormElement);
-            const newItem = {
+            const formData = new FormData(formEvent.target as HTMLFormElement);
+            const newItem: BasicDto<NewItem> = {
                 id: "new",
                 eventId: event.id,
                 itemNumber: Number(formData.get("itemNumber")),
                 itemDescription: formData.get("itemDescription") as string,
-                minimumBid: formData.get("minimumBid") as string,
+                minimumBid: Number(formData.get("minimumBid") as string),
                 categoryId: Number(formData.get("category")),
-                disqualified: false,
-                disqualificationReason: "",
-                createdAt: DateTime.now().toISO(),
-                createdBy: 0,
-                updatedAt: null,
-                updatedBy: null,
-                disqualifiedBy: null
             };
 
-            itemFetcher.submit(newItem as any, {
+            itemUpdateFetcher.submit(newItem, {
                 method: "POST",
-                action: `/admin/events/${event.id}/items/update`
+                action: `/admin/events/${event.id}/items/update`,
+                encType: "application/json"
             });
         } else {
             console.error("There was no event to save this item to...");
@@ -222,31 +217,39 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
 
     // We use this fetcher to send requests to update/create items, and then
     // we use an effect to listen for the response we get back
-    const itemFetcher = useFetcher<EventItemUpdateResult>();
+    const itemUpdateFetcher = useFetcher<EventItemUpdateResult>();
     useEffect(() => {
-        if (itemFetcher.state === "idle" && itemFetcher.data) {
-            setRows(oldRows => oldRows.filter((row) => row.id !== 0));
+        if (itemUpdateFetcher.state === "idle" && itemUpdateFetcher.data) {
+            const itemUpdateData = itemUpdateFetcher.data;
+            
+            setRows(oldRows => {
+                const newRows = oldRows.filter((row) => row.id !== 0);
+                if (itemUpdateData.success) {
+                    for (const result of itemUpdateData.results) {
+                        if (result.operation === "create") {
+                            oldRows.push(result.item);
+                        } else if (result.operation === "update") {
+                            const oldItemIndex = newRows.findIndex(item => item.id === result.item.id);
+                            newRows[oldItemIndex] = result.item;
+                        }
+                    }
+                }
+                return newRows;
+            });
 
-            if (itemFetcher.data.success) {
-                const createdRows = itemFetcher.data.results
-                    .filter(result => result.operation === "create")
-                    .map(result => result.item);
-                setRows(oldRows => [...oldRows, ...createdRows]);
-
-                setSnackbar({ alerts: [{ message: "Item successfully saved", severity: "success" }] });
-            } else {
-                setSnackbar({
-                    alerts: [{
-                        message: itemFetcher.data.errors
+            setSnackbar({ 
+                alerts: [{ 
+                    message: itemUpdateData.success 
+                        ? "Item successfully saved"
+                        : itemUpdateData.errors
                             .flatMap(error => error.messages)
                             .map(message => `- ${message}`)
                             .join("\r\n"),
-                        severity: "error"
-                    }]
-                });
-            }
+                    severity: itemUpdateData.success ? "success" : "error" 
+                }] 
+            });
         }
-    }, [itemFetcher]);
+    }, [itemUpdateFetcher]);
 
     // We use this fetcher to send requests to delete items, and then
     // we use an effect to listen for the response we get back
@@ -255,7 +258,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
         if (itemDeleteFetcher.state === "idle" && itemDeleteFetcher.data) {
             const deleteData = itemDeleteFetcher.data;
             if (deleteData.success) {
-                setRows(rows.filter((row) => row.id !== deleteData.deletedItemId));
+                setRows((oldRows) => oldRows.filter((row) => row.id !== deleteData.deletedItemId));
 
                 setSnackbar({ alerts: [{ message: "Item successfully removed", severity: "success" }] });
             } else {
@@ -272,11 +275,14 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
     }, [itemDeleteFetcher]);
 
     const onRowDelete = (id: GridRowId) => () => {
-        // We will process the result of this submission
-        // in the "useEffect" that listens to this "itemDeleteFetcher"
-        itemDeleteFetcher.submit({ id }, {
+        const itemToDelete: BasicDto<ItemWithJustId> = {
+            id: Number(id)
+        };
+
+        itemDeleteFetcher.submit(itemToDelete, {
             method: "POST",
-            action: `/admin/events/${event.id}/items/delete`
+            action: `/admin/events/${event.id}/items/delete`,
+            encType: "application/json"
         });
     };
 
@@ -288,12 +294,20 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
 
     const onRowUpdate = function (newItem: Dto<Item>, oldItem: Dto<Item>) {
         try {
-            // We will process the result of this submission
-            // in the "useEffect" that listens to this "itemFetcher"
-            itemFetcher.submit(newItem as any, {
+            const itemToCreateOrUpdate: BasicDto<Item> = {
+                ...newItem,
+                createdAt: newItem.createdAt.toISOString(),
+                updatedAt: newItem.updatedAt
+                    ? newItem.updatedAt.toISOString()
+                    : null
+            };
+
+            itemUpdateFetcher.submit(itemToCreateOrUpdate, {
                 method: "POST",
-                action: `/admin/events/${event.id}/items/update`
+                action: `/admin/events/${event.id}/items/update`,
+                encType: "application/json"
             });
+
             return newItem;
         } catch (error) {
             return oldItem;
@@ -455,7 +469,7 @@ export function EventItemsEditor({ event, categories }: EventItemsEditorProps) {
                                 <EventItemsEditorToolbar
                                     event={event}
                                     categories={categories}
-                                    itemFetcher={itemFetcher}
+                                    itemUpdateFetcher={itemUpdateFetcher}
                                     {...props}
                                 />
                             )

@@ -4,6 +4,10 @@ import { Dto } from "~/commons/general.common";
 import { ItemService } from "./item.server";
 import { BidderService } from "./users.server";
 
+export type BidWithJustId = Pick<Bid, "id">;
+export type NewBid = Omit<Partial<Bid>, "id"> & Pick<Bid, "bidAmount" | "eventId" | "itemId"> & {
+    id: "new"
+};
 type BidVariant = Bid | BidWithItem | BidWithBidder | BidWithItemAndBidder;
 
 type GetBidArgs = {

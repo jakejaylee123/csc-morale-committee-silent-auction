@@ -65,6 +65,7 @@ type ConvertToSerializable<T, U, V> = T extends U
                 ? V | null | undefined
                 : never;
 
+// This DTO type supports all the property types that Remix Single Fetch supports
 export type Dto<T> = {
     [K in keyof T]: T[K] extends BasicSerializable | RemixSingleFetchSupportedTypes
     ? T[K]
@@ -73,4 +74,17 @@ export type Dto<T> = {
         : T[K] extends Maybe<Record<string, any>>
             ? Dto<T[K]>
             : never;
+};
+
+// If you need a DTO type that only supports native JavaScript types, use this type
+export type BasicDto<T> = {
+    [K in keyof T]: T[K] extends BasicSerializable
+    ? T[K]
+    : T[K] extends Maybe<Prisma.Decimal>
+        ? ConvertToSerializable<T[K], Prisma.Decimal, number>
+        : T[K] extends Maybe<Date>
+            ? ConvertToSerializable<T[K], Date, string>
+            : T[K] extends Maybe<Record<string, any>>
+                ? BasicDto<T[K]>
+                : never;
 };
