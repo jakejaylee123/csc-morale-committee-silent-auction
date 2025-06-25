@@ -13,7 +13,7 @@ export const StyledModalBox = styled("div")(({ theme }) => ({
     backgroundSize: "cover",
     padding: 20,
     ...theme.applyStyles("dark", {
-        backgroundColor: "hsla(0, 0%, 35%, 0.6)",
+        backgroundColor: "hsla(0, 0%, 35%, 1)",
         boxShadow: "0 0 24px 12px hsla(210, 100%, 25%, 0.2)",
         outlineColor: "hsla(210, 100%, 80%, 0.1)",
     }),
