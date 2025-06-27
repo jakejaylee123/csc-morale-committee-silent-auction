@@ -1,17 +1,11 @@
-// This is a script meant to run from the "Automation" tab of Excel
-// on Microsoft Office 365 (Web). It takes all of the items in each sheet
-// of an auction item workbook, and consolidates them into one sheet. 
-// The consolidated sheet can be saved as a CSV file to upload to the
-// silent auction app.
-
 const MILLISECONDS_IN_SECOND = 1000;
 
 const SOURCE_START_ROW_INDEX = 3;
 
 const SOURCE_ITEM_NUM_INDEX = 0;
-const SOURCE_CAT_NAME_INDEX = 2;
-const SOURCE_DESC_INDEX = 3;
-const SOURCE_MIN_PRICE_INDEX = 4;
+const SOURCE_CAT_NAME_INDEX = 1;
+const SOURCE_DESC_INDEX = 2;
+const SOURCE_MIN_PRICE_INDEX = 3;
 
 const DEST_CAT_CODE_INDEX = 0;
 const DEST_ITEM_NUMBER_INDEX = 1;
@@ -55,7 +49,6 @@ function main(workbook: ExcelScript.Workbook) {
     }
 
     logWorksheetName(sheet);
-    const usedRange = sheet.getUsedRange();
     const usedRangeValues = getSheetUsedRangeValues(sheet);
 
     for (let i = SOURCE_START_ROW_INDEX; true; ++i) {
