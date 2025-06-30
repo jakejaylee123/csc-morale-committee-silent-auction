@@ -81,6 +81,7 @@ export function FileUploadModal({
                                     role={undefined}
                                     variant="contained"
                                     tabIndex={-1}
+                                    loading={submitting}
                                 >
                                     Choose file...
                                     <VisuallyHiddenInput 
