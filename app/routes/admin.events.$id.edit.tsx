@@ -149,13 +149,16 @@ export default function AdminEventEdit() {
     // the proper URL of the newly created auction
     useEffect(() => {
         if (result?.success) {
-            try {
-                window.history.replaceState(null, "", `/admin/events/${result.event.id}/edit`);
-            } catch (error) { }
-
-            if (event) event.id = result.event.id;
+            const desiredPathName = `/admin/events/${result.event.id}/edit`;
+            if (window.location.href !== desiredPathName) {
+                try {
+                    window.location.href = desiredPathName;
+                } catch (error) { 
+                    console.log("Unable to navigate to new event URL: ", error);
+                }
+            }
         }
-    }, []);
+    }, [result]);
     
     const snackBarProps = result ? {
         alerts: [{

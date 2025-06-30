@@ -62,6 +62,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
             }]
         };
     }
+    const eventId = Number(id);
 
     const formData = await request.formData();
     const uploadFile = formData.get(ITEM_UPLOAD_FORM_DATA_FILE) as File;
@@ -76,10 +77,11 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
         line: lines[index],
         splitLine,
         index,
+        skip: "" === lines[index].trim(),
         valid: splitLine.length === ITEM_ROW_ARRAY_INDICES.length
     }));
     const badRowArrayValidations = rowArrayValidations
-        .filter(validation => !validation.valid);
+        .filter(validation => !validation.skip && !validation.valid);
 
     if (badRowArrayValidations.length) {
         return {
@@ -92,15 +94,17 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
         };
     }
 
-    const itemRequests: BasicDto<NewOrExistingItem>[] = splitLines.map(splitLine => ({
-        id: "new",
-        eventId: id,
-        categoryPrefix: splitLine[ITEM_ROW_ARRAY_INDEX_CATEGORY],
-        itemNumber: Number(splitLine[ITEM_ROW_ARRAY_INDEX_NUMBER]),
-        itemDescription: splitLine[ITEM_ROW_ARRAY_INDEX_DESC],
-        minimumBid: splitLine[ITEM_ROW_ARRAY_INDEX_MIN_BID] ? Number(splitLine[ITEM_ROW_ARRAY_INDEX_MIN_BID]) : null,
-        categoryId: 0, // We initialize this as zero because we're using the category prefix
-    }));
+    const itemRequests: BasicDto<NewOrExistingItem>[] = splitLines
+        .filter((_, index) => !rowArrayValidations[index].skip)
+        .map(splitLine => ({
+            id: "new",
+            eventId,
+            categoryPrefix: splitLine[ITEM_ROW_ARRAY_INDEX_CATEGORY],
+            itemNumber: Number(splitLine[ITEM_ROW_ARRAY_INDEX_NUMBER]),
+            itemDescription: splitLine[ITEM_ROW_ARRAY_INDEX_DESC],
+            minimumBid: splitLine[ITEM_ROW_ARRAY_INDEX_MIN_BID] ? Number(splitLine[ITEM_ROW_ARRAY_INDEX_MIN_BID]) : null,
+            categoryId: 0, // We initialize this as zero because we're using the category prefix
+        }));
 
     const requestResult = await ItemService.createBulkChangeRequest({
         bidderId: bidder.id,
@@ -123,6 +127,8 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<E
         await ItemService.createBulk(requestResult.requests);
         return { success: true };
     } catch (error) {
+        console.log("Error uploading auction event items: ", error);
+
         return {
             success: false,
             errors: [{

@@ -35,7 +35,7 @@ export function FileUploadModal({
     onClose
 }: FileUploadModalProps) {
     const [file, setFile] = useState("");
-    const canUpload = !!file;
+    const [submitting, setSubmitting] = useState(false);
 
     return (
         <Modal
@@ -54,9 +54,11 @@ export function FileUploadModal({
             <Fade in={open}>
                 <StyledModalBox>
                     <Form 
+                        reloadDocument
                         method="post"
                         action={`/admin/events/${event?.id || "invalid"}/items/upload`}
                         encType="multipart/form-data"
+                        onSubmit={(_) => { setSubmitting(true); }}
                     >
                         <Stack spacing={2}>
                             {
@@ -93,7 +95,8 @@ export function FileUploadModal({
                                 <Button
                                     type="submit"
                                     color="primary"
-                                    disabled={!canUpload}
+                                    disabled={!file || submitting}
+                                    loading={submitting}
                                     startIcon={<UploadFile />}
                                 >
                                     Upload

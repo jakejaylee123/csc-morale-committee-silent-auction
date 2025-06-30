@@ -71,8 +71,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
             method: "POST",
             encType: "application/json",
             navigate: true,
-            preventScrollReset: false,
-            replace: eventToSubmit.id !== "new"
+            preventScrollReset: false
         });
     };
 
@@ -93,7 +92,7 @@ export function EventEditor({ event, categories }: EventEditorProps) {
                 >
                     <StyledBox>
                         <Typography variant={"h4"} gutterBottom>{"Main properties"}</Typography>
-                        <Form onSubmit={onEventSubmit}>
+                        <Form reloadDocument={true} onSubmit={onEventSubmit}>
                             <Stack spacing={2}>
                                 <TextField
                                     required
