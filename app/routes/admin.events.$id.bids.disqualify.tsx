@@ -44,15 +44,10 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<A
     }
 
     const disqualifiedBid = await BidService.disqualify(bidId, bidder.id);
-    const disqualifiedBidDto = {
-        ...disqualifiedBid,
-        bidAmount: disqualifiedBid.bidAmount.toNumber()
-    };
-
     try {
         return { 
             success: true,
-            bid: disqualifiedBidDto
+            bid: BidService.toDto(disqualifiedBid)
         };
     } catch (error) {
         console.log("Error trying to disqualify bid: ", error);
