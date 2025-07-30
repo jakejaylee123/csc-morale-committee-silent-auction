@@ -6,19 +6,13 @@ import * as confetti from "canvas-confetti";
 
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
 import SentimentVeryDissatisfied from "@mui/icons-material/SentimentVeryDissatisfied";
 
-import { CategoryCode } from "@prisma/client";
+import { CategoryCode, Item } from "@prisma/client";
 
-import { BidWithItem } from "~/services/bid.server";
+import { BidWithItem, BidWithItemAndBidder } from "~/services/bid.server";
 import { EventWithConvenience } from "~/services/event.server";
 
 import { ItemTagNumberGenerator } from "~/commons/item.common";
@@ -26,15 +20,19 @@ import { Dto, MoneyFormatter } from "~/commons/general.common";
 import { CategoryCommon } from "~/commons/category.common";
 
 import { StyledBox } from "./StyledBox";
+import { WinnerReport } from "./WinnerReport";
 
 export type WrappedConfettiProps = {
     width: number,
     height: number
 };
 export type WinningsProps = {
+    title: string,
     event: Dto<EventWithConvenience>,
     categories: Dto<CategoryCode>[],
-    winningBids: Dto<BidWithItem>[]
+    winningBids: Dto<BidWithItemAndBidder>[],
+    disqualifiedItems: Dto<Item>[],
+    bidderId: number
 };
 
 const getWinningBidTotal = function (bids: Dto<BidWithItem>[]): string {
@@ -45,20 +43,7 @@ const getWinningBidTotal = function (bids: Dto<BidWithItem>[]): string {
     });
 };
 
-export function Winnings({ categories, winningBids }: WinningsProps) {
-    const categoryHash = useRef(CategoryCommon.convertCategoryArrayToHash(categories));
-    const generator = new ItemTagNumberGenerator(categoryHash.current);
-
-    const winningBidsWithTagNumbers = winningBids.map(bid => ({
-        ...bid,
-        tagNumber: generator.getItemTagNumber({
-            categoryId: bid.item.categoryId,
-            itemNumber: bid.item.itemNumber
-        })
-    })).sort((lhs, rhs) => {
-        return lhs.tagNumber.localeCompare(rhs.tagNumber);
-    });
-
+export function Winnings({ title, event, categories, winningBids, disqualifiedItems, bidderId }: WinningsProps) {
     if (!winningBids.length) {
         return (
             <Stack alignItems="center">
@@ -135,32 +120,13 @@ export function Winnings({ categories, winningBids }: WinningsProps) {
                             fontWeight: "bold"
                         }}
                     >Congratulations on your winnings!</Alert>
-                    <TableContainer>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Item tag number</TableCell>
-                                    <TableCell>Description</TableCell>
-                                    <TableCell sx={{ textAlign: "right" }}>Winning bid amount</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    winningBidsWithTagNumbers.map(bid => (
-                                        <TableRow
-                                            key={`table-row-bid-${bid.id}`}
-                                        >
-                                            <TableCell>{bid.tagNumber}</TableCell>
-                                            <TableCell>{bid.item.itemDescription}</TableCell>
-                                            <TableCell sx={{ textAlign: "right" }}>{MoneyFormatter.getFormattedMoney({
-                                                amount: bid.bidAmount
-                                            })}</TableCell>
-                                        </TableRow>
-                                    ))
-                                }
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <WinnerReport 
+                        title={title}
+                        categories={categories}
+                        winningBids={winningBids}
+                        disqualifiedItems={disqualifiedItems}
+                        bidderId={bidderId} 
+                        event={event} />
                 </Stack>
             </StyledBox>
         </Stack>

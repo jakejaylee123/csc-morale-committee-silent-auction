@@ -21,7 +21,8 @@ export type WinnerReportProps = {
     event: Dto<EventWithConvenience>,
     categories: Dto<CategoryCode>[],
     winningBids: Dto<BidWithItemAndBidder>[],
-    disqualifiedItems: Dto<Item>[]
+    disqualifiedItems: Dto<Item>[],
+    bidderId?: number
 };
 
 type WinnerReportDataSourceItem = {
@@ -34,6 +35,7 @@ type WinnerReportDataSource = WinnerReportDataSourceItem[];
 export type WinnerReportDataSourceProps = {
     categoryHash: CategoryHash,
     winningBids: Dto<BidWithItemAndBidder>[]
+    bidderId?: number
 };
 
 type DisqualifiedItemsSubReportProps = {
@@ -51,7 +53,7 @@ function createBidderString(bidder: Bidder): string {
     return `${bidder.firstName} ${bidder.lastName} [${bidder.emailAddress}]`;
 }
 
-function createWinnerReportDataSource({ winningBids, categoryHash }: WinnerReportDataSourceProps): WinnerReportDataSource {
+function createWinnerReportDataSource({ winningBids, categoryHash, bidderId }: WinnerReportDataSourceProps): WinnerReportDataSource {
     const sorter = new ItemTagNumberSorter(categoryHash);
     const sortedWinningBids = sorter.getSortedItems(
         winningBids.map(bid => ({
@@ -62,19 +64,21 @@ function createWinnerReportDataSource({ winningBids, categoryHash }: WinnerRepor
     );
 
     const winningBidsHash: { [bidderIdString: string]: WinnerReportDataSourceItem } = {};
-    sortedWinningBids.forEach(bid => {
-        const bidderIdString = `${bid.bidderId}`;
-        if (!winningBidsHash[bidderIdString]) {
-            winningBidsHash[bidderIdString] = {
-                bidderId: bid.bidderId,
-                bidderString: createBidderString(bid.bidder),
-                winningBids: [],
-                total: 0
-            };
-        }
-        winningBidsHash[bidderIdString].winningBids.push(bid);
-        winningBidsHash[bidderIdString].total += bid.bidAmount;
-    });
+    sortedWinningBids
+        .filter(bid => !bidderId || bid.bidderId === bidderId)
+        .forEach(bid => {
+            const bidderIdString = `${bid.bidderId}`;
+            if (!winningBidsHash[bidderIdString]) {
+                winningBidsHash[bidderIdString] = {
+                    bidderId: bid.bidderId,
+                    bidderString: createBidderString(bid.bidder),
+                    winningBids: [],
+                    total: 0
+                };
+            }
+            winningBidsHash[bidderIdString].winningBids.push(bid);
+            winningBidsHash[bidderIdString].total += bid.bidAmount;
+        });
 
     return Object.values(winningBidsHash).sort((lhs, rhs) => {
         return lhs.bidderString.localeCompare(rhs.bidderString);
@@ -235,36 +239,41 @@ function WinnerSubReport({ source, categoryHash }: WinnerSubReportProps) {
     );
 }
 
-export function WinnerReport({ title, categories, winningBids, disqualifiedItems }: WinnerReportProps) {
+export function WinnerReport({ title, categories, winningBids, disqualifiedItems, bidderId }: WinnerReportProps) {
     const categoryHash = CategoryCommon.convertCategoryArrayToHash(categories);
-    const source = createWinnerReportDataSource({ winningBids, categoryHash });
+    const source = createWinnerReportDataSource({ winningBids, categoryHash, bidderId });
+    const forAllBidders = undefined === bidderId;
 
     return (
         <>
             <Stack
                 spacing={2}
             >
-                <Typography
-                    variant="h5"
-                    align="center"
-                    sx={{
-                        fontWeight: "bold"
-                    }}
-                >{title}</Typography>
-                <Typography
-                    align="center"
-                    sx={{
-                        fontWeight: "bold"
-                    }}
-                >{`Auction event gross profit: ${MoneyFormatter.getFormattedMoney({
-                    amount: getAuctionEventGrossProfit(winningBids),
-                    emptyPlaceholder: "$0.00"
-                })}`}</Typography>
+                {forAllBidders &&  
+                    <>
+                        <Typography
+                            variant="h5"
+                            align="center"
+                            sx={{
+                                fontWeight: "bold"
+                            }}
+                        >{title}</Typography>
+                        <Typography
+                            align="center"
+                            sx={{
+                                fontWeight: "bold"
+                            }}
+                        >{`Auction event gross profit: ${MoneyFormatter.getFormattedMoney({
+                            amount: getAuctionEventGrossProfit(winningBids),
+                            emptyPlaceholder: "$0.00"
+                        })}`}</Typography>
 
-                <DisqualifiedItemsSubReport
-                    disqualifiedItems={disqualifiedItems}
-                    categoryHash={categoryHash}
-                />
+                        <DisqualifiedItemsSubReport
+                            disqualifiedItems={disqualifiedItems}
+                            categoryHash={categoryHash}
+                        />
+                    </>
+                }
 
                 <WinnerSubReport
                     source={source}

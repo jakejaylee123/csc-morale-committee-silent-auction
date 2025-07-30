@@ -81,7 +81,7 @@ export function FileUploadModal({
                                     role={undefined}
                                     variant="contained"
                                     tabIndex={-1}
-                                    loading={submitting}
+                                    disabled={submitting}
                                 >
                                     Choose file...
                                     <VisuallyHiddenInput 
@@ -99,9 +99,7 @@ export function FileUploadModal({
                                     disabled={!file || submitting}
                                     loading={submitting}
                                     startIcon={<UploadFile />}
-                                >
-                                    Upload
-                                </Button>
+                                >{submitting ? "Uploading..." : "Upload"}</Button>
                             </ButtonGroup>
                         </Stack>
                     </Form>

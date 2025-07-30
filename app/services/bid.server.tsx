@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import { Dto } from "~/commons/general.common";
 import { ItemService } from "./item.server";
 import { BidderService } from "./users.server";
+import { notEqual } from "node:assert";
 
 export type BidWithJustId = Pick<Bid, "id">;
 export type NewBid = Omit<Partial<Bid>, "id"> & Pick<Bid, "bidAmount" | "eventId" | "itemId"> & {
@@ -149,16 +150,15 @@ export class BidService {
     }: GetWinningBidsArgs): Promise<BidVariant[]> {
         const eventBids = await BidService.getMany({
             forEventId,
-            forBidderId,
             forItemId,
             withBidder,
             withItem
         });
         
         const winningBids: BidVariant[] = []
-        for (const bid of eventBids) {
+        for (const [index, bid] of eventBids.entries()) {
             const canAddWinningBid = 
-                (!winningBids.length || winningBids[winningBids.length - 1].itemId !== bid.itemId)
+                (index === 0 || eventBids[index - 1].itemId !== bid.itemId)
                 && (!forEventId || forEventId === bid.eventId)
                 && (!forBidderId || forBidderId === bid.bidderId)
                 && (!forItemId || forItemId === bid.itemId);

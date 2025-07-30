@@ -8,6 +8,7 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import Stack  from "@mui/material/Stack";
 
 import Add from "@mui/icons-material/Add";
+import Article from "@mui/icons-material/Article";
 import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import Edit from "@mui/icons-material/Edit";
 
@@ -57,6 +58,12 @@ export function AdminDashboard({ events }: AdminDashboardProps) {
                                 color="primary"
                                 href={`/admin/events/${selectedEventId || 0}/bids/edit`}
                             >Manage bids</Button>
+                            <Button
+                                disabled={undefined === selectedEventId}
+                                startIcon={<Article />}
+                                color="secondary"
+                                href={`/events/${selectedEventId || 0}/reports/bid-sheet`}
+                            >View bid sheet</Button>
                             <Button
                                 disabled={undefined === selectedEventId}
                                 startIcon={<AutoAwesome />}
