@@ -21,7 +21,7 @@ type AdminEventBidLoaderFunctionData = {
 };
 
 export async function loader({ request, params }: LoaderFunctionArgs): Promise<AdminEventBidLoaderFunctionData> {
-    const { bidder } = await requireAuthenticatedBidder(request, {
+    await requireAuthenticatedBidder(request, {
         mustBeAdmin: true
     });
     
@@ -39,8 +39,6 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<A
 
     const bids = await BidService.getMany({ 
         forEventId: event.id, 
-        forBidderId: 
-        bidder.id,
         withBidder: true,
         withItem: true
     });

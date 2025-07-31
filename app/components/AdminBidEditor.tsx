@@ -111,7 +111,7 @@ const getRowClassName = function (params: GridRowClassNameParams<AdminBidEditorD
 
 export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps) {
     const categoryHash = useRef(CategoryCommon.convertCategoryArrayToHash(categories));
-    const [currentBids, setCurrentBids] = useState(bids || []);
+    const [currentBids, _] = useState(bids || []);
     
     const [rows, setRows] = useState<AdminBidEditorDataSource>(createAdminBidEditorDataSource({
         categoryHash: categoryHash.current,
@@ -282,7 +282,7 @@ export function AdminBidEditor({ event, categories, bids }: AdminBidEditorProps)
                             getRowClassName={getRowClassName}
                             onRowEditStop={onRowEditStop}
                             isCellEditable={(params) => !params.row.disqualified}
-                            slots={{ toolbar: GridQuickSearchToolbar }}
+                            showToolbar
                         />
                     </Stack>
                 </StyledBox>
